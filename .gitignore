@@ -1,0 +1,28 @@
+# ==========================================
+# CASSY KASIR - .gitignore
+# ==========================================
+
+# Build & Gradle
+.gradle
+/build
+.externalNativeBuild
+.cxx
+
+# IDE Files (Android Studio / IntelliJ IDEA)
+*.iml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# Local Configuration
+local.properties
+/local.properties
+
+# Android Studio Captures
+/captures
+
+# OS Specific
+.DS_Store

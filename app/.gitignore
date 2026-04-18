@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Kotlin
+.kotlin/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Local Android SDK path
+local.properties
+
+# Log
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keystore dan file sensitif lokal
+*.jks
+*.keystore
+*.pem
+*.p12
+
+# Temporary / cache
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Generated APK / AAB
+*.apk
+*.aab
