@@ -22,8 +22,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
 /**
- * Definisi palet warna untuk mode terang aplikasi CassyKasir.
- * Menggunakan warna hijau hutan sebagai identitas utama untuk kesan profesional dan segar.
+ * Konfigurasi palet warna untuk Tema Terang (Light Mode).
+ * Menggunakan skema warna yang kontras untuk penggunaan di siang hari atau ruangan terang.
+ * Warna dasar Hijau Hutan (Primary: #1F5B50) memberikan kesan profesional dan segar.
  */
 private val SkemaWarnaTerang = lightColorScheme(
     primary = Color(0xFF1F5B50),
@@ -46,8 +47,8 @@ private val SkemaWarnaTerang = lightColorScheme(
 )
 
 /**
- * Definisi palet warna untuk mode gelap aplikasi CassyKasir.
- * Mengoptimalkan kontras rendah untuk kenyamanan penggunaan di malam hari bagi kasir.
+ * Konfigurasi palet warna untuk Tema Gelap (Dark Mode).
+ * Mengurangi emisi cahaya biru untuk kenyamanan mata saat penggunaan di malam hari oleh kasir.
  */
 private val SkemaWarnaGelap = darkColorScheme(
     primary = Color(0xFF9ED6C8),
@@ -70,8 +71,9 @@ private val SkemaWarnaGelap = darkColorScheme(
 )
 
 /**
- * Konfigurasi tipografi standar Material 3 yang disesuaikan.
- * Memberikan penekanan pada headline untuk kejelasan nama toko/aplikasi.
+ * Konfigurasi Tipografi aplikasi menggunakan standar Material 3.
+ * Menentukan ukuran font, ketebalan, dan jarak antar baris untuk elemen teks.
+ * Memberikan penekanan pada headline untuk kejelasan nama toko atau aplikasi.
  */
 private val TipografiCassyKasir = Typography(
     headlineMedium = TextStyle(
@@ -107,7 +109,8 @@ private val TipografiCassyKasir = Typography(
 )
 
 /**
- * Konfigurasi bentuk sudut (shapes) yang konsisten di seluruh aplikasi.
+ * Konfigurasi Bentuk (Shapes) untuk komponen Material 3 di seluruh aplikasi.
+ * Menentukan radius sudut untuk kartu, tombol, dan kontainer lainnya.
  */
 private val BentukCassyKasir = Shapes(
     small = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
@@ -116,8 +119,12 @@ private val BentukCassyKasir = Shapes(
 )
 
 /**
- * Komponen tema utama yang membungkus aplikasi.
+ * Tema utama untuk Aplikasi Cassy Kasir yang membungkus seluruh hierarki UI.
  * Mendukung fitur modern seperti Dynamic Color (Android 12+) dan Insets Controller.
+ *
+ * @param modeGelap Menentukan apakah menggunakan tema gelap atau terang.
+ * @param gunakanWarnaDinamis Mendukung skema warna dinamis Android 12+.
+ * @param konten Blok Composable yang akan dibungkus oleh tema ini.
  */
 @Composable
 fun TemaCassyKasir(
@@ -128,23 +135,21 @@ fun TemaCassyKasir(
     val konteks = LocalContext.current
     val tampilan = LocalView.current
 
-    // Logika pemilihan skema warna berdasarkan kondisi sistem
+    // Logika pemilihan skema warna berdasarkan kondisi sistem dan preferensi
     val skemaWarna = when {
         gunakanWarnaDinamis && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (modeGelap) dynamicDarkColorScheme(konteks) else dynamicLightColorScheme(konteks)
         }
-
         modeGelap -> SkemaWarnaGelap
         else -> SkemaWarnaTerang
     }
 
-    // Mengatur gaya visual status bar sistem agar selaras dengan tema
+    // Mengatur gaya visual status bar sistem agar selaras dengan tema yang aktif
     if (!tampilan.isInEditMode) {
         SideEffect {
             val aktivitas = tampilan.context as? Activity ?: return@SideEffect
             val jendela = aktivitas.window
-            WindowCompat.getInsetsController(jendela, tampilan).isAppearanceLightStatusBars =
-                !modeGelap
+            WindowCompat.getInsetsController(jendela, tampilan).isAppearanceLightStatusBars = !modeGelap
         }
     }
 
