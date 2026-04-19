@@ -1,28 +1,40 @@
-# ==========================================
-# CASSY KASIR - .gitignore
-# ==========================================
+# ====================================================================
+# Cassy Kasir - Pengaturan Pengabaian Git (Git Ignore)
+# ====================================================================
 
-# Build & Gradle
-.gradle
-/build
-.externalNativeBuild
-.cxx
+# Build dan Output Gradle
+.gradle/
+build/
+**/build/
+.externalNativeBuild/
+.cxx/
+captures/
 
-# IDE Files (Android Studio / IntelliJ IDEA)
+# Berkas IDE (Android Studio / IntelliJ)
+.idea/
 *.iml
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+*.ipr
+*.iws
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.navigation/
 
-# Local Configuration
+# Konfigurasi Lokal dan Rahasia
 local.properties
-/local.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+google-services.json
 
-# Android Studio Captures
-/captures
-
-# OS Specific
+# Berkas Sistem Operasi
 .DS_Store
+Thumbs.db
+
+# Log dan Cache
+*.log
+.kotlin/

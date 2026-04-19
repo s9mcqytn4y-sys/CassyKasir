@@ -48,7 +48,10 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            pickFirsts += "lib/**/libandroidx.graphics.path.so"
+            pickFirsts += "**/libandroidx.graphics.path.so"
+        }
+        jniLibs {
+            keepDebugSymbols += "**/libandroidx.graphics.path.so"
         }
     }
 }

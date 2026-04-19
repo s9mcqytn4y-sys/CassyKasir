@@ -1,53 +1,53 @@
 # Cassy Kasir
 
-Cassy Kasir adalah aplikasi Point of Sales Android Native modern untuk UMKM.
+**Cassy Kasir** adalah solusi *Point of Sales* (POS) berbasis Android Native yang dirancang khusus untuk memenuhi kebutuhan UMKM modern. Aplikasi ini mengutamakan efisiensi operasional, keandalan di jam sibuk, dan antarmuka yang intuitif bagi pemilik usaha.
 
-## Posisi Produk
+---
 
-- ringan
-- cepat
-- modern
-- mudah dipakai
-- tepercaya saat jam sibuk
+## Karakteristik Produk
 
-## Tujuan Proyek
+*   **Responsif & Ringan:** Dibangun dengan Jetpack Compose untuk performa antarmuka yang mulus.
+*   **Keandalan Tinggi:** Dirancang untuk menangani transaksi cepat tanpa hambatan teknis.
+*   **Modern & Estetik:** Mengimplementasikan Material 3 dengan filosofi desain yang bersih dan profesional.
+*   **Offline-First:** Menjamin kelancaran operasional meskipun dalam kondisi jaringan yang tidak stabil.
 
-Membangun aplikasi kasir Android yang:
+---
 
-- nyaman untuk transaksi cepat,
-- berjalan offline lebih dulu,
-- mudah dipelihara,
-- dan siap tumbuh ke standar produksi.
+## Fondasi Teknologi
 
-## Stack Utama
+Aplikasi ini menggunakan teknologi terkini di ekosistem Android untuk menjamin kemudahan pemeliharaan dan skalabilitas:
 
-- Kotlin 2.x
-- Java 17+
-- Android Gradle Plugin 9.x
-- Gradle 9.x
-- Jetpack Compose
-- Material 3
+*   **Bahasa Pemrograman:** Kotlin 2.x (Modern Syntax & Performance)
+*   **UI Framework:** Jetpack Compose & Material 3
+*   **Build System:** Gradle 9.x dengan Konfigurasi Cache
+*   **Arsitektur:** Android Native dengan kepatuhan terhadap prinsip DRY (*Don't Repeat Yourself*).
 
-## Status Saat Ini
+---
 
-Level 0:
+## Memulai Pengembangan
 
-- setup lingkungan kerja selesai
-- repository dasar sudah rapi
-- model domain dasar sudah dibuat
-- kualitas fondasi sedang dirapikan
+### Persyaratan Sistem
+*   Android Studio Ladybug atau versi lebih baru.
+*   JDK 17+.
+*   Perangkat Android atau Emulator dengan API 26 (Android 8.0) ke atas.
 
-## Cara Menjalankan
+### Cara Membangun (Build)
+Untuk menghasilkan berkas APK Debug melalui terminal:
 
-### Android Studio
+**Windows:**
+```powershell
+./gradlew.bat assembleDebug
+```
 
-1. Buka proyek di Android Studio.
-2. Pastikan SDK dan emulator tersedia.
-3. Jalankan build variant `debug`.
-
-### Terminal
-
-#### Windows
-
+**Linux/macOS:**
 ```bash
-gradlew.bat assembleDebug
+./gradlew assembleDebug
+```
+
+---
+
+## Status Proyek
+Saat ini proyek berada dalam tahap pengembangan **Fondasi Inti (Level 0)**. Fokus utama adalah pada pemantapan infrastruktur build, model domain, dan standarisasi antarmuka pengguna.
+
+---
+© 2025 Cassy Kasir - Solusi Digital UMKM Indonesia.
