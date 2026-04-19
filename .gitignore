@@ -38,3 +38,6 @@ Thumbs.db
 # Log dan Cache
 *.log
 .kotlin/
+
+# Berkas Tambahan Agent
+STUDIO_AGENT_GUIDE.md
