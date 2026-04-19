@@ -23,7 +23,7 @@ fun AplikasiCassyKasir() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            LayarUtamaKasir(statusBeranda = statusBerandaAwal)
+            LayarUtamaKasir(statusBeranda = statusBerandaAwal, KatalogProdukContoh.daftarAwal())
         }
     }
 }
