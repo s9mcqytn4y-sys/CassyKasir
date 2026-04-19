@@ -3,14 +3,16 @@ package id.cassy.kasir.antarmuka
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import id.cassy.kasir.antarmuka.tema.TemaCassyKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.RingkasanPembayaranStatis
 import id.cassy.kasir.antarmuka.utama.StatusBerandaKasir
 import id.cassy.kasir.antarmuka.utama.StatusKeranjangStatis
-import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
+import id.cassy.kasir.antarmuka.utama.UtamaViewModel
 
 /**
  * Komponen tingkat atas (Root Composable) untuk aplikasi Cassy Kasir.
@@ -18,42 +20,44 @@ import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
  * dan navigasi utama aplikasi.
  */
 @Composable
-fun AplikasiCassyKasir() {
-    // Inisialisasi data contoh untuk demonstrasi UI
-    val daftarProdukAwal = remember { KatalogProdukContoh.daftarAwal() }
+fun AplikasiCassyKasir(
+    viewModel: UtamaViewModel = viewModel(),
+) {
+    // Mengamati status UI dari ViewModel secara reaktif
+    val uiState by viewModel.uiState.collectAsState()
 
-    // State awal untuk informasi beranda/dashboard
-    val statusBerandaAwal = remember {
-        StatusBerandaKasir(
-            namaAplikasi = "Cassy Kasir",
-            sloganAplikasi = "Kasir Cepat untuk Usaha Hebat",
-            jumlahProdukTersedia = daftarProdukAwal.size,
-            jumlahItemKeranjang = 0,
-            totalBelanjaSementara = "Rp0",
-            statusSinkronisasi = "Belum ada sinkronisasi",
-        )
-    }
+    // Transformasi status bisnis ke status tampilan (UI State Mapping)
+    val statusBeranda = StatusBerandaKasir(
+        namaAplikasi = "Cassy Kasir",
+        sloganAplikasi = "Kasir Cepat untuk Usaha Hebat",
+        jumlahProdukTersedia = uiState.daftarProduk.size,
+        jumlahItemKeranjang = uiState.jumlahItem,
+        totalBelanjaSementara = "Rp${uiState.subtotal}",
+        statusSinkronisasi = "Tersimpan Lokal",
+    )
 
-    // State awal untuk tampilan keranjang yang masih kosong
-    val statusKeranjangAwal = remember {
+    val statusKeranjang = if (uiState.keranjang.isEmpty()) {
         StatusKeranjangStatis(
             judul = "Keranjang masih kosong",
             deskripsi = "Pilih produk dari katalog untuk mulai transaksi.",
             jumlahItem = "0 item",
         )
-    }
-
-    // State awal untuk rincian biaya pembayaran
-    val ringkasanPembayaranAwal = remember {
-        RingkasanPembayaranStatis(
-            subtotal = "Rp0",
-            potongan = "Rp0",
-            pajak = "Rp0",
-            totalAkhir = "Rp0",
-            labelAksiUtama = "Pilih produk dulu",
-            aksiUtamaAktif = false,
+    } else {
+        StatusKeranjangStatis(
+            judul = "Keranjang Belanja",
+            deskripsi = "${uiState.keranjang.size} jenis produk terpilih",
+            jumlahItem = "${uiState.jumlahItem} item",
         )
     }
+
+    val ringkasanPembayaran = RingkasanPembayaranStatis(
+        subtotal = "Rp${uiState.subtotal}",
+        potongan = "Rp${uiState.potongan}",
+        pajak = "Rp${uiState.pajak}",
+        totalAkhir = "Rp${uiState.totalAkhir}",
+        labelAksiUtama = if (uiState.keranjang.isEmpty()) "Pilih produk dulu" else "Proses Bayar",
+        aksiUtamaAktif = uiState.keranjang.isNotEmpty(),
+    )
 
     // Penerapan tema aplikasi dengan konfigurasi Material 3
     TemaCassyKasir(
@@ -63,12 +67,12 @@ fun AplikasiCassyKasir() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            // Memuat layar utama kasir dengan menyuntikkan state awal
+            // Memuat layar utama kasir dengan menyuntikkan state dari ViewModel
             LayarUtamaKasir(
-                statusBeranda = statusBerandaAwal,
-                daftarProduk = daftarProdukAwal,
-                statusKeranjang = statusKeranjangAwal,
-                ringkasanPembayaran = ringkasanPembayaranAwal,
+                statusBeranda = statusBeranda,
+                daftarProduk = uiState.daftarProduk,
+                statusKeranjang = statusKeranjang,
+                ringkasanPembayaran = ringkasanPembayaran,
             )
         }
     }

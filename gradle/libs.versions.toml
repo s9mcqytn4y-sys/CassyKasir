@@ -4,6 +4,8 @@ kotlin = "2.2.10"
 coreKtx = "1.18.0"
 activityCompose = "1.12.4"
 composeBom = "2026.03.00"
+lifecycle = "2.10.0"
+navigation = "2.9.7"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -18,3 +20,6 @@ androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }

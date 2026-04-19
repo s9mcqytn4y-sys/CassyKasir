@@ -2,8 +2,16 @@ package id.cassy.kasir.ranah.contoh
 
 import id.cassy.kasir.ranah.model.Produk
 
+/**
+ * Objek penyedia data tiruan (mock data) untuk keperluan pengembangan dan demonstrasi.
+ */
 object KatalogProdukContoh {
 
+    /**
+     * Menghasilkan daftar awal produk yang beragam (Kopi, Makanan, Retail).
+     *
+     * @return List berisi objek [Produk].
+     */
     fun daftarAwal(): List<Produk> {
         return listOf(
             // --- DATA ASLI ---
