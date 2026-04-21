@@ -1,30 +1,20 @@
 # Cassy Kasir
 
-**Cassy Kasir** adalah solusi *Point of Sales* (POS) berbasis Android Native yang dirancang khusus untuk memenuhi kebutuhan UMKM modern. Aplikasi ini mengutamakan efisiensi operasional, keandalan di jam sibuk, dan antarmuka yang intuitif bagi pemilik usaha.
-
----
+Cassy Kasir adalah solusi Point of Sales (POS) berbasis Android Native yang dirancang untuk kebutuhan UMKM. Aplikasi ini mengutamakan efisiensi operasional, keandalan, dan antarmuka yang intuitif.
 
 ## Karakteristik Produk
 
-* **Responsif & Ringan:** Dibangun dengan Jetpack Compose untuk performa antarmuka yang mulus.
-* **Keandalan Tinggi:** Dirancang untuk menangani transaksi cepat tanpa hambatan teknis.
-* **Modern & Estetik:** Mengimplementasikan Material 3 dengan filosofi desain yang bersih dan profesional.
-* **Offline-First:** Menjamin kelancaran operasional meskipun dalam kondisi jaringan yang tidak stabil.
-* **Integrasi AI (Gemini):** Dioptimalkan untuk pengembangan berbasis AI dengan panduan khusus agent.
-
----
+* Responsif & Ringan: Dibangun dengan Jetpack Compose untuk performa antarmuka yang mulus.
+* Keandalan Tinggi: Dirancang untuk menangani transaksi cepat tanpa hambatan teknis.
+* Modern & Estetik: Mengimplementasikan Material 3 dengan filosofi desain yang bersih.
+* Offline-First: Menjamin kelancaran operasional meskipun dalam kondisi jaringan yang tidak stabil.
 
 ## Fondasi Teknologi
 
-Aplikasi ini menggunakan teknologi terkini di ekosistem Android untuk menjamin kemudahan pemeliharaan dan skalabilitas:
-
-* **Bahasa Pemrograman:** Kotlin 2.2.x
-* **UI Framework:** Jetpack Compose & Material 3 (dengan dukungan Dynamic Color)
-* **Architecture Components:** ViewModel, StateFlow, LiveData
-* **Build System:** Gradle 9.x dengan Version Catalog (libs.versions.toml)
-* **AI Support:** Studio Bot / Gemini terintegrasi untuk optimasi kode.
-
----
+* Bahasa Pemrograman: Kotlin 2.2.x
+* UI Framework: Jetpack Compose & Material 3
+* Architecture Components: ViewModel, StateFlow, Livedata
+* Build System: Gradle 9.x dengan Version Catalog
 
 ## Memulai Pengembangan
 
@@ -38,29 +28,15 @@ Aplikasi ini menggunakan teknologi terkini di ekosistem Android untuk menjamin k
 
 Untuk menghasilkan berkas APK Debug melalui terminal:
 
-**Windows:**
-
-```powershell
+Windows:
 ./gradlew assembleDebug
-```
 
-**Linux/macOS:**
-
-```bash
+Linux/macOS:
 ./gradlew assembleDebug
-```
-
----
-
-## Dokumentasi Tambahan
-
-* [Panduan Agent AI (STUDIO_AGENT_GUIDE.md)](STUDIO_AGENT_GUIDE.md): Referensi khusus untuk pengembangan menggunakan asisten AI di Android Studio.
-
----
 
 ## Status Proyek
 
-Saat ini proyek berada dalam tahap pengembangan **Fondasi Inti (Level 0)**. Infrastruktur build, tema Material 3, dan dokumentasi kode dalam bahasa Indonesia telah distandarisasi.
+Saat ini proyek berada dalam tahap pengembangan Fondasi Inti (Level 0). Infrastruktur build, tema Material 3, dan dokumentasi kode dalam bahasa Indonesia telah distandarisasi.
 
 ---
 © 2025 Cassy Kasir - Solusi Digital UMKM Indonesia.
