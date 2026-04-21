@@ -12,10 +12,9 @@ import id.cassy.kasir.antarmuka.AplikasiCassyKasir
  */
 class AktivitasUtama : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         // Mengaktifkan fitur Edge-to-Edge untuk tampilan yang lebih imersif dan modern
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
 
         setContent {
             // Memulai fungsi komposabel utama aplikasi

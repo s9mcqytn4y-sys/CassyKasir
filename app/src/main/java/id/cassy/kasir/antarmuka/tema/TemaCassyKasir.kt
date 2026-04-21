@@ -3,6 +3,7 @@ package id.cassy.kasir.antarmuka.tema
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
@@ -22,9 +23,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
 /**
- * Konfigurasi palet warna untuk Tema Terang (Light Mode).
- * Menggunakan skema warna yang kontras untuk penggunaan di siang hari atau ruangan terang.
- * Warna dasar Hijau Hutan (Primary: #1F5B50) memberikan kesan profesional dan segar.
+ * Pengaturan warna untuk Tema Terang.
+ * Kita menggunakan perpaduan warna hijau hutan yang profesional namun tetap terlihat segar.
+ * Sangat cocok digunakan saat kondisi ruangan terang agar teks tetap mudah dibaca.
  */
 private val SkemaWarnaTerang = lightColorScheme(
     primary = Color(0xFF1F5B50),
@@ -47,8 +48,9 @@ private val SkemaWarnaTerang = lightColorScheme(
 )
 
 /**
- * Konfigurasi palet warna untuk Tema Gelap (Dark Mode).
- * Mengurangi emisi cahaya biru untuk kenyamanan mata saat penggunaan di malam hari oleh kasir.
+ * Pengaturan warna untuk Tema Gelap.
+ * Tema ini dirancang agar mata kasir tidak cepat lelah saat bekerja di malam hari atau ruangan redup.
+ * Warna hijaunya dibuat lebih lembut agar tetap nyaman dipandang.
  */
 private val SkemaWarnaGelap = darkColorScheme(
     primary = Color(0xFF9ED6C8),
@@ -71,9 +73,9 @@ private val SkemaWarnaGelap = darkColorScheme(
 )
 
 /**
- * Konfigurasi Tipografi aplikasi menggunakan standar Material 3.
- * Menentukan ukuran font, ketebalan, dan jarak antar baris untuk elemen teks.
- * Memberikan penekanan pada headline untuk kejelasan nama toko atau aplikasi.
+ * Kumpulan gaya tulisan (Tipografi) yang digunakan di seluruh aplikasi.
+ * Ukuran dan ketebalan huruf diatur sedemikian rupa agar informasi penting seperti
+ * nama produk dan total harga bisa terlihat dengan jelas.
  */
 private val TipografiCassyKasir = Typography(
     headlineMedium = TextStyle(
@@ -109,22 +111,22 @@ private val TipografiCassyKasir = Typography(
 )
 
 /**
- * Konfigurasi Bentuk (Shapes) untuk komponen Material 3 di seluruh aplikasi.
- * Menentukan radius sudut untuk kartu, tombol, dan kontainer lainnya.
+ * Definisi bentuk lengkungan pada komponen seperti kartu dan tombol.
+ * Kita menggunakan sudut yang agak membulat agar tampilan aplikasi terasa lebih ramah dan modern.
  */
 private val BentukCassyKasir = Shapes(
-    small = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-    large = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+    small = RoundedCornerShape(16.dp),
+    medium = RoundedCornerShape(20.dp),
+    large = RoundedCornerShape(24.dp),
 )
 
 /**
- * Tema utama untuk Aplikasi Cassy Kasir yang membungkus seluruh hierarki UI.
- * Mendukung fitur modern seperti Dynamic Color (Android 12+) dan Insets Controller.
+ * Fungsi utama untuk membungkus seluruh tampilan aplikasi dengan Tema Cassy Kasir.
+ * Fungsi ini otomatis mengatur warna, tulisan, dan bentuk sesuai dengan mode yang dipilih.
  *
- * @param modeGelap Menentukan apakah menggunakan tema gelap atau terang.
- * @param gunakanWarnaDinamis Mendukung skema warna dinamis Android 12+.
- * @param konten Blok Composable yang akan dibungkus oleh tema ini.
+ * @param modeGelap Otomatis mengikuti pengaturan sistem, tapi bisa dipaksa manual jika perlu.
+ * @param gunakanWarnaDinamis Fitur Android 12+ yang menyesuaikan warna aplikasi dengan wallpaper pengguna.
+ * @param konten Isi tampilan aplikasi yang akan diberikan tema ini.
  */
 @Composable
 fun TemaCassyKasir(
@@ -135,20 +137,22 @@ fun TemaCassyKasir(
     val konteks = LocalContext.current
     val tampilan = LocalView.current
 
-    // Logika pemilihan skema warna berdasarkan kondisi sistem dan preferensi
+    // Tentukan skema warna yang paling pas untuk digunakan
     val skemaWarna = when {
         gunakanWarnaDinamis && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (modeGelap) dynamicDarkColorScheme(konteks) else dynamicLightColorScheme(konteks)
         }
+
         modeGelap -> SkemaWarnaGelap
         else -> SkemaWarnaTerang
     }
 
-    // Mengatur gaya visual status bar sistem agar selaras dengan tema yang aktif
+    // Mengatur agar ikon di status bar (baterai, jam, dll) tetap terlihat jelas sesuai tema
     if (!tampilan.isInEditMode) {
         SideEffect {
             val aktivitas = tampilan.context as? Activity ?: return@SideEffect
             val jendela = aktivitas.window
+            // Jika mode terang, gunakan ikon gelap. Jika mode gelap, gunakan ikon terang.
             WindowCompat.getInsetsController(jendela, tampilan).isAppearanceLightStatusBars = !modeGelap
         }
     }

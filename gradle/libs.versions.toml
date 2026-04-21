@@ -7,6 +7,7 @@ composeBom = "2026.03.00"
 lifecycle = "2.10.0"
 navigation = "2.9.7"
 material = "1.13.0"
+foundation = "1.10.6"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -25,3 +26,4 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }

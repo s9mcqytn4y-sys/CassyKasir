@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.foundation)
 
     // Dependensi Debug & Pengujian
     debugImplementation(libs.androidx.compose.ui.tooling)
