@@ -3,23 +3,31 @@ package id.cassy.kasir.antarmuka.utama
 import androidx.compose.runtime.Immutable
 
 /**
- * Representasi aksi (Intent) yang dapat dikirim dari antarmuka ke logika bisnis.
+ * Representasi aksi dari antarmuka ke pengelola status layar utama kasir.
  *
- * Mengikuti pola MVI (Model-View-Intent) atau UDF (Unidirectional Data Flow).
- * Penggunaan sealed interface memastikan penanganan aksi yang komprehensif pada ViewModel.
+ * Seluruh interaksi pengguna dikirim sebagai aksi agar alur data tetap satu arah.
  */
 @Immutable
 sealed interface AksiLayarUtamaKasir {
 
     /**
-     * Aksi untuk memperbarui filter pencarian produk.
-     *
-     * @property kataKunciBaru String yang dimasukkan pengguna pada kolom pencarian.
+     * Aksi saat pengguna mengubah isi kolom pencarian produk.
      */
-    data class UbahKataKunciPencarian(val kataKunciBaru: String) : AksiLayarUtamaKasir
+    data class UbahKataKunciPencarian(
+        val kataKunciBaru: String,
+    ) : AksiLayarUtamaKasir
 
     /**
-     * Aksi untuk mengalihkan (toggle) tampilan panel ringkasan pembayaran.
+     * Aksi saat pengguna ingin menampilkan atau menyembunyikan
+     * panel pembayaran.
      */
     data object UbahVisibilitasRingkasanPembayaran : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna mengetuk satu produk pada katalog
+     * untuk menambahkannya ke keranjang.
+     */
+    data class TambahProdukKeKeranjang(
+        val produkId: String,
+    ) : AksiLayarUtamaKasir
 }

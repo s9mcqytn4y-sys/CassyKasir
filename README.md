@@ -1,42 +1,44 @@
-# Cassy Kasir
+# CassyKasir 🛡️
 
-Cassy Kasir adalah solusi Point of Sales (POS) berbasis Android Native yang dirancang untuk kebutuhan UMKM. Aplikasi ini mengutamakan efisiensi operasional, keandalan, dan antarmuka yang intuitif.
+Solusi Digital UMKM Modern untuk manajemen kasir yang cepat, akurat, dan andal.
 
-## Karakteristik Produk
+## 🚀 Gambaran Proyek
+CassyKasir adalah aplikasi kasir berbasis Android yang dirancang khusus untuk memenuhi kebutuhan pemilik usaha kecil dan menengah (UMKM). Fokus utama proyek ini adalah pada kemudahan penggunaan, kecepatan transaksi, dan akurasi perhitungan keuangan.
 
-* Responsif & Ringan: Dibangun dengan Jetpack Compose untuk performa antarmuka yang mulus.
-* Keandalan Tinggi: Dirancang untuk menangani transaksi cepat tanpa hambatan teknis.
-* Modern & Estetik: Mengimplementasikan Material 3 dengan filosofi desain yang bersih.
-* Offline-First: Menjamin kelancaran operasional meskipun dalam kondisi jaringan yang tidak stabil.
+## 🛠️ Arsitektur & Teknologi
+Proyek ini dikembangkan dengan standar industri modern:
+- **Bahasa**: Kotlin 2.2.x (100%)
+- **UI Framework**: Jetpack Compose dengan Material 3
+- **Pola Arsitektur**: Unidirectional Data Flow (UDF) menggunakan StateFlow dan ViewModel
+- **Build System**: Gradle 9.x (Kotlin DSL)
+- **Dokumentasi**: KDoc dalam Bahasa Indonesia penuh
 
-## Fondasi Teknologi
+## 📐 Standar Kode
+Kami menerapkan aturan ketat untuk menjaga kualitas dan keterbacaan kode:
+1. **Bahasa Indonesia Penuh**: Seluruh sintaks buatan sendiri (fungsi, variabel, kelas) dan komentar wajib menggunakan Bahasa Indonesia.
+2. **Atomisitas State**: Pembaruan status UI dilakukan secara atomik menggunakan fungsi `.update` pada `StateFlow`.
+3. **Stateless UI**: Komponen antarmuka dirancang untuk tidak memiliki status internal (*stateless*) untuk memudahkan pengujian dan pemeliharaan.
 
-* Bahasa Pemrograman: Kotlin 2.2.x
-* UI Framework: Jetpack Compose & Material 3
-* Architecture Components: ViewModel, StateFlow, Livedata
-* Build System: Gradle 9.x dengan Version Catalog
+## 🧮 Logika Keuangan
+Rumus perhitungan transaksi utama:
+```kotlin
+Total = (Subtotal - Potongan) + BiayaLayanan + Pajak
+```
+*Catatan: Pajak bersifat menambah total belanja.*
 
-## Memulai Pengembangan
+## 📦 Menjalankan Proyek
+Pastikan Anda memiliki Android Studio terbaru (Koala atau lebih baru).
 
-### Persyaratan Sistem
+```bash
+# Clone repository
+git clone https://github.com/username/CassyKasir.git
 
-* Android Studio Ladybug atau versi lebih baru.
-* JDK 17+.
-* Perangkat Android atau Emulator dengan API 26 (Android 8.0) ke atas.
-
-### Cara Membangun (Build)
-
-Untuk menghasilkan berkas APK Debug melalui terminal:
-
-Windows:
+# Build proyek
 ./gradlew assembleDebug
 
-Linux/macOS:
-./gradlew assembleDebug
+# Jalankan pengujian
+./gradlew test
+```
 
-## Status Proyek
-
-Saat ini proyek berada dalam tahap pengembangan Fondasi Inti (Level 0). Infrastruktur build, tema Material 3, dan dokumentasi kode dalam bahasa Indonesia telah distandarisasi.
-
----
-© 2025 Cassy Kasir - Solusi Digital UMKM Indonesia.
+## 📄 Lisensi
+Hak Cipta © 2024 Cassy Digital. Seluruh hak cipta dilindungi undang-undang.

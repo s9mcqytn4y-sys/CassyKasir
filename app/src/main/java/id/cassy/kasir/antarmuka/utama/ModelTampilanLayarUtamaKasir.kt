@@ -1,38 +1,32 @@
 package id.cassy.kasir.antarmuka.utama
 
 import androidx.compose.runtime.Immutable
+import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.Produk
 
 /**
- * Representasi status UI (State) tunggal untuk Layar Utama Kasir.
+ * Representasi seluruh status UI untuk Layar Utama Kasir.
  *
- * Menggunakan anotasi @Immutable untuk optimasi rekomposisi pada Jetpack Compose.
- * Seluruh properti bersifat immutable (val) untuk mendukung pola Unidirectional Data Flow (UDF).
- *
- * @property statusBeranda Informasi identitas dan statistik ringkas aplikasi.
- * @property daftarProdukTersaring Daftar produk yang ditampilkan setelah melalui filter pencarian.
- * @property statusKeranjang Status visual keranjang belanja (saat ini statis/kosong).
- * @property ringkasanPembayaran Detail kalkulasi biaya transaksi.
- * @property kataKunciPencarian Teks aktif yang ada pada kolom pencarian.
- * @property apakahRingkasanPembayaranTampil Status visibilitas panel detail pembayaran.
+ * Model ini menjadi satu sumber kebenaran untuk seluruh tampilan layar.
  */
 @Immutable
 data class ModelTampilanLayarUtamaKasir(
     val statusBeranda: StatusBerandaKasir = StatusBerandaKasir(
         namaAplikasi = "Cassy Kasir",
-        sloganAplikasi = "Solusi Kasir UMKM",
+        sloganAplikasi = "Solusi Digital UMKM Modern",
         jumlahProdukTersedia = 0,
         jumlahItemKeranjang = 0,
         totalBelanjaSementara = "Rp0",
         statusSinkronisasi = "Tersimpan Lokal",
     ),
     val daftarProdukTersaring: List<Produk> = emptyList(),
-    val statusKeranjang: StatusKeranjangStatis = StatusKeranjangStatis(
-        judul = "Keranjang Kosong",
+    val daftarItemKeranjang: List<ItemKeranjang> = emptyList(),
+    val statusKeranjang: StatusKeranjangKasir = StatusKeranjangKasir(
+        judul = "Keranjang kosong",
         deskripsi = "Mulai transaksi dengan memilih produk.",
         jumlahItem = "0 item",
     ),
-    val ringkasanPembayaran: RingkasanPembayaranStatis = RingkasanPembayaranStatis(
+    val ringkasanPembayaran: RingkasanPembayaranKasir = RingkasanPembayaranKasir(
         subtotal = "Rp0",
         potongan = "Rp0",
         pajak = "Rp0",
