@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.update
 /**
  * ViewModel untuk mengelola status dan logika bisnis pada Layar Utama Kasir.
  *
- * ViewModel ini mengimplementasikan pola Unidirectional Data Flow (UDF)
- * dengan mengekspos satu StateFlow tunggal yang berisi seluruh status UI.
+ * Mengimplementasikan pola Unidirectional Data Flow (UDF) dengan mengekspos
+ * [StateFlow] tunggal yang berisi seluruh status antarmuka.
  */
 class LayarUtamaKasirViewModel : ViewModel() {
 
@@ -22,7 +22,7 @@ class LayarUtamaKasirViewModel : ViewModel() {
         ModelTampilanLayarUtamaKasir(
             statusBeranda = StatusBerandaKasir(
                 namaAplikasi = "Cassy Kasir",
-                sloganAplikasi = "Kasir Cepat untuk Usaha Hebat",
+                sloganAplikasi = "Solusi Digital UMKM Modern",
                 jumlahProdukTersedia = daftarProdukPenuh.size,
                 jumlahItemKeranjang = 0,
                 totalBelanjaSementara = "Rp0",
@@ -38,37 +38,38 @@ class LayarUtamaKasirViewModel : ViewModel() {
     val modelTampilan: StateFlow<ModelTampilanLayarUtamaKasir> = _modelTampilan.asStateFlow()
 
     /**
-     * Memperbarui kata kunci pencarian dan menyaring daftar produk.
+     * Titik masuk tunggal untuk memproses semua interaksi pengguna dari UI.
      *
-     * @param kataKunciBaru String yang dimasukkan pengguna pada kolom pencarian.
+     * @param aksi Objek [AksiLayarUtamaKasir] yang mewakili niat pengguna.
      */
-    fun ubahKataKunciPencarian(kataKunciBaru: String) {
-        val kataKunciBersih = kataKunciBaru.trim()
-
-        val daftarProdukTersaringBaru = if (kataKunciBersih.isBlank()) {
-            daftarProdukPenuh
-        } else {
-            daftarProdukPenuh.filter { produk ->
-                produk.nama.contains(kataKunciBersih, ignoreCase = true)
-            }
-        }
-
-        _modelTampilan.update { modelSaatIni ->
-            modelSaatIni.copy(
-                kataKunciPencarian = kataKunciBaru,
-                daftarProdukTersaring = daftarProdukTersaringBaru,
-            )
+    fun tanganiAksi(aksi: AksiLayarUtamaKasir) {
+        when (aksi) {
+            is AksiLayarUtamaKasir.UbahKataKunciPencarian -> perbaruiPencarian(aksi.kataKunciBaru)
+            AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran -> toggleVisibilitasPembayaran()
         }
     }
 
-    /**
-     * Mengatur visibilitas panel ringkasan pembayaran.
-     */
-    fun ubahVisibilitasRingkasanPembayaran() {
-        _modelTampilan.update { modelSaatIni ->
-            modelSaatIni.copy(
-                apakahRingkasanPembayaranTampil = !modelSaatIni.apakahRingkasanPembayaranTampil,
-            )
+    private fun perbaruiPencarian(kataKunci: String) {
+        val pencarianBersih = kataKunci.trim()
+
+        // Optimasi: Hindari proses filter jika kata kunci sama dengan state saat ini
+        if (_modelTampilan.value.kataKunciPencarian == kataKunci) return
+
+        val hasilFilter = if (pencarianBersih.isBlank()) {
+            daftarProdukPenuh
+        } else {
+            daftarProdukPenuh.filter { it.nama.contains(pencarianBersih, ignoreCase = true) }
         }
+
+        _modelTampilan.update { it.copy(
+            kataKunciPencarian = kataKunci,
+            daftarProdukTersaring = hasilFilter
+        )}
+    }
+
+    private fun toggleVisibilitasPembayaran() {
+        _modelTampilan.update { it.copy(
+            apakahRingkasanPembayaranTampil = !it.apakahRingkasanPembayaranTampil
+        )}
     }
 }

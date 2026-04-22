@@ -1,24 +1,26 @@
 package id.cassy.kasir.antarmuka.utama
 
+import androidx.compose.runtime.Immutable
 import id.cassy.kasir.ranah.model.Produk
 
 /**
- * Model data yang mewakili seluruh status UI pada Layar Utama Kasir.
+ * Representasi status UI (State) tunggal untuk Layar Utama Kasir.
  *
- * Mengikuti pola Unidirectional Data Flow (UDF), di mana seluruh status tampilan
- * digabungkan dalam satu objek state tunggal yang bersifat immutable.
+ * Menggunakan anotasi @Immutable untuk optimasi rekomposisi pada Jetpack Compose.
+ * Seluruh properti bersifat immutable (val) untuk mendukung pola Unidirectional Data Flow (UDF).
  *
- * @property statusBeranda Informasi ringkasan di bagian atas layar.
- * @property daftarProdukTersaring Koleksi produk yang telah disaring berdasarkan pencarian.
- * @property statusKeranjang Informasi status keranjang belanja saat ini.
- * @property ringkasanPembayaran Detail biaya dan total transaksi.
- * @property kataKunciPencarian Teks yang dimasukkan pengguna di kolom pencarian.
+ * @property statusBeranda Informasi identitas dan statistik ringkas aplikasi.
+ * @property daftarProdukTersaring Daftar produk yang ditampilkan setelah melalui filter pencarian.
+ * @property statusKeranjang Status visual keranjang belanja (saat ini statis/kosong).
+ * @property ringkasanPembayaran Detail kalkulasi biaya transaksi.
+ * @property kataKunciPencarian Teks aktif yang ada pada kolom pencarian.
  * @property apakahRingkasanPembayaranTampil Status visibilitas panel detail pembayaran.
  */
+@Immutable
 data class ModelTampilanLayarUtamaKasir(
     val statusBeranda: StatusBerandaKasir = StatusBerandaKasir(
         namaAplikasi = "Cassy Kasir",
-        sloganAplikasi = "Kasir Cepat untuk Usaha Hebat",
+        sloganAplikasi = "Solusi Kasir UMKM",
         jumlahProdukTersedia = 0,
         jumlahItemKeranjang = 0,
         totalBelanjaSementara = "Rp0",
@@ -26,8 +28,8 @@ data class ModelTampilanLayarUtamaKasir(
     ),
     val daftarProdukTersaring: List<Produk> = emptyList(),
     val statusKeranjang: StatusKeranjangStatis = StatusKeranjangStatis(
-        judul = "Keranjang masih kosong",
-        deskripsi = "Pilih produk dari katalog untuk mulai transaksi.",
+        judul = "Keranjang Kosong",
+        deskripsi = "Mulai transaksi dengan memilih produk.",
         jumlahItem = "0 item",
     ),
     val ringkasanPembayaran: RingkasanPembayaranStatis = RingkasanPembayaranStatis(
@@ -35,7 +37,7 @@ data class ModelTampilanLayarUtamaKasir(
         potongan = "Rp0",
         pajak = "Rp0",
         totalAkhir = "Rp0",
-        labelAksiUtama = "Pilih produk dulu",
+        labelAksiUtama = "Pilih Produk",
         aksiUtamaAktif = false,
     ),
     val kataKunciPencarian: String = "",
