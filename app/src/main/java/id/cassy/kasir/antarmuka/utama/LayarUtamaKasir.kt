@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.font.FontWeight
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 import id.cassy.kasir.antarmuka.tema.TemaCassyKasir
 import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
@@ -76,12 +75,7 @@ data class RingkasanPembayaranKasir(
 )
 
 /**
- * Komposabel utama Layar Kasir.
- *
- * Mengimplementasikan pola stateless UI dengan tata letak adaptif (Responsif).
- *
- * @param modelTampilan Status UI tunggal dari ViewModel.
- * @param saatAksiDikirim Callback untuk mengirimkan interaksi pengguna.
+ * Komposabel utama layar kasir.
  */
 @Composable
 fun LayarUtamaKasir(
@@ -93,169 +87,330 @@ fun LayarUtamaKasir(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
-    ) { paddingSistem ->
+    ) { paddingKerangka ->
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingSistem),
+                .padding(paddingKerangka),
         ) {
-            val apakahTablet = maxWidth >= 840.dp
+            val gunakanDuaPanel = maxWidth >= 840.dp
 
-            if (apakahTablet) {
-                TataLetakTablet(modelTampilan, saatAksiDikirim)
+            if (gunakanDuaPanel) {
+                TataLetakTabletKasir(
+                    modelTampilan = modelTampilan,
+                    saatAksiDikirim = saatAksiDikirim,
+                )
             } else {
-                TataLetakPonsel(modelTampilan, saatAksiDikirim)
+                TataLetakPonselKasir(
+                    modelTampilan = modelTampilan,
+                    saatAksiDikirim = saatAksiDikirim,
+                )
             }
         }
     }
 }
 
+/**
+ * Tata letak layar untuk perangkat dengan lebar terbatas.
+ */
 @Composable
-private fun TataLetakPonsel(
+private fun TataLetakPonselKasir(
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { HeaderAplikasi(modelTampilan.statusBeranda) }
-        item { RingkasanBeranda(modelTampilan.statusBeranda) }
         item {
-            PanelKeranjang(
-                modelTampilan.daftarItemKeranjang,
-                modelTampilan.statusKeranjang
+            HeaderBerandaKasir(
+                namaAplikasi = modelTampilan.statusBeranda.namaAplikasi,
+                sloganAplikasi = modelTampilan.statusBeranda.sloganAplikasi,
             )
         }
+
         item {
-            PanelPembayaran(
-                modelTampilan.ringkasanPembayaran,
-                modelTampilan.apakahRingkasanPembayaranTampil,
-                saatUbahTampilan = { saatAksiDikirim(AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran) }
+            RingkasanKasir(
+                statusBeranda = modelTampilan.statusBeranda,
             )
         }
+
         item {
-            KotakPencarian(
-                modelTampilan.kataKunciPencarian,
-                modelTampilan.daftarProdukTersaring.size,
-                saatBerubah = { saatAksiDikirim(AksiLayarUtamaKasir.UbahKataKunciPencarian(it)) }
+            PanelKeranjangKasir(
+                daftarItemKeranjang = modelTampilan.daftarItemKeranjang,
+                statusKeranjang = modelTampilan.statusKeranjang,
+                saatKurangiProduk = { produkId ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.KurangiProdukDiKeranjang(
+                            produkId = produkId,
+                        ),
+                    )
+                },
+                saatHapusProduk = { produkId ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.HapusProdukDariKeranjang(
+                            produkId = produkId,
+                        ),
+                    )
+                },
             )
         }
-        item { JudulBagian("Katalog Produk") }
+
+        item {
+            BagianRingkasanPembayaranKasir(
+                ringkasanPembayaran = modelTampilan.ringkasanPembayaran,
+                apakahRingkasanPembayaranTampil = modelTampilan.apakahRingkasanPembayaranTampil,
+                saatUbahVisibilitasRingkasanPembayaran = {
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran,
+                    )
+                },
+            )
+        }
+
+        item {
+            BidangPencarianProdukKasir(
+                nilaiPencarian = modelTampilan.kataKunciPencarian,
+                saatNilaiPencarianBerubah = { kataKunciBaru ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.UbahKataKunciPencarian(
+                            kataKunciBaru = kataKunciBaru,
+                        ),
+                    )
+                },
+                jumlahHasil = modelTampilan.daftarProdukTersaring.size,
+            )
+        }
+
+        item {
+            JudulBagianKasir(
+                judul = "Katalog produk",
+            )
+        }
 
         if (modelTampilan.daftarProdukTersaring.isEmpty()) {
-            item { StatusKosong() }
+            item {
+                StatusKosongSederhana(
+                    judul = "Produk tidak ditemukan",
+                    deskripsi = "Coba gunakan kata kunci lain.",
+                )
+            }
         } else {
-            items(modelTampilan.daftarProdukTersaring, key = { it.id }) { produk ->
-                KartuProduk(produk) {
-                    saatAksiDikirim(AksiLayarUtamaKasir.TambahProdukKeKeranjang(produk.id))
-                }
+            items(
+                items = modelTampilan.daftarProdukTersaring,
+                key = { produk -> produk.id },
+            ) { produk ->
+                KartuProdukKasir(
+                    produk = produk,
+                    saatKlikProduk = {
+                        saatAksiDikirim(
+                            AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                                produkId = produk.id,
+                            ),
+                        )
+                    },
+                )
             }
         }
     }
 }
 
+/**
+ * Tata letak layar untuk perangkat layar lebar.
+ */
 @Composable
-private fun TataLetakTablet(
+private fun TataLetakTabletKasir(
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Kolom Kiri: Katalog
         LazyColumn(
-            modifier = Modifier.weight(1.2f).fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .weight(1.35f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item { HeaderAplikasi(modelTampilan.statusBeranda) }
             item {
-                KotakPencarian(
-                    modelTampilan.kataKunciPencarian,
-                    modelTampilan.daftarProdukTersaring.size,
-                    saatBerubah = { saatAksiDikirim(AksiLayarUtamaKasir.UbahKataKunciPencarian(it)) }
+                HeaderBerandaKasir(
+                    namaAplikasi = modelTampilan.statusBeranda.namaAplikasi,
+                    sloganAplikasi = modelTampilan.statusBeranda.sloganAplikasi,
                 )
             }
-            item { JudulBagian("Katalog Produk") }
+
+            item {
+                BidangPencarianProdukKasir(
+                    nilaiPencarian = modelTampilan.kataKunciPencarian,
+                    saatNilaiPencarianBerubah = { kataKunciBaru ->
+                        saatAksiDikirim(
+                            AksiLayarUtamaKasir.UbahKataKunciPencarian(
+                                kataKunciBaru = kataKunciBaru,
+                            ),
+                        )
+                    },
+                    jumlahHasil = modelTampilan.daftarProdukTersaring.size,
+                )
+            }
+
+            item {
+                JudulBagianKasir(
+                    judul = "Katalog produk",
+                )
+            }
 
             if (modelTampilan.daftarProdukTersaring.isEmpty()) {
-                item { StatusKosong() }
+                item {
+                    StatusKosongSederhana(
+                        judul = "Produk tidak ditemukan",
+                        deskripsi = "Coba gunakan kata kunci lain.",
+                    )
+                }
             } else {
-                items(modelTampilan.daftarProdukTersaring, key = { it.id }) { produk ->
-                    KartuProduk(produk) {
-                        saatAksiDikirim(AksiLayarUtamaKasir.TambahProdukKeKeranjang(produk.id))
-                    }
+                items(
+                    items = modelTampilan.daftarProdukTersaring,
+                    key = { produk -> produk.id },
+                ) { produk ->
+                    KartuProdukKasir(
+                        produk = produk,
+                        saatKlikProduk = {
+                            saatAksiDikirim(
+                                AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                                    produkId = produk.id,
+                                ),
+                            )
+                        },
+                    )
                 }
             }
         }
 
-        // Kolom Kanan: Detail Transaksi
         Column(
-            modifier = Modifier.weight(0.8f).fillMaxHeight().verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .weight(0.95f)
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            RingkasanBeranda(modelTampilan.statusBeranda)
-            PanelKeranjang(modelTampilan.daftarItemKeranjang, modelTampilan.statusKeranjang)
-            PanelPembayaran(
-                modelTampilan.ringkasanPembayaran,
-                modelTampilan.apakahRingkasanPembayaranTampil,
-                saatUbahTampilan = { saatAksiDikirim(AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran) }
+            RingkasanKasir(
+                statusBeranda = modelTampilan.statusBeranda,
+            )
+
+            PanelKeranjangKasir(
+                daftarItemKeranjang = modelTampilan.daftarItemKeranjang,
+                statusKeranjang = modelTampilan.statusKeranjang,
+                saatKurangiProduk = { produkId ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.KurangiProdukDiKeranjang(
+                            produkId = produkId,
+                        ),
+                    )
+                },
+                saatHapusProduk = { produkId ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.HapusProdukDariKeranjang(
+                            produkId = produkId,
+                        ),
+                    )
+                },
+            )
+
+            BagianRingkasanPembayaranKasir(
+                ringkasanPembayaran = modelTampilan.ringkasanPembayaran,
+                apakahRingkasanPembayaranTampil = modelTampilan.apakahRingkasanPembayaranTampil,
+                saatUbahVisibilitasRingkasanPembayaran = {
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran,
+                    )
+                },
             )
         }
     }
 }
 
-
+/**
+ * Komponen identitas aplikasi pada bagian atas layar.
+ */
 @Composable
-private fun HeaderAplikasi(status: StatusBerandaKasir) {
-    Column {
-        Text(status.namaAplikasi, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+private fun HeaderBerandaKasir(
+    namaAplikasi: String,
+    sloganAplikasi: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         Text(
-            status.sloganAplikasi,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary
+            text = namaAplikasi,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = sloganAplikasi,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
+/**
+ * Komponen judul teks standar untuk setiap bagian layar.
+ */
 @Composable
-private fun JudulBagian(teks: String) {
-    Text(teks, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-}
-
-@Composable
-private fun KotakPencarian(
-    nilai: String,
-    hasil: Int,
-    saatBerubah: (String) -> Unit
+private fun JudulBagianKasir(
+    judul: String,
+    modifier: Modifier = Modifier,
 ) {
-    OutlinedTextField(
-        value = nilai,
-        onValueChange = saatBerubah,
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text("Cari Produk") },
-        placeholder = { Text("Nama atau Barcode...") },
-        supportingText = { Text("Ditemukan $hasil produk") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
-    )
-}
-
-@Composable
-private fun StatusKosong() {
-    StatusKosongSederhana(
-        judul = "Produk Tidak Ditemukan",
-        deskripsi = "Silakan gunakan kata kunci pencarian lainnya."
+    Text(
+        text = judul,
+        modifier = modifier,
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.onBackground,
     )
 }
 
 /**
- * Komponen grid statistik ringkas (produk, item, total).
+ * Input teks untuk pencarian katalog produk.
  */
 @Composable
-private fun RingkasanBeranda(
+private fun BidangPencarianProdukKasir(
+    nilaiPencarian: String,
+    saatNilaiPencarianBerubah: (String) -> Unit,
+    jumlahHasil: Int,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = nilaiPencarian,
+        onValueChange = saatNilaiPencarianBerubah,
+        modifier = modifier.fillMaxWidth(),
+        singleLine = true,
+        label = {
+            Text(text = "Cari produk")
+        },
+        placeholder = {
+            Text(text = "Contoh: kopi, teh, roti")
+        },
+        supportingText = {
+            Text(text = "Ditemukan: $jumlahHasil produk")
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Search,
+        ),
+    )
+}
+
+/**
+ * Komponen ringkasan metrik kasir.
+ */
+@Composable
+private fun RingkasanKasir(
     statusBeranda: StatusBerandaKasir,
     modifier: Modifier = Modifier,
 ) {
@@ -297,9 +452,8 @@ private fun RingkasanBeranda(
     }
 }
 
-
 /**
- * Kartu individual untuk menampilkan satu metrik statistik.
+ * Kartu statistik kecil.
  */
 @Composable
 private fun KartuStatistikKasir(
@@ -332,19 +486,23 @@ private fun KartuStatistikKasir(
 }
 
 /**
- * Panel yang menampilkan daftar produk yang telah masuk ke keranjang.
+ * Panel yang menampilkan daftar item dalam keranjang.
  */
 @Composable
-private fun PanelKeranjang(
+private fun PanelKeranjangKasir(
     daftarItemKeranjang: List<ItemKeranjang>,
     statusKeranjang: StatusKeranjangKasir,
+    saatKurangiProduk: (String) -> Unit,
+    saatHapusProduk: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        JudulBagian(teks = "Keranjang")
+        JudulBagianKasir(
+            judul = "Keranjang",
+        )
 
         if (daftarItemKeranjang.isEmpty()) {
             StatusKosongSederhana(
@@ -353,14 +511,29 @@ private fun PanelKeranjang(
             )
         } else {
             Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.14f)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.14f),
+                ),
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    daftarItemKeranjang.forEach { BarisItemKeranjangKasir(it) }
+                    daftarItemKeranjang.forEach { itemKeranjang ->
+                        BarisItemKeranjangKasir(
+                            itemKeranjang = itemKeranjang,
+                            saatKurangiProduk = {
+                                saatKurangiProduk(itemKeranjang.produk.id)
+                            },
+                            saatHapusProduk = {
+                                saatHapusProduk(itemKeranjang.produk.id)
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -373,51 +546,80 @@ private fun PanelKeranjang(
     }
 }
 
-
 /**
- * Komponen satu baris produk di dalam panel keranjang.
+ * Satu baris item di keranjang.
  */
 @Composable
 private fun BarisItemKeranjangKasir(
     itemKeranjang: ItemKeranjang,
+    saatKurangiProduk: () -> Unit,
+    saatHapusProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = itemKeranjang.produk.nama,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = "${itemKeranjang.jumlah} x ${itemKeranjang.produk.harga.sebagaiRupiahSederhana()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
             Text(
-                text = itemKeranjang.produk.nama,
+                text = itemKeranjang.hitungSubTotal().sebagaiRupiahSederhana(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Text(
-                text = "${itemKeranjang.jumlah} x ${itemKeranjang.produk.harga.sebagaiRupiahSederhana()}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
 
-        Text(
-            text = itemKeranjang.hitungSubTotal().sebagaiRupiahSederhana(),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            TextButton(
+                onClick = saatKurangiProduk,
+                enabled = itemKeranjang.jumlah > 1,
+            ) {
+                Text(
+                    text = "Kurangi",
+                )
+            }
+
+            TextButton(
+                onClick = saatHapusProduk,
+            ) {
+                Text(
+                    text = "Hapus",
+                )
+            }
+        }
+
+        HorizontalDivider()
     }
 }
 
 /**
- * Bagian pembungkus panel ringkasan pembayaran dengan tombol alih visibilitas.
+ * Bagian pembungkus panel ringkasan pembayaran.
  */
 @Composable
-private fun PanelPembayaran(
+private fun BagianRingkasanPembayaranKasir(
     ringkasanPembayaran: RingkasanPembayaranKasir,
     apakahRingkasanPembayaranTampil: Boolean,
-    saatUbahTampilan: () -> Unit,
+    saatUbahVisibilitasRingkasanPembayaran: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -428,21 +630,33 @@ private fun PanelPembayaran(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            JudulBagian(teks = "Pembayaran")
-            TextButton(onClick = saatUbahTampilan) {
-                Text(if (apakahRingkasanPembayaranTampil) "Sembunyikan" else "Tampilkan")
+            JudulBagianKasir(
+                judul = "Pembayaran",
+            )
+
+            TextButton(
+                onClick = saatUbahVisibilitasRingkasanPembayaran,
+            ) {
+                Text(
+                    text = if (apakahRingkasanPembayaranTampil) {
+                        "Sembunyikan"
+                    } else {
+                        "Tampilkan"
+                    },
+                )
             }
         }
 
         if (apakahRingkasanPembayaranTampil) {
-            PanelRingkasanPembayaranKasir(ringkasanPembayaran)
+            PanelRingkasanPembayaranKasir(
+                ringkasanPembayaran = ringkasanPembayaran,
+            )
         }
     }
 }
 
-
 /**
- * Panel kartu yang merinci subtotal, potongan, pajak, dan total akhir.
+ * Panel detail pembayaran.
  */
 @Composable
 private fun PanelRingkasanPembayaranKasir(
@@ -451,31 +665,54 @@ private fun PanelRingkasanPembayaranKasir(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.14f)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.14f),
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            BarisRingkasanPembayaranKasir("Subtotal", ringkasanPembayaran.subtotal)
-            BarisRingkasanPembayaranKasir("Potongan", ringkasanPembayaran.potongan)
-            BarisRingkasanPembayaranKasir("Pajak", ringkasanPembayaran.pajak)
+            BarisRingkasanPembayaranKasir(
+                label = "Subtotal",
+                nilai = ringkasanPembayaran.subtotal,
+            )
+            BarisRingkasanPembayaranKasir(
+                label = "Potongan",
+                nilai = ringkasanPembayaran.potongan,
+            )
+            BarisRingkasanPembayaranKasir(
+                label = "Pajak",
+                nilai = ringkasanPembayaran.pajak,
+            )
+
             HorizontalDivider()
-            BarisRingkasanPembayaranKasir("Total", ringkasanPembayaran.totalAkhir, tonjolkan = true)
+
+            BarisRingkasanPembayaranKasir(
+                label = "Total",
+                nilai = ringkasanPembayaran.totalAkhir,
+                tonjolkan = true,
+            )
+
             Button(
                 onClick = {},
                 modifier = Modifier.fillMaxWidth(),
                 enabled = ringkasanPembayaran.aksiUtamaAktif,
             ) {
-                Text(ringkasanPembayaran.labelAksiUtama)
+                Text(
+                    text = ringkasanPembayaran.labelAksiUtama,
+                )
             }
         }
     }
 }
 
 /**
- * Komponen satu baris informasi biaya (misal: Subtotal: Rp...).
+ * Satu baris informasi pembayaran.
  */
 @Composable
 private fun BarisRingkasanPembayaranKasir(
@@ -490,35 +727,55 @@ private fun BarisRingkasanPembayaranKasir(
     ) {
         Text(
             text = label,
-            style = if (tonjolkan) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
-            color = if (tonjolkan) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            style = if (tonjolkan) {
+                MaterialTheme.typography.titleMedium
+            } else {
+                MaterialTheme.typography.bodyLarge
+            },
+            color = if (tonjolkan) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
+
         Text(
             text = nilai,
-            style = if (tonjolkan) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+            style = if (tonjolkan) {
+                MaterialTheme.typography.titleMedium
+            } else {
+                MaterialTheme.typography.bodyLarge
+            },
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
 
 /**
- * Kartu produk di dalam katalog yang dapat diklik untuk menambahkan ke keranjang.
+ * Kartu produk di katalog.
  */
 @Composable
-private fun KartuProduk(
+private fun KartuProdukKasir(
     produk: Produk,
-    modifier: Modifier = Modifier,
     saatKlikProduk: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-
     val produkBisaDipilih = produk.aktif && produk.stokTersedia > 0
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(enabled = produkBisaDipilih, onClick = saatKlikProduk),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.14f)),
+            .clickable(
+                enabled = produkBisaDipilih,
+                onClick = saatKlikProduk,
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.14f),
+        ),
     ) {
         Row(
             modifier = Modifier
@@ -541,18 +798,25 @@ private fun KartuProduk(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = if (produkBisaDipilih) "Ketuk untuk tambah" else "Produk tidak tersedia",
+                    text = if (produkBisaDipilih) {
+                        "Ketuk untuk tambah"
+                    } else {
+                        "Produk tidak tersedia"
+                    },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            LencanaStokKasir(stokTersedia = produk.stokTersedia)
+
+            LencanaStokKasir(
+                stokTersedia = produk.stokTersedia,
+            )
         }
     }
 }
 
 /**
- * Lencana kecil untuk menunjukkan jumlah stok produk yang tersisa.
+ * Lencana kecil untuk menunjukkan jumlah stok produk.
  */
 @Composable
 private fun LencanaStokKasir(
@@ -566,14 +830,19 @@ private fun LencanaStokKasir(
     ) {
         Text(
             text = "Stok $stokTersedia",
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(
+                horizontal = 12.dp,
+                vertical = 8.dp,
+            ),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
 }
 
-private fun Long.sebagaiRupiahSederhana(): String = "Rp$this"
+private fun Long.sebagaiRupiahSederhana(): String {
+    return "Rp$this"
+}
 
 @Preview(
     name = "Workspace tablet terang",
@@ -595,25 +864,35 @@ private fun PreviewWorkspaceTabletTerang() {
                     namaAplikasi = "Cassy Kasir",
                     sloganAplikasi = "Solusi Digital UMKM Modern",
                     jumlahProdukTersedia = daftarProduk.size,
-                    jumlahItemKeranjang = 3,
-                    totalBelanjaSementara = "Rp30000",
+                    jumlahItemKeranjang = 4,
+                    totalBelanjaSementara = "Rp59000",
                     statusSinkronisasi = "Tersimpan Lokal",
                 ),
                 daftarProdukTersaring = daftarProduk,
                 daftarItemKeranjang = listOf(
-                    ItemKeranjang(produk = daftarProduk[0], jumlah = 1),
-                    ItemKeranjang(produk = daftarProduk[1], jumlah = 2),
+                    ItemKeranjang(
+                        produk = daftarProduk[0],
+                        jumlah = 2,
+                    ),
+                    ItemKeranjang(
+                        produk = daftarProduk[1],
+                        jumlah = 1,
+                    ),
+                    ItemKeranjang(
+                        produk = daftarProduk[2],
+                        jumlah = 1,
+                    ),
                 ),
                 statusKeranjang = StatusKeranjangKasir(
                     judul = "Keranjang aktif",
-                    deskripsi = "Periksa item sebelum lanjut ke pembayaran.",
-                    jumlahItem = "3 item",
+                    deskripsi = "Atur jumlah item sebelum lanjut ke pembayaran.",
+                    jumlahItem = "4 item",
                 ),
                 ringkasanPembayaran = RingkasanPembayaranKasir(
-                    subtotal = "Rp30000",
+                    subtotal = "Rp59000",
                     potongan = "Rp0",
                     pajak = "Rp0",
-                    totalAkhir = "Rp30000",
+                    totalAkhir = "Rp59000",
                     labelAksiUtama = "Lanjut Pembayaran",
                     aksiUtamaAktif = true,
                 ),

@@ -30,4 +30,20 @@ sealed interface AksiLayarUtamaKasir {
     data class TambahProdukKeKeranjang(
         val produkId: String,
     ) : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna ingin mengurangi jumlah produk
+     * yang sudah ada di keranjang.
+     */
+    data class KurangiProdukDiKeranjang(
+        val produkId: String,
+    ) : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna ingin menghapus satu item sepenuhnya
+     * dari keranjang.
+     */
+    data class HapusProdukDariKeranjang(
+        val produkId: String,
+    ) : AksiLayarUtamaKasir
 }
