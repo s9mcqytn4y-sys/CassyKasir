@@ -22,7 +22,7 @@ fun hitungTotalTransaksi(
     pajak: Long,
 ): Long {
     val subTotal = daftarItemKeranjang.hitungSubtotalKeranjang()
-    return (subTotal - potongan + biayaLayanan - pajak).coerceAtLeast(0)
+    return (subTotal - potongan + biayaLayanan + pajak).coerceAtLeast(0)
 }
 
 /**

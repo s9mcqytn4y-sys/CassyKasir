@@ -11,12 +11,12 @@ import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 
 /**
- * Root composable aplikasi.
+ * Komposabel akar aplikasi.
  *
  * Tanggung jawab file ini sederhana:
  * - mengambil ViewModel
- * - membaca state layar secara lifecycle-aware
- * - meneruskan state dan aksi ke layar utama
+ * - membaca status layar secara sadar siklus hidup (lifecycle-aware)
+ * - meneruskan status dan aksi ke layar utama
  */
 @Composable
 fun AplikasiCassyKasir(

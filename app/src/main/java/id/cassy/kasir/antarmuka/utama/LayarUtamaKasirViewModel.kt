@@ -45,7 +45,7 @@ class LayarUtamaKasirViewModel : ViewModel() {
     fun tanganiAksi(aksi: AksiLayarUtamaKasir) {
         when (aksi) {
             is AksiLayarUtamaKasir.UbahKataKunciPencarian -> perbaruiPencarian(aksi.kataKunciBaru)
-            AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran -> toggleVisibilitasPembayaran()
+            AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran -> alihkanVisibilitasPembayaran()
         }
     }
 
@@ -61,15 +61,19 @@ class LayarUtamaKasirViewModel : ViewModel() {
             daftarProdukPenuh.filter { it.nama.contains(pencarianBersih, ignoreCase = true) }
         }
 
-        _modelTampilan.update { it.copy(
-            kataKunciPencarian = kataKunci,
-            daftarProdukTersaring = hasilFilter
-        )}
+        _modelTampilan.update {
+            it.copy(
+                kataKunciPencarian = kataKunci,
+                daftarProdukTersaring = hasilFilter,
+            )
+        }
     }
 
-    private fun toggleVisibilitasPembayaran() {
-        _modelTampilan.update { it.copy(
-            apakahRingkasanPembayaranTampil = !it.apakahRingkasanPembayaranTampil
-        )}
+    private fun alihkanVisibilitasPembayaran() {
+        _modelTampilan.update {
+            it.copy(
+                apakahRingkasanPembayaranTampil = !it.apakahRingkasanPembayaranTampil,
+            )
+        }
     }
 }
