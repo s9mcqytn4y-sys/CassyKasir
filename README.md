@@ -1,44 +1,38 @@
-# CassyKasir 🛡️
+# Cassy Kasir 🏪
 
-Solusi Digital UMKM Modern untuk manajemen kasir yang cepat, akurat, dan andal.
+Sistem Point of Sale (POS) modern untuk UMKM Indonesia, dibangun dengan prinsip **Unidirectional Data Flow (UDF)** yang atomik dan antarmuka **Jetpack Compose** yang adaptif.
 
-## 🚀 Gambaran Proyek
-CassyKasir adalah aplikasi kasir berbasis Android yang dirancang khusus untuk memenuhi kebutuhan pemilik usaha kecil dan menengah (UMKM). Fokus utama proyek ini adalah pada kemudahan penggunaan, kecepatan transaksi, dan akurasi perhitungan keuangan.
+## 📌 Fokus Proyek
+- **Kemandirian Bahasa**: 100% dokumentasi dan sintaks buatan sendiri menggunakan Bahasa Indonesia yang baku dan teknis.
+- **Integritas Data**: Logika keuangan yang presisi dengan penanganan pajak yang akurat.
+- **Performa Responsif**: Manajemen status asinkron untuk mencegah hambatan pada antarmuka pengguna (UI).
 
-## 🛠️ Arsitektur & Teknologi
-Proyek ini dikembangkan dengan standar industri modern:
-- **Bahasa**: Kotlin 2.2.x (100%)
-- **UI Framework**: Jetpack Compose dengan Material 3
-- **Pola Arsitektur**: Unidirectional Data Flow (UDF) menggunakan StateFlow dan ViewModel
-- **Build System**: Gradle 9.x (Kotlin DSL)
-- **Dokumentasi**: KDoc dalam Bahasa Indonesia penuh
+## 🏗️ Arsitektur Sistem
+Proyek ini mengadopsi pola **MVI-Lite** dengan aliran data searah:
+1.  **Status (State)**: Menggunakan `StateFlow` tunggal yang tidak dapat diubah (*immutable*) sebagai sumber kebenaran.
+2.  **Aksi (Action)**: Interaksi pengguna dikirim sebagai objek `sealed interface` ke ViewModel.
+3.  **Reduser**: ViewModel memperbarui status secara atomik menggunakan fungsi `.update` untuk menjamin keamanan konkurensi.
 
-## 📐 Standar Kode
-Kami menerapkan aturan ketat untuk menjaga kualitas dan keterbacaan kode:
-1. **Bahasa Indonesia Penuh**: Seluruh sintaks buatan sendiri (fungsi, variabel, kelas) dan komentar wajib menggunakan Bahasa Indonesia.
-2. **Atomisitas State**: Pembaruan status UI dilakukan secara atomik menggunakan fungsi `.update` pada `StateFlow`.
-3. **Stateless UI**: Komponen antarmuka dirancang untuk tidak memiliki status internal (*stateless*) untuk memudahkan pengujian dan pemeliharaan.
+## 🛠️ Tumpukan Teknologi
+- **Kotlin 2.0+**: Memanfaatkan fitur terbaru untuk keamanan tipe data.
+- **Jetpack Compose**: UI deklaratif yang mendukung tata letak Ponsel & Tablet.
+- **Coroutines & Flow**: Penanganan proses latar belakang yang efisien.
+- **Material 3**: Desain antarmuka modern dengan dukungan tema dinamis.
 
-## 🧮 Logika Keuangan
-Rumus perhitungan transaksi utama:
-```kotlin
-Total = (Subtotal - Potongan) + BiayaLayanan + Pajak
-```
-*Catatan: Pajak bersifat menambah total belanja.*
+## 📖 Pedoman Pengembangan (Agentic Docs)
+Untuk agen AI atau pengembang baru, harap perhatikan aturan berikut:
+- **Penamaan**: Gunakan kata kerja Bahasa Indonesia untuk fungsi (misal: `hitungTotal`, bukan `calculateTotal`).
+- **KDocs**: Setiap fungsi publik wajib memiliki dokumentasi dengan format `@param` dan `@return` dalam Bahasa Indonesia.
+- **UI Stateless**: Komposabel tidak boleh menyimpan status internal yang krusial; semua status harus berasal dari parameter.
 
-## 📦 Menjalankan Proyek
-Pastikan Anda memiliki Android Studio terbaru (Koala atau lebih baru).
+## 🚀 Memulai
+```powershell
+# Bersihkan dan Bangun Proyek
+./gradlew clean assembleDebug
 
-```bash
-# Clone repository
-git clone https://github.com/username/CassyKasir.git
-
-# Build proyek
-./gradlew assembleDebug
-
-# Jalankan pengujian
+# Jalankan Unit Test
 ./gradlew test
 ```
 
-## 📄 Lisensi
-Hak Cipta © 2024 Cassy Digital. Seluruh hak cipta dilindungi undang-undang.
+---
+*Dikembangkan dengan ❤️ untuk kemajuan UMKM Indonesia.*
