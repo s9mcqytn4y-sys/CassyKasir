@@ -1,6 +1,7 @@
 package id.cassy.kasir.antarmuka.utama
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,8 +24,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -132,6 +136,20 @@ private fun TataLetakPonselKasir(
         }
 
         item {
+            BidangPencarianProdukKasir(
+                nilaiPencarian = modelTampilan.kataKunciPencarian,
+                saatNilaiPencarianBerubah = { kataKunciBaru ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.UbahKataKunciPencarian(
+                            kataKunciBaru = kataKunciBaru,
+                        ),
+                    )
+                },
+                jumlahHasil = modelTampilan.daftarProdukTersaring.size,
+            )
+        }
+
+        item {
             RingkasanKasir(
                 statusBeranda = modelTampilan.statusBeranda,
             )
@@ -141,6 +159,13 @@ private fun TataLetakPonselKasir(
             PanelKeranjangKasir(
                 daftarItemKeranjang = modelTampilan.daftarItemKeranjang,
                 statusKeranjang = modelTampilan.statusKeranjang,
+                saatTambahProduk = { produkId ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                            produkId = produkId,
+                        ),
+                    )
+                },
                 saatKurangiProduk = { produkId ->
                     saatAksiDikirim(
                         AksiLayarUtamaKasir.KurangiProdukDiKeranjang(
@@ -167,20 +192,6 @@ private fun TataLetakPonselKasir(
                         AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran,
                     )
                 },
-            )
-        }
-
-        item {
-            BidangPencarianProdukKasir(
-                nilaiPencarian = modelTampilan.kataKunciPencarian,
-                saatNilaiPencarianBerubah = { kataKunciBaru ->
-                    saatAksiDikirim(
-                        AksiLayarUtamaKasir.UbahKataKunciPencarian(
-                            kataKunciBaru = kataKunciBaru,
-                        ),
-                    )
-                },
-                jumlahHasil = modelTampilan.daftarProdukTersaring.size,
             )
         }
 
@@ -305,6 +316,13 @@ private fun TataLetakTabletKasir(
             PanelKeranjangKasir(
                 daftarItemKeranjang = modelTampilan.daftarItemKeranjang,
                 statusKeranjang = modelTampilan.statusKeranjang,
+                saatTambahProduk = { produkId ->
+                    saatAksiDikirim(
+                        AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                            produkId = produkId,
+                        ),
+                    )
+                },
                 saatKurangiProduk = { produkId ->
                     saatAksiDikirim(
                         AksiLayarUtamaKasir.KurangiProdukDiKeranjang(
@@ -478,7 +496,7 @@ private fun KartuStatistikKasir(
             )
             Text(
                 text = nilai,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -492,12 +510,13 @@ private fun KartuStatistikKasir(
 private fun PanelKeranjangKasir(
     daftarItemKeranjang: List<ItemKeranjang>,
     statusKeranjang: StatusKeranjangKasir,
+    saatTambahProduk: (String) -> Unit,
     saatKurangiProduk: (String) -> Unit,
     saatHapusProduk: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.animateContentSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         JudulBagianKasir(
@@ -521,11 +540,14 @@ private fun PanelKeranjangKasir(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    daftarItemKeranjang.forEach { itemKeranjang ->
+                    daftarItemKeranjang.forEachIndexed { indeks, itemKeranjang ->
                         BarisItemKeranjangKasir(
                             itemKeranjang = itemKeranjang,
+                            saatTambahProduk = {
+                                saatTambahProduk(itemKeranjang.produk.id)
+                            },
                             saatKurangiProduk = {
                                 saatKurangiProduk(itemKeranjang.produk.id)
                             },
@@ -533,6 +555,10 @@ private fun PanelKeranjangKasir(
                                 saatHapusProduk(itemKeranjang.produk.id)
                             },
                         )
+
+                        if (indeks < daftarItemKeranjang.lastIndex) {
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -552,13 +578,16 @@ private fun PanelKeranjangKasir(
 @Composable
 private fun BarisItemKeranjangKasir(
     itemKeranjang: ItemKeranjang,
+    saatTambahProduk: () -> Unit,
     saatKurangiProduk: () -> Unit,
     saatHapusProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val stokSudahPenuh = itemKeranjang.jumlah >= itemKeranjang.produk.stokTersedia
+
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -570,7 +599,7 @@ private fun BarisItemKeranjangKasir(
             ) {
                 Text(
                     text = itemKeranjang.produk.nama,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
@@ -582,25 +611,44 @@ private fun BarisItemKeranjangKasir(
 
             Text(
                 text = itemKeranjang.hitungSubTotal().sebagaiRupiahSederhana(),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            TextButton(
+            OutlinedButton(
                 onClick = saatKurangiProduk,
                 enabled = itemKeranjang.jumlah > 1,
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 48.dp),
             ) {
                 Text(
                     text = "Kurangi",
                 )
             }
 
-            TextButton(
+            FilledTonalButton(
+                onClick = saatTambahProduk,
+                enabled = !stokSudahPenuh,
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 48.dp),
+            ) {
+                Text(
+                    text = "Tambah",
+                )
+            }
+
+            OutlinedButton(
                 onClick = saatHapusProduk,
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 48.dp),
             ) {
                 Text(
                     text = "Hapus",
@@ -608,7 +656,13 @@ private fun BarisItemKeranjangKasir(
             }
         }
 
-        HorizontalDivider()
+        if (stokSudahPenuh) {
+            Text(
+                text = "Jumlah item sudah mencapai stok tersedia.",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -623,7 +677,7 @@ private fun BagianRingkasanPembayaranKasir(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.animateContentSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
@@ -675,7 +729,7 @@ private fun PanelRingkasanPembayaranKasir(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             BarisRingkasanPembayaranKasir(
                 label = "Subtotal",
@@ -700,7 +754,9 @@ private fun PanelRingkasanPembayaranKasir(
 
             Button(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 52.dp),
                 enabled = ringkasanPembayaran.aksiUtamaAktif,
             ) {
                 Text(
@@ -728,7 +784,7 @@ private fun BarisRingkasanPembayaranKasir(
         Text(
             text = label,
             style = if (tonjolkan) {
-                MaterialTheme.typography.titleMedium
+                MaterialTheme.typography.titleLarge
             } else {
                 MaterialTheme.typography.bodyLarge
             },
@@ -742,7 +798,7 @@ private fun BarisRingkasanPembayaranKasir(
         Text(
             text = nilai,
             style = if (tonjolkan) {
-                MaterialTheme.typography.titleMedium
+                MaterialTheme.typography.titleLarge
             } else {
                 MaterialTheme.typography.bodyLarge
             },
@@ -845,13 +901,13 @@ private fun Long.sebagaiRupiahSederhana(): String {
 }
 
 @Preview(
-    name = "Workspace tablet terang",
+    name = "Workspace tablet terang transaksi aktif",
     showBackground = true,
     widthDp = 1280,
     heightDp = 800,
 )
 @Composable
-private fun PreviewWorkspaceTabletTerang() {
+private fun PreviewWorkspaceTabletTerangTransaksiAktif() {
     val daftarProduk = KatalogProdukContoh.daftarAwal()
 
     TemaCassyKasir(
@@ -905,14 +961,14 @@ private fun PreviewWorkspaceTabletTerang() {
 }
 
 @Preview(
-    name = "Workspace ponsel gelap",
+    name = "Workspace ponsel gelap keranjang kosong",
     showBackground = true,
     widthDp = 411,
     heightDp = 891,
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-private fun PreviewWorkspacePonselGelap() {
+private fun PreviewWorkspacePonselGelapKeranjangKosong() {
     val daftarProduk = KatalogProdukContoh.daftarAwal()
 
     TemaCassyKasir(
