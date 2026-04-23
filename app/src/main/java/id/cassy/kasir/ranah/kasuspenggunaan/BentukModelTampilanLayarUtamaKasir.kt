@@ -62,11 +62,11 @@ class BentukModelTampilanLayarUtamaKasir {
             daftarProdukTersaring = daftarProdukTersaring,
             daftarItemKeranjang = daftarItemKeranjang,
             statusKeranjang = StatusKeranjangKasir(
-                judul = if (daftarItemKeranjang.isEmpty()) "Keranjang Kosong" else "Keranjang Aktif",
+                judul = if (daftarItemKeranjang.isEmpty()) "Keranjang masih kosong" else "Keranjang aktif",
                 deskripsi = if (daftarItemKeranjang.isEmpty()) {
-                    "Mulai transaksi dengan memilih produk pada katalog."
+                    "Yuk, mulai transaksi dengan memilih produk favorit!"
                 } else {
-                    "Atur jumlah item sebelum melanjutkan ke pembayaran."
+                    "Atur jumlah item sebelum lanjut ke pembayaran."
                 },
                 jumlahItem = "$jumlahItem item",
             ),
@@ -75,14 +75,14 @@ class BentukModelTampilanLayarUtamaKasir {
                 potongan = "Rp0",
                 pajak = "Rp0",
                 totalAkhir = total.sebagaiRupiahSederhana(),
-                labelAksiUtama = if (jumlahItem > 0) "Bayar Sekarang" else "Pilih Produk",
+                labelAksiUtama = if (jumlahItem > 0) "Bayar sekarang" else "Pilih produk",
                 aksiUtamaAktif = jumlahItem > 0,
             ),
             statusKonfirmasiCheckout = StatusKonfirmasiCheckoutKasir(
                 apakahTampil = statusElemenLayar.apakahDialogKonfirmasiCheckoutTampil && jumlahItem > 0,
-                judul = "Konfirmasi Pembayaran",
-                deskripsi = "Proses pembayaran untuk $jumlahItem item dengan total ${total.sebagaiRupiahSederhana()}?",
-                labelKonfirmasi = "Konfirmasi",
+                judul = "Konfirmasi pembayaran",
+                deskripsi = "Bayar $jumlahItem item dengan total ${total.sebagaiRupiahSederhana()} sekarang?",
+                labelKonfirmasi = "Bayar sekarang",
             ),
             statusHasilCheckout = statusElemenLayar.statusHasilCheckout,
             kataKunciPencarian = kataKunciPencarian,

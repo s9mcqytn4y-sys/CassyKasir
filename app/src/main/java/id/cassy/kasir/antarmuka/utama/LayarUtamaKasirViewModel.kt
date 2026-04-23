@@ -106,10 +106,16 @@ class LayarUtamaKasirViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Menambahkan produk ke dalam keranjang belanja.
+     * Jika produk sudah ada, jumlahnya akan bertambah selama stok mencukupi.
+     *
+     * @param produkId ID unik dari produk yang ingin ditambahkan.
+     */
     private fun tambahProdukKeKeranjang(produkId: String) {
         val produk = daftarProdukPenuh.firstOrNull { it.id == produkId } ?: return
 
-        var stokSudahPenuh = false
+        var apakahStokPenuh = false
 
         _statusTransaksi.update { statusLama ->
             val daftarLama = statusLama.daftarItemKeranjang
@@ -118,7 +124,7 @@ class LayarUtamaKasirViewModel : ViewModel() {
                 produk = produk,
             )
 
-            stokSudahPenuh = daftarBaru == daftarLama
+            apakahStokPenuh = daftarBaru == daftarLama
 
             statusLama.copy(
                 daftarItemKeranjang = daftarBaru,
@@ -132,11 +138,17 @@ class LayarUtamaKasirViewModel : ViewModel() {
             )
         }
 
-        if (stokSudahPenuh) {
-            kirimPesanSingkat("Jumlah item sudah mencapai stok tersedia.")
+        if (apakahStokPenuh) {
+            kirimPesanSingkat("Stok produk sudah mencapai batas maksimum.")
         }
     }
 
+    /**
+     * Mengurangi satu satuan jumlah produk di dalam keranjang.
+     * Jika jumlah menjadi nol, item akan dihapus dari keranjang.
+     *
+     * @param produkId ID unik dari produk yang ingin dikurangi.
+     */
     private fun kurangiProdukDiKeranjang(produkId: String) {
         _statusTransaksi.update { statusLama ->
             statusLama.copy(
@@ -151,6 +163,11 @@ class LayarUtamaKasirViewModel : ViewModel() {
         resetStatusHasil()
     }
 
+    /**
+     * Menghapus seluruh jumlah produk tertentu dari keranjang belanja.
+     *
+     * @param produkId ID unik dari produk yang ingin dihapus.
+     */
     private fun hapusProdukDariKeranjang(produkId: String) {
         _statusTransaksi.update { statusLama ->
             statusLama.copy(
@@ -165,9 +182,12 @@ class LayarUtamaKasirViewModel : ViewModel() {
         resetStatusHasil()
     }
 
+    /**
+     * Memvalidasi keranjang sebelum menampilkan dialog konfirmasi checkout.
+     */
     private fun cobaCheckout() {
         if (_statusTransaksi.value.daftarItemKeranjang.isEmpty()) {
-            kirimPesanSingkat("Keranjang masih kosong.")
+            kirimPesanSingkat("Keranjang masih kosong. Yuk, tambah produk!")
             return
         }
 
@@ -179,6 +199,9 @@ class LayarUtamaKasirViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Menutup dialog konfirmasi tanpa memproses transaksi.
+     */
     private fun batalkanKonfirmasiCheckout() {
         _statusElemenLayar.update { statusLama ->
             statusLama.copy(
@@ -187,10 +210,13 @@ class LayarUtamaKasirViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Memproses transaksi dari keranjang ke status selesai secara lokal.
+     */
     private fun konfirmasiCheckout() {
         val daftarKeranjangSaatIni = _statusTransaksi.value.daftarItemKeranjang
         if (daftarKeranjangSaatIni.isEmpty()) {
-            kirimPesanSingkat("Keranjang masih kosong.")
+            kirimPesanSingkat("Keranjang masih kosong. Yuk, tambah produk!")
             return
         }
 
@@ -211,7 +237,7 @@ class LayarUtamaKasirViewModel : ViewModel() {
                 statusHasilCheckout = StatusHasilCheckoutKasir(
                     apakahTampil = true,
                     judul = "Transaksi Berhasil",
-                    deskripsi = "Sebanyak ${hasilCheckout.jumlahItemCheckout} item dengan total ${hasilCheckout.totalCheckout.sebagaiRupiahSederhana()} telah diproses secara lokal.",
+                    deskripsi = "Sebanyak ${hasilCheckout.jumlahItemCheckout} item dengan total ${hasilCheckout.totalCheckout.sebagaiRupiahSederhana()} telah diproses.",
                 ),
             )
         }

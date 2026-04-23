@@ -79,8 +79,8 @@ data class ModelTampilanLayarUtamaKasir(
     val daftarProdukTersaring: List<Produk> = emptyList(),
     val daftarItemKeranjang: List<ItemKeranjang> = emptyList(),
     val statusKeranjang: StatusKeranjangKasir = StatusKeranjangKasir(
-        judul = "Keranjang kosong",
-        deskripsi = "Mulai transaksi dengan memilih produk.",
+        judul = "Keranjang masih kosong",
+        deskripsi = "Yuk, mulai transaksi dengan memilih produk favorit!",
         jumlahItem = "0 item",
     ),
     val ringkasanPembayaran: RingkasanPembayaranKasir = RingkasanPembayaranKasir(

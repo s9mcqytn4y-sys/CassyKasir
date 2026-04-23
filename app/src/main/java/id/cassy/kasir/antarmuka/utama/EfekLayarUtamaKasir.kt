@@ -1,15 +1,18 @@
 package id.cassy.kasir.antarmuka.utama
 
 /**
- * Representasi efek sekali pakai dari ViewModel ke antarmuka.
+ * Representasi efek sekali pakai (side-effects) dari ViewModel ke antarmuka pengguna.
  *
- * Efek digunakan untuk kejadian sementara yang tidak perlu disimpan
- * sebagai status layar persisten, seperti pesan singkat operasional.
+ * Berbeda dengan "status" yang bersifat persisten, efek digunakan untuk kejadian
+ * sesaat yang tidak perlu disimpan saat terjadi konfigurasi ulang (seperti rotasi layar),
+ * contohnya adalah menampilkan Snackbar atau navigasi.
  */
 sealed interface EfekLayarUtamaKasir {
 
     /**
-     * Menampilkan pesan singkat sementara kepada pengguna.
+     * Menginstruksikan antarmuka untuk menampilkan pesan singkat (Snackbar).
+     *
+     * @property pesan Isi teks pesan yang akan ditampilkan kepada pengguna.
      */
     data class TampilkanPesanSingkat(
         val pesan: String,

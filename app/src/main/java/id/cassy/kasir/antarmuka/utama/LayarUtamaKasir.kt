@@ -54,7 +54,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 
 /**
- * Komposabel utama layar kasir.
+ * Komposabel utama yang merangkai seluruh elemen layar kasir.
+ * Mengatur koordinasi antara status (state), aksi (action), dan efek (effect).
+ *
+ * @param modelTampilan Representasi status layar yang akan dirender.
+ * @param saatAksiDikirim Callback untuk mengirimkan aksi pengguna ke ViewModel.
+ * @param alurEfek Aliran efek sekali pakai seperti tampilan pesan singkat.
+ * @param modifier Modifikasi tata letak opsional.
  */
 @Composable
 fun LayarUtamaKasir(
@@ -63,13 +69,13 @@ fun LayarUtamaKasir(
     alurEfek: Flow<EfekLayarUtamaKasir> = emptyFlow(),
     modifier: Modifier = Modifier,
 ) {
-    val statusHostSnackbar = remember { SnackbarHostState() }
+    val keadaanHostSnackbar = remember { SnackbarHostState() }
 
     LaunchedEffect(alurEfek) {
         alurEfek.collectLatest { efek ->
             when (efek) {
                 is EfekLayarUtamaKasir.TampilkanPesanSingkat -> {
-                    statusHostSnackbar.showSnackbar(
+                    keadaanHostSnackbar.showSnackbar(
                         message = efek.pesan,
                     )
                 }
@@ -83,7 +89,7 @@ fun LayarUtamaKasir(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             SnackbarHost(
-                hostState = statusHostSnackbar,
+                hostState = keadaanHostSnackbar,
             )
         },
     ) { paddingKerangka ->
@@ -122,7 +128,8 @@ fun LayarUtamaKasir(
 }
 
 /**
- * Tata letak layar untuk perangkat dengan lebar terbatas.
+ * Tata letak khusus untuk perangkat dengan lebar layar terbatas (ponsel).
+ * Menggunakan satu kolom gulir (LazyColumn) untuk semua elemen.
  */
 @Composable
 private fun TataLetakPonselKasir(
@@ -251,7 +258,8 @@ private fun TataLetakPonselKasir(
 }
 
 /**
- * Tata letak layar untuk perangkat layar lebar.
+ * Tata letak khusus untuk perangkat dengan layar lebar (tablet atau desktop).
+ * Membagi layar menjadi dua panel utama: Katalog di kiri dan Keranjang di kanan.
  */
 @Composable
 private fun TataLetakTabletKasir(
@@ -388,7 +396,10 @@ private fun TataLetakTabletKasir(
 }
 
 /**
- * Komponen identitas aplikasi pada bagian atas layar.
+ * Komponen identitas visual aplikasi yang menampilkan nama dan slogan.
+ *
+ * @param namaAplikasi Nama brand aplikasi kasir.
+ * @param sloganAplikasi Pesan pemasaran atau slogan pendukung.
  */
 @Composable
 private fun HeaderBerandaKasir(
@@ -414,7 +425,9 @@ private fun HeaderBerandaKasir(
 }
 
 /**
- * Komponen judul teks standar untuk setiap bagian layar.
+ * Komponen judul teks standar untuk memisahkan setiap bagian informasi pada layar.
+ *
+ * @param judul Teks utama yang akan ditampilkan sebagai label bagian.
  */
 @Composable
 private fun JudulBagianKasir(
@@ -430,7 +443,11 @@ private fun JudulBagianKasir(
 }
 
 /**
- * Input teks untuk pencarian katalog produk.
+ * Input teks pencarian untuk menyaring katalog produk secara waktu nyata.
+ *
+ * @param nilaiPencarian Kata kunci pencarian yang sedang diketik.
+ * @param saatNilaiPencarianBerubah Callback saat input teks berubah.
+ * @param jumlahHasil Keterangan jumlah produk yang ditemukan sesuai kata kunci.
  */
 @Composable
 private fun BidangPencarianProdukKasir(
@@ -460,7 +477,10 @@ private fun BidangPencarianProdukKasir(
 }
 
 /**
- * Komponen ringkasan metrik kasir.
+ * Komponen ringkasan metrik performa kasir dalam bentuk kartu statistik.
+ * Menampilkan ringkasan jumlah produk, item keranjang, total belanja, dan status.
+ *
+ * @param statusBeranda Data ringkasan beranda dari ViewModel.
  */
 @Composable
 private fun RingkasanKasir(
@@ -539,7 +559,11 @@ private fun KartuStatistikKasir(
 }
 
 /**
- * Banner status hasil checkout.
+ * Banner informasi hasil akhir dari proses checkout.
+ * Digunakan untuk memberikan umpan balik sukses atau gagal setelah transaksi.
+ *
+ * @param statusHasilCheckout Detail hasil transaksi yang diproses.
+ * @param saatTutup Callback untuk menyembunyikan banner.
  */
 @Composable
 private fun KartuHasilCheckoutKasir(
@@ -586,7 +610,13 @@ private fun KartuHasilCheckoutKasir(
 }
 
 /**
- * Panel yang menampilkan daftar item dalam keranjang.
+ * Panel yang menampilkan daftar item belanja saat ini dalam keranjang.
+ *
+ * @param daftarItemKeranjang Koleksi item yang telah ditambahkan.
+ * @param statusKeranjang Informasi status visual keranjang (kosong/aktif).
+ * @param saatTambahProduk Callback untuk menambah jumlah item.
+ * @param saatKurangiProduk Callback untuk mengurangi jumlah item.
+ * @param saatHapusProduk Callback untuk menghapus item sepenuhnya.
  */
 @Composable
 private fun PanelKeranjangKasir(
@@ -655,7 +685,12 @@ private fun PanelKeranjangKasir(
 }
 
 /**
- * Satu baris item di keranjang.
+ * Satu baris informasi item di dalam keranjang belanja.
+ *
+ * @param itemKeranjang Data produk dan jumlah di keranjang.
+ * @param saatTambahProduk Callback tombol tambah.
+ * @param saatKurangiProduk Callback tombol kurangi.
+ * @param saatHapusProduk Callback tombol hapus.
  */
 @Composable
 private fun BarisItemKeranjangKasir(
@@ -893,7 +928,11 @@ private fun BarisRingkasanPembayaranKasir(
 }
 
 /**
- * Dialog konfirmasi checkout.
+ * Menampilkan pesan konfirmasi sebelum transaksi diproses.
+ *
+ * @param statusKonfirmasiCheckout Data status untuk dialog konfirmasi.
+ * @param saatBatalkan Callback saat pengguna membatalkan checkout.
+ * @param saatKonfirmasi Callback saat pengguna menyetujui checkout.
  */
 @Composable
 private fun DialogKonfirmasiCheckoutKasir(
@@ -935,7 +974,10 @@ private fun DialogKonfirmasiCheckoutKasir(
 }
 
 /**
- * Kartu produk di katalog.
+ * Kartu informasi produk tunggal dalam daftar katalog.
+ *
+ * @param produk Data model produk.
+ * @param saatKlikProduk Callback saat kartu produk diketuk.
  */
 @Composable
 private fun KartuProdukKasir(
@@ -999,7 +1041,9 @@ private fun KartuProdukKasir(
 }
 
 /**
- * Lencana kecil untuk menunjukkan jumlah stok produk.
+ * Lencana (Badge) kecil untuk menunjukkan jumlah stok produk yang tersedia.
+ *
+ * @param stokTersedia Angka sisa stok dari sistem.
  */
 @Composable
 private fun LencanaStokKasir(
