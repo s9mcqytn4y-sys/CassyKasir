@@ -3,7 +3,9 @@ package id.cassy.kasir.ranah.kasuspenggunaan
 import id.cassy.kasir.antarmuka.utama.ModelTampilanLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.RingkasanPembayaranKasir
 import id.cassy.kasir.antarmuka.utama.StatusBerandaKasir
+import id.cassy.kasir.antarmuka.utama.StatusHasilCheckoutKasir
 import id.cassy.kasir.antarmuka.utama.StatusKeranjangKasir
+import id.cassy.kasir.antarmuka.utama.StatusKonfirmasiCheckoutKasir
 import id.cassy.kasir.ranah.fungsi.cariProduk
 import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
 import id.cassy.kasir.ranah.fungsi.hitungSubtotalKeranjang
@@ -13,7 +15,7 @@ import id.cassy.kasir.ranah.model.Produk
 
 /**
  * Membentuk satu model tampilan utuh untuk layar utama kasir
- * dari data produk, keranjang, pencarian, dan status panel pembayaran.
+ * dari data produk, keranjang, pencarian, dan status layar.
  */
 class BentukModelTampilanLayarUtamaKasir {
 
@@ -22,6 +24,9 @@ class BentukModelTampilanLayarUtamaKasir {
         daftarItemKeranjang: List<ItemKeranjang>,
         kataKunciPencarian: String,
         apakahRingkasanPembayaranTampil: Boolean,
+        statusSinkronisasi: String,
+        apakahDialogKonfirmasiCheckoutTampil: Boolean,
+        statusHasilCheckout: StatusHasilCheckoutKasir,
     ): ModelTampilanLayarUtamaKasir {
         val daftarProdukTersaring = daftarProdukPenuh.cariProduk(kataKunciPencarian)
         val jumlahItem = daftarItemKeranjang.hitungJumlahItem()
@@ -40,7 +45,7 @@ class BentukModelTampilanLayarUtamaKasir {
                 jumlahProdukTersedia = daftarProdukPenuh.size,
                 jumlahItemKeranjang = jumlahItem,
                 totalBelanjaSementara = subtotal.sebagaiRupiahSederhana(),
-                statusSinkronisasi = "Tersimpan Lokal",
+                statusSinkronisasi = statusSinkronisasi,
             ),
             daftarProdukTersaring = daftarProdukTersaring,
             daftarItemKeranjang = daftarItemKeranjang,
@@ -63,18 +68,25 @@ class BentukModelTampilanLayarUtamaKasir {
                 pajak = "Rp0",
                 totalAkhir = total.sebagaiRupiahSederhana(),
                 labelAksiUtama = if (jumlahItem > 0) {
-                    "Lanjut Pembayaran"
+                    "Bayar sekarang"
                 } else {
-                    "Pilih Produk"
+                    "Pilih produk"
                 },
                 aksiUtamaAktif = jumlahItem > 0,
             ),
+            statusKonfirmasiCheckout = StatusKonfirmasiCheckoutKasir(
+                apakahTampil = apakahDialogKonfirmasiCheckoutTampil && jumlahItem > 0,
+                judul = "Konfirmasi pembayaran",
+                deskripsi = "Bayar $jumlahItem item dengan total ${total.sebagaiRupiahSederhana()} sekarang?",
+                labelKonfirmasi = "Bayar sekarang",
+            ),
+            statusHasilCheckout = statusHasilCheckout,
             kataKunciPencarian = kataKunciPencarian,
             apakahRingkasanPembayaranTampil = apakahRingkasanPembayaranTampil,
         )
     }
+}
 
-    private fun Long.sebagaiRupiahSederhana(): String {
-        return "Rp$this"
-    }
+private fun Long.sebagaiRupiahSederhana(): String {
+    return "Rp$this"
 }

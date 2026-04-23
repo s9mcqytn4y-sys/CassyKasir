@@ -6,6 +6,7 @@ import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
 import id.cassy.kasir.ranah.kasuspenggunaan.BentukModelTampilanLayarUtamaKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.HapusProdukDariKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
+import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.TambahProdukKeKeranjang
 import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.Produk
@@ -19,97 +20,188 @@ import kotlinx.coroutines.flow.update
 /**
  * Pengelola status layar utama kasir dengan pola Unidirectional Data Flow (UDF).
  *
- * ViewModel ini mengelola aliran status (StateFlow) secara atomik untuk:
- * - Sinkronisasi data keranjang belanja melalui use cases.
- * - Penyaringan katalog produk berdasarkan input pengguna.
- * - Penggabungan state atomik menjadi model tampilan tunggal yang efisien.
+ * ViewModel ini mengelola aliran status secara atomik untuk:
+ * - Keranjang belanja.
+ * - Kata kunci pencarian.
+ * - Status panel pembayaran.
+ * - Status sinkronisasi lokal.
+ * - Status dialog konfirmasi checkout.
+ * - Status hasil checkout.
  */
 class LayarUtamaKasirViewModel : ViewModel() {
 
     private val daftarProdukPenuh: List<Produk> = KatalogProdukContoh.daftarAwal()
 
-    // Kasus penggunaan (Use Cases)
     private val tambahProdukKeKeranjangUseCase = TambahProdukKeKeranjang()
     private val kurangiProdukDiKeranjangUseCase = KurangiProdukDiKeranjang()
     private val hapusProdukDariKeranjangUseCase = HapusProdukDariKeranjang()
+    private val selesaikanCheckoutLokalKasirUseCase = SelesaikanCheckoutLokalKasir()
     private val bentukModelTampilanUseCase = BentukModelTampilanLayarUtamaKasir()
 
-    // Status atomik internal yang bersifat privat
     private val _daftarItemKeranjang = MutableStateFlow<List<ItemKeranjang>>(emptyList())
     private val _kataKunciPencarian = MutableStateFlow("")
     private val _apakahRingkasanTampil = MutableStateFlow(true)
+    private val _statusSinkronisasi = MutableStateFlow("Tersimpan Lokal")
+    private val _apakahDialogKonfirmasiCheckoutTampil = MutableStateFlow(false)
+    private val _statusHasilCheckout = MutableStateFlow(StatusHasilCheckoutKasir())
 
     /**
-     * Aliran status UI tunggal yang menggabungkan seluruh status internal.
-     * Menggunakan [combine] untuk memastikan re-kalkulasi hanya terjadi saat data berubah.
+     * Aliran status UI tunggal.
      */
+    @Suppress("UNCHECKED_CAST")
     val modelTampilan: StateFlow<ModelTampilanLayarUtamaKasir> = combine(
         _daftarItemKeranjang,
         _kataKunciPencarian,
-        _apakahRingkasanTampil
-    ) { keranjang, kataKunci, tampil ->
+        _apakahRingkasanTampil,
+        _statusSinkronisasi,
+        _apakahDialogKonfirmasiCheckoutTampil,
+        _statusHasilCheckout,
+    ) { params ->
         bentukModelTampilanUseCase(
             daftarProdukPenuh = daftarProdukPenuh,
-            daftarItemKeranjang = keranjang,
-            kataKunciPencarian = kataKunci,
-            apakahRingkasanPembayaranTampil = tampil
+            daftarItemKeranjang = params[0] as List<ItemKeranjang>,
+            kataKunciPencarian = params[1] as String,
+            apakahRingkasanPembayaranTampil = params[2] as Boolean,
+            statusSinkronisasi = params[3] as String,
+            apakahDialogKonfirmasiCheckoutTampil = params[4] as Boolean,
+            statusHasilCheckout = params[5] as StatusHasilCheckoutKasir,
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = bentukModelTampilanUseCase(
             daftarProdukPenuh = daftarProdukPenuh,
             daftarItemKeranjang = emptyList(),
             kataKunciPencarian = "",
-            apakahRingkasanPembayaranTampil = true
-        )
+            apakahRingkasanPembayaranTampil = true,
+            statusSinkronisasi = "Tersimpan Lokal",
+            apakahDialogKonfirmasiCheckoutTampil = false,
+            statusHasilCheckout = StatusHasilCheckoutKasir(),
+        ),
     )
 
     /**
-     * Menangani interaksi pengguna (Aksi) dari antarmuka.
-     *
-     * @param aksi Objek [AksiLayarUtamaKasir] yang mewakili interaksi pengguna.
+     * Memproses aksi yang datang dari UI.
      */
     fun tanganiAksi(aksi: AksiLayarUtamaKasir) {
         when (aksi) {
             is AksiLayarUtamaKasir.UbahKataKunciPencarian -> {
-                _kataKunciPencarian.value = aksi.kataKunciBaru
+                perbaruiPencarian(aksi.kataKunciBaru)
             }
 
             AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran -> {
-                _apakahRingkasanTampil.update { !it }
+                alihkanVisibilitasPembayaran()
             }
 
             is AksiLayarUtamaKasir.TambahProdukKeKeranjang -> {
-                tambahKeKeranjang(aksi.produkId)
+                tambahProdukKeKeranjang(aksi.produkId)
             }
 
             is AksiLayarUtamaKasir.KurangiProdukDiKeranjang -> {
-                kurangiDiKeranjang(aksi.produkId)
+                kurangiProdukDiKeranjang(aksi.produkId)
             }
 
             is AksiLayarUtamaKasir.HapusProdukDariKeranjang -> {
-                hapusDariKeranjang(aksi.produkId)
+                hapusProdukDariKeranjang(aksi.produkId)
+            }
+
+            AksiLayarUtamaKasir.CobaCheckout -> {
+                cobaCheckout()
+            }
+
+            AksiLayarUtamaKasir.BatalkanKonfirmasiCheckout -> {
+                batalkanKonfirmasiCheckout()
+            }
+
+            AksiLayarUtamaKasir.KonfirmasiCheckout -> {
+                konfirmasiCheckout()
+            }
+
+            AksiLayarUtamaKasir.TutupStatusHasilCheckout -> {
+                tutupStatusHasilCheckout()
             }
         }
     }
 
-    private fun tambahKeKeranjang(produkId: String) {
-        val produkTarget = daftarProdukPenuh.firstOrNull { it.id == produkId } ?: return
-        _daftarItemKeranjang.update { daftarLama ->
-            tambahProdukKeKeranjangUseCase(daftarLama, produkTarget)
-        }
+    private fun perbaruiPencarian(kataKunciBaru: String) {
+        if (_kataKunciPencarian.value == kataKunciBaru) return
+        _kataKunciPencarian.value = kataKunciBaru
     }
 
-    private fun kurangiDiKeranjang(produkId: String) {
-        _daftarItemKeranjang.update { daftarLama ->
-            kurangiProdukDiKeranjangUseCase(daftarLama, produkId)
-        }
+    private fun alihkanVisibilitasPembayaran() {
+        _apakahRingkasanTampil.update { nilaiLama -> !nilaiLama }
     }
 
-    private fun hapusDariKeranjang(produkId: String) {
+    private fun tambahProdukKeKeranjang(produkId: String) {
+        val produk = daftarProdukPenuh.firstOrNull { it.id == produkId } ?: return
+
         _daftarItemKeranjang.update { daftarLama ->
-            hapusProdukDariKeranjangUseCase(daftarLama, produkId)
+            tambahProdukKeKeranjangUseCase(
+                daftarItemKeranjang = daftarLama,
+                produk = produk,
+            )
         }
+
+        _statusSinkronisasi.value = "Tersimpan Lokal"
+        _statusHasilCheckout.value = StatusHasilCheckoutKasir()
     }
+
+    private fun kurangiProdukDiKeranjang(produkId: String) {
+        _daftarItemKeranjang.update { daftarLama ->
+            kurangiProdukDiKeranjangUseCase(
+                daftarItemKeranjang = daftarLama,
+                produkId = produkId,
+            )
+        }
+
+        _statusSinkronisasi.value = "Tersimpan Lokal"
+        _statusHasilCheckout.value = StatusHasilCheckoutKasir()
+    }
+
+    private fun hapusProdukDariKeranjang(produkId: String) {
+        _daftarItemKeranjang.update { daftarLama ->
+            hapusProdukDariKeranjangUseCase(
+                daftarItemKeranjang = daftarLama,
+                produkId = produkId,
+            )
+        }
+
+        _statusSinkronisasi.value = "Tersimpan Lokal"
+        _statusHasilCheckout.value = StatusHasilCheckoutKasir()
+    }
+
+    private fun cobaCheckout() {
+        if (_daftarItemKeranjang.value.isEmpty()) return
+
+        _apakahDialogKonfirmasiCheckoutTampil.value = true
+        _statusHasilCheckout.value = StatusHasilCheckoutKasir()
+    }
+
+    private fun batalkanKonfirmasiCheckout() {
+        _apakahDialogKonfirmasiCheckoutTampil.value = false
+    }
+
+    private fun konfirmasiCheckout() {
+        val daftarKeranjangSaatIni = _daftarItemKeranjang.value
+        if (daftarKeranjangSaatIni.isEmpty()) return
+
+        val hasilCheckout = selesaikanCheckoutLokalKasirUseCase(daftarKeranjangSaatIni)
+
+        _daftarItemKeranjang.value = hasilCheckout.daftarItemKeranjangBaru
+        _statusSinkronisasi.value = hasilCheckout.statusSinkronisasiBaru
+        _apakahDialogKonfirmasiCheckoutTampil.value = false
+        _statusHasilCheckout.value = StatusHasilCheckoutKasir(
+            apakahTampil = true,
+            judul = "Transaksi berhasil",
+            deskripsi = "${hasilCheckout.jumlahItemCheckout} item dengan total ${hasilCheckout.totalCheckout.sebagaiRupiahSederhana()} siap disimpan ke riwayat lokal pada scope data berikutnya.",
+        )
+    }
+
+    private fun tutupStatusHasilCheckout() {
+        _statusHasilCheckout.value = StatusHasilCheckoutKasir()
+    }
+}
+
+private fun Long.sebagaiRupiahSederhana(): String {
+    return "Rp$this"
 }

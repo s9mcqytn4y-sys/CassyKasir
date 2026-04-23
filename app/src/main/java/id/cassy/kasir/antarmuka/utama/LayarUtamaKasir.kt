@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,39 +47,6 @@ import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.Produk
 
 /**
- * Representasi status ringkasan beranda kasir.
- */
-data class StatusBerandaKasir(
-    val namaAplikasi: String,
-    val sloganAplikasi: String,
-    val jumlahProdukTersedia: Int,
-    val jumlahItemKeranjang: Int,
-    val totalBelanjaSementara: String,
-    val statusSinkronisasi: String,
-)
-
-/**
- * Representasi status visual panel keranjang.
- */
-data class StatusKeranjangKasir(
-    val judul: String,
-    val deskripsi: String,
-    val jumlahItem: String,
-)
-
-/**
- * Representasi status rincian biaya pembayaran.
- */
-data class RingkasanPembayaranKasir(
-    val subtotal: String,
-    val potongan: String,
-    val pajak: String,
-    val totalAkhir: String,
-    val labelAksiUtama: String,
-    val aksiUtamaAktif: Boolean,
-)
-
-/**
  * Komposabel utama layar kasir.
  */
 @Composable
@@ -92,6 +60,18 @@ fun LayarUtamaKasir(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { paddingKerangka ->
+        if (modelTampilan.statusKonfirmasiCheckout.apakahTampil) {
+            DialogKonfirmasiCheckoutKasir(
+                statusKonfirmasiCheckout = modelTampilan.statusKonfirmasiCheckout,
+                saatBatalkan = {
+                    saatAksiDikirim(AksiLayarUtamaKasir.BatalkanKonfirmasiCheckout)
+                },
+                saatKonfirmasi = {
+                    saatAksiDikirim(AksiLayarUtamaKasir.KonfirmasiCheckout)
+                },
+            )
+        }
+
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
@@ -155,6 +135,17 @@ private fun TataLetakPonselKasir(
             )
         }
 
+        if (modelTampilan.statusHasilCheckout.apakahTampil) {
+            item {
+                KartuHasilCheckoutKasir(
+                    statusHasilCheckout = modelTampilan.statusHasilCheckout,
+                    saatTutup = {
+                        saatAksiDikirim(AksiLayarUtamaKasir.TutupStatusHasilCheckout)
+                    },
+                )
+            }
+        }
+
         item {
             PanelKeranjangKasir(
                 daftarItemKeranjang = modelTampilan.daftarItemKeranjang,
@@ -192,6 +183,9 @@ private fun TataLetakPonselKasir(
                         AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran,
                     )
                 },
+                saatCheckout = {
+                    saatAksiDikirim(AksiLayarUtamaKasir.CobaCheckout)
+                },
             )
         }
 
@@ -212,6 +206,7 @@ private fun TataLetakPonselKasir(
             items(
                 items = modelTampilan.daftarProdukTersaring,
                 key = { produk -> produk.id },
+                contentType = { "KartuProduk" },
             ) { produk ->
                 KartuProdukKasir(
                     produk = produk,
@@ -287,6 +282,7 @@ private fun TataLetakTabletKasir(
                 items(
                     items = modelTampilan.daftarProdukTersaring,
                     key = { produk -> produk.id },
+                    contentType = { "KartuProduk" },
                 ) { produk ->
                     KartuProdukKasir(
                         produk = produk,
@@ -312,6 +308,15 @@ private fun TataLetakTabletKasir(
             RingkasanKasir(
                 statusBeranda = modelTampilan.statusBeranda,
             )
+
+            if (modelTampilan.statusHasilCheckout.apakahTampil) {
+                KartuHasilCheckoutKasir(
+                    statusHasilCheckout = modelTampilan.statusHasilCheckout,
+                    saatTutup = {
+                        saatAksiDikirim(AksiLayarUtamaKasir.TutupStatusHasilCheckout)
+                    },
+                )
+            }
 
             PanelKeranjangKasir(
                 daftarItemKeranjang = modelTampilan.daftarItemKeranjang,
@@ -346,6 +351,9 @@ private fun TataLetakTabletKasir(
                     saatAksiDikirim(
                         AksiLayarUtamaKasir.UbahVisibilitasRingkasanPembayaran,
                     )
+                },
+                saatCheckout = {
+                    saatAksiDikirim(AksiLayarUtamaKasir.CobaCheckout)
                 },
             )
         }
@@ -498,6 +506,53 @@ private fun KartuStatistikKasir(
                 text = nilai,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+}
+
+/**
+ * Banner status hasil checkout.
+ */
+@Composable
+private fun KartuHasilCheckoutKasir(
+    statusHasilCheckout: StatusHasilCheckoutKasir,
+    saatTutup: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = statusHasilCheckout.judul,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+
+                TextButton(
+                    onClick = saatTutup,
+                ) {
+                    Text(
+                        text = "Tutup",
+                    )
+                }
+            }
+
+            Text(
+                text = statusHasilCheckout.deskripsi,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
     }
@@ -674,6 +729,7 @@ private fun BagianRingkasanPembayaranKasir(
     ringkasanPembayaran: RingkasanPembayaranKasir,
     apakahRingkasanPembayaranTampil: Boolean,
     saatUbahVisibilitasRingkasanPembayaran: () -> Unit,
+    saatCheckout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -704,6 +760,7 @@ private fun BagianRingkasanPembayaranKasir(
         if (apakahRingkasanPembayaranTampil) {
             PanelRingkasanPembayaranKasir(
                 ringkasanPembayaran = ringkasanPembayaran,
+                saatCheckout = saatCheckout,
             )
         }
     }
@@ -715,6 +772,7 @@ private fun BagianRingkasanPembayaranKasir(
 @Composable
 private fun PanelRingkasanPembayaranKasir(
     ringkasanPembayaran: RingkasanPembayaranKasir,
+    saatCheckout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -753,7 +811,7 @@ private fun PanelRingkasanPembayaranKasir(
             )
 
             Button(
-                onClick = {},
+                onClick = saatCheckout,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 52.dp),
@@ -805,6 +863,48 @@ private fun BarisRingkasanPembayaranKasir(
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
+}
+
+/**
+ * Dialog konfirmasi checkout.
+ */
+@Composable
+private fun DialogKonfirmasiCheckoutKasir(
+    statusKonfirmasiCheckout: StatusKonfirmasiCheckoutKasir,
+    saatBatalkan: () -> Unit,
+    saatKonfirmasi: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = saatBatalkan,
+        title = {
+            Text(
+                text = statusKonfirmasiCheckout.judul,
+            )
+        },
+        text = {
+            Text(
+                text = statusKonfirmasiCheckout.deskripsi,
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = saatKonfirmasi,
+            ) {
+                Text(
+                    text = statusKonfirmasiCheckout.labelKonfirmasi,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = saatBatalkan,
+            ) {
+                Text(
+                    text = "Batal",
+                )
+            }
+        },
+    )
 }
 
 /**
@@ -901,13 +1001,13 @@ private fun Long.sebagaiRupiahSederhana(): String {
 }
 
 @Preview(
-    name = "Workspace tablet terang transaksi aktif",
+    name = "Workspace tablet terang dialog checkout",
     showBackground = true,
     widthDp = 1280,
     heightDp = 800,
 )
 @Composable
-private fun PreviewWorkspaceTabletTerangTransaksiAktif() {
+private fun PreviewWorkspaceTabletTerangDialogCheckout() {
     val daftarProduk = KatalogProdukContoh.daftarAwal()
 
     TemaCassyKasir(
@@ -949,8 +1049,14 @@ private fun PreviewWorkspaceTabletTerangTransaksiAktif() {
                     potongan = "Rp0",
                     pajak = "Rp0",
                     totalAkhir = "Rp59000",
-                    labelAksiUtama = "Lanjut Pembayaran",
+                    labelAksiUtama = "Bayar sekarang",
                     aksiUtamaAktif = true,
+                ),
+                statusKonfirmasiCheckout = StatusKonfirmasiCheckoutKasir(
+                    apakahTampil = true,
+                    judul = "Konfirmasi pembayaran",
+                    deskripsi = "Bayar 4 item dengan total Rp59000 sekarang?",
+                    labelKonfirmasi = "Bayar sekarang",
                 ),
                 kataKunciPencarian = "",
                 apakahRingkasanPembayaranTampil = true,
@@ -961,14 +1067,14 @@ private fun PreviewWorkspaceTabletTerangTransaksiAktif() {
 }
 
 @Preview(
-    name = "Workspace ponsel gelap keranjang kosong",
+    name = "Workspace ponsel gelap hasil checkout",
     showBackground = true,
     widthDp = 411,
     heightDp = 891,
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-private fun PreviewWorkspacePonselGelapKeranjangKosong() {
+private fun PreviewWorkspacePonselGelapHasilCheckout() {
     val daftarProduk = KatalogProdukContoh.daftarAwal()
 
     TemaCassyKasir(
@@ -983,7 +1089,7 @@ private fun PreviewWorkspacePonselGelapKeranjangKosong() {
                     jumlahProdukTersedia = daftarProduk.size,
                     jumlahItemKeranjang = 0,
                     totalBelanjaSementara = "Rp0",
-                    statusSinkronisasi = "Tersimpan Lokal",
+                    statusSinkronisasi = "Transaksi lokal selesai",
                 ),
                 daftarProdukTersaring = daftarProduk,
                 daftarItemKeranjang = emptyList(),
@@ -997,8 +1103,13 @@ private fun PreviewWorkspacePonselGelapKeranjangKosong() {
                     potongan = "Rp0",
                     pajak = "Rp0",
                     totalAkhir = "Rp0",
-                    labelAksiUtama = "Pilih Produk",
+                    labelAksiUtama = "Pilih produk",
                     aksiUtamaAktif = false,
+                ),
+                statusHasilCheckout = StatusHasilCheckoutKasir(
+                    apakahTampil = true,
+                    judul = "Transaksi berhasil",
+                    deskripsi = "4 item dengan total Rp59000 siap disimpan ke riwayat lokal pada scope data berikutnya.",
                 ),
                 kataKunciPencarian = "",
                 apakahRingkasanPembayaranTampil = true,

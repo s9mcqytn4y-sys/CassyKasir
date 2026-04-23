@@ -46,4 +46,24 @@ sealed interface AksiLayarUtamaKasir {
     data class HapusProdukDariKeranjang(
         val produkId: String,
     ) : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna menekan tombol checkout.
+     */
+    data object CobaCheckout : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna membatalkan dialog konfirmasi checkout.
+     */
+    data object BatalkanKonfirmasiCheckout : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna menyetujui checkout.
+     */
+    data object KonfirmasiCheckout : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna menutup banner hasil checkout.
+     */
+    data object TutupStatusHasilCheckout : AksiLayarUtamaKasir
 }
