@@ -9,42 +9,52 @@ import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.TambahProdukKeKeranjang
 import id.cassy.kasir.ranah.model.Produk
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 /**
- * Pengelola status (ViewModel) untuk layar utama kasir menggunakan pola Unidirectional Data Flow (UDF).
+ * Pengelola status layar utama kasir dengan pola alur data satu arah.
  *
- * ViewModel ini bertanggung jawab untuk mengelola aliran data antara lapisan domain dan antarmuka.
- * Status internal dipisahkan menjadi [StatusTransaksiLayarUtamaKasir] untuk data bisnis
- * dan [StatusElemenLayarUtamaKasir] untuk status UI murni guna meningkatkan keterbacaan dan pemeliharaan.
+ * State internal dipisah menjadi:
+ * - status transaksi
+ * - status elemen layar
  *
- * @property daftarProdukPenuh Sumber data produk mentah dari katalog.
+ * Efek sekali pakai dipisah ke SharedFlow agar pesan sementara
+ * tidak mencemari state layar persisten.
  */
 class LayarUtamaKasirViewModel : ViewModel() {
 
     private val daftarProdukPenuh: List<Produk> = KatalogProdukContoh.daftarAwal()
 
-    // Kasus penggunaan (Use Cases)
     private val tambahProdukKeKeranjangUseCase = TambahProdukKeKeranjang()
     private val kurangiProdukDiKeranjangUseCase = KurangiProdukDiKeranjang()
     private val hapusProdukDariKeranjangUseCase = HapusProdukDariKeranjang()
     private val selesaikanCheckoutLokalKasirUseCase = SelesaikanCheckoutLokalKasir()
     private val bentukModelTampilanUseCase = BentukModelTampilanLayarUtamaKasir()
 
-    // Status internal yang dikemas (Encapsulated internal states)
-    private val _statusTransaksi = MutableStateFlow(StatusTransaksiLayarUtamaKasir())
-    private val _statusElemenLayar = MutableStateFlow(StatusElemenLayarUtamaKasir())
+    private val _statusTransaksi = MutableStateFlow(
+        StatusTransaksiLayarUtamaKasir(),
+    )
+
+    private val _statusElemenLayar = MutableStateFlow(
+        StatusElemenLayarUtamaKasir(),
+    )
+
+    private val _efek = MutableSharedFlow<EfekLayarUtamaKasir>(
+        extraBufferCapacity = 1,
+    )
+    val efek: SharedFlow<EfekLayarUtamaKasir> = _efek.asSharedFlow()
 
     /**
-     * Aliran status UI tunggal (StateFlow) yang dikonsumsi oleh layar utama.
-     * Menggabungkan data transaksi dan elemen visual menggunakan operator [combine].
+     * Aliran status UI publik yang dirender oleh Compose.
      */
-    val modelTampilan: StateFlow<ModelTampilanLayarUtamaKasir> = combine(
+    val modelTampilan = combine(
         _statusTransaksi,
         _statusElemenLayar,
     ) { statusTransaksi, statusElemenLayar ->
@@ -64,9 +74,7 @@ class LayarUtamaKasirViewModel : ViewModel() {
     )
 
     /**
-     * Titik masuk tunggal untuk semua interaksi pengguna dari UI.
-     *
-     * @param aksi Representasi dari interaksi pengguna (Event).
+     * Titik masuk tunggal untuk semua aksi dari UI.
      */
     fun tanganiAksi(aksi: AksiLayarUtamaKasir) {
         when (aksi) {
@@ -83,26 +91,50 @@ class LayarUtamaKasirViewModel : ViewModel() {
     }
 
     private fun perbaruiPencarian(kataKunciBaru: String) {
-        _statusElemenLayar.update { it.copy(kataKunciPencarian = kataKunciBaru) }
+        _statusElemenLayar.update { statusLama ->
+            statusLama.copy(
+                kataKunciPencarian = kataKunciBaru,
+            )
+        }
     }
 
     private fun alihkanVisibilitasPembayaran() {
-        _statusElemenLayar.update { it.copy(apakahRingkasanPembayaranTampil = !it.apakahRingkasanPembayaranTampil) }
+        _statusElemenLayar.update { statusLama ->
+            statusLama.copy(
+                apakahRingkasanPembayaranTampil = !statusLama.apakahRingkasanPembayaranTampil,
+            )
+        }
     }
 
     private fun tambahProdukKeKeranjang(produkId: String) {
         val produk = daftarProdukPenuh.firstOrNull { it.id == produkId } ?: return
 
+        var stokSudahPenuh = false
+
         _statusTransaksi.update { statusLama ->
+            val daftarLama = statusLama.daftarItemKeranjang
+            val daftarBaru = tambahProdukKeKeranjangUseCase(
+                daftarItemKeranjang = daftarLama,
+                produk = produk,
+            )
+
+            stokSudahPenuh = daftarBaru == daftarLama
+
             statusLama.copy(
-                daftarItemKeranjang = tambahProdukKeKeranjangUseCase(
-                    daftarItemKeranjang = statusLama.daftarItemKeranjang,
-                    produk = produk,
-                ),
+                daftarItemKeranjang = daftarBaru,
                 statusSinkronisasi = "Tersimpan Lokal",
             )
         }
-        resetStatusHasil()
+
+        _statusElemenLayar.update { statusLama ->
+            statusLama.copy(
+                statusHasilCheckout = StatusHasilCheckoutKasir(),
+            )
+        }
+
+        if (stokSudahPenuh) {
+            kirimPesanSingkat("Jumlah item sudah mencapai stok tersedia.")
+        }
     }
 
     private fun kurangiProdukDiKeranjang(produkId: String) {
@@ -115,6 +147,7 @@ class LayarUtamaKasirViewModel : ViewModel() {
                 statusSinkronisasi = "Tersimpan Lokal",
             )
         }
+
         resetStatusHasil()
     }
 
@@ -128,14 +161,18 @@ class LayarUtamaKasirViewModel : ViewModel() {
                 statusSinkronisasi = "Tersimpan Lokal",
             )
         }
+
         resetStatusHasil()
     }
 
     private fun cobaCheckout() {
-        if (_statusTransaksi.value.daftarItemKeranjang.isEmpty()) return
+        if (_statusTransaksi.value.daftarItemKeranjang.isEmpty()) {
+            kirimPesanSingkat("Keranjang masih kosong.")
+            return
+        }
 
-        _statusElemenLayar.update {
-            it.copy(
+        _statusElemenLayar.update { statusLama ->
+            statusLama.copy(
                 apakahDialogKonfirmasiCheckoutTampil = true,
                 statusHasilCheckout = StatusHasilCheckoutKasir(),
             )
@@ -143,14 +180,23 @@ class LayarUtamaKasirViewModel : ViewModel() {
     }
 
     private fun batalkanKonfirmasiCheckout() {
-        _statusElemenLayar.update { it.copy(apakahDialogKonfirmasiCheckoutTampil = false) }
+        _statusElemenLayar.update { statusLama ->
+            statusLama.copy(
+                apakahDialogKonfirmasiCheckoutTampil = false,
+            )
+        }
     }
 
     private fun konfirmasiCheckout() {
         val daftarKeranjangSaatIni = _statusTransaksi.value.daftarItemKeranjang
-        if (daftarKeranjangSaatIni.isEmpty()) return
+        if (daftarKeranjangSaatIni.isEmpty()) {
+            kirimPesanSingkat("Keranjang masih kosong.")
+            return
+        }
 
-        val hasilCheckout = selesaikanCheckoutLokalKasirUseCase(daftarKeranjangSaatIni)
+        val hasilCheckout = selesaikanCheckoutLokalKasirUseCase(
+            daftarItemKeranjang = daftarKeranjangSaatIni,
+        )
 
         _statusTransaksi.update {
             StatusTransaksiLayarUtamaKasir(
@@ -172,11 +218,27 @@ class LayarUtamaKasirViewModel : ViewModel() {
     }
 
     private fun tutupStatusHasilCheckout() {
-        _statusElemenLayar.update { it.copy(statusHasilCheckout = StatusHasilCheckoutKasir()) }
+        _statusElemenLayar.update { statusLama ->
+            statusLama.copy(
+                statusHasilCheckout = StatusHasilCheckoutKasir(),
+            )
+        }
     }
 
     private fun resetStatusHasil() {
-        _statusElemenLayar.update { it.copy(statusHasilCheckout = StatusHasilCheckoutKasir()) }
+        _statusElemenLayar.update { statusLama ->
+            statusLama.copy(
+                statusHasilCheckout = StatusHasilCheckoutKasir(),
+            )
+        }
+    }
+
+    private fun kirimPesanSingkat(pesan: String) {
+        _efek.tryEmit(
+            EfekLayarUtamaKasir.TampilkanPesanSingkat(
+                pesan = pesan,
+            ),
+        )
     }
 }
 

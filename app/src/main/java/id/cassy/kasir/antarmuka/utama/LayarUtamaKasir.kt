@@ -31,10 +31,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +49,9 @@ import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
 import id.cassy.kasir.ranah.fungsi.hitungSubTotal
 import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.Produk
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * Komposabel utama layar kasir.
@@ -53,12 +60,32 @@ import id.cassy.kasir.ranah.model.Produk
 fun LayarUtamaKasir(
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
+    alurEfek: Flow<EfekLayarUtamaKasir> = emptyFlow(),
     modifier: Modifier = Modifier,
 ) {
+    val statusHostSnackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(alurEfek) {
+        alurEfek.collectLatest { efek ->
+            when (efek) {
+                is EfekLayarUtamaKasir.TampilkanPesanSingkat -> {
+                    statusHostSnackbar.showSnackbar(
+                        message = efek.pesan,
+                    )
+                }
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = statusHostSnackbar,
+            )
+        },
     ) { paddingKerangka ->
         if (modelTampilan.statusKonfirmasiCheckout.apakahTampil) {
             DialogKonfirmasiCheckoutKasir(

@@ -1,6 +1,6 @@
-# Cassy Kasir 🏪
+# Cassy Kasir
 
-Sistem Point of Sale (POS) modern untuk UMKM Indonesia, dibangun dengan prinsip **Unidirectional Data Flow (UDF)** yang atomik dan antarmuka **Jetpack Compose** yang adaptif.
+Sistem Point of Sale (POS) modern untuk UMKM Indonesia, dibangun dengan prinsip Unidirectional Data Flow (UDF) yang atomik dan antarmuka Jetpack Compose yang adaptif.
 
 ## 📌 Fokus Proyek
 - **Kemandirian Bahasa**: 100% dokumentasi dan sintaks buatan sendiri menggunakan Bahasa Indonesia yang baku dan teknis.
@@ -24,6 +24,7 @@ Untuk agen AI atau pengembang baru, harap perhatikan aturan berikut:
 - **Penamaan**: Gunakan kata kerja Bahasa Indonesia untuk fungsi (misal: `hitungTotal`, bukan `calculateTotal`).
 - **KDocs**: Setiap fungsi publik wajib memiliki dokumentasi dengan format `@param` dan `@return` dalam Bahasa Indonesia.
 - **UI Stateless**: Komposabel tidak boleh menyimpan status internal yang krusial; semua status harus berasal dari parameter.
+- **AI-Ready**: Rujuk [GEMINI.md](./GEMINI.md) untuk panduan kolaborasi mendalam dengan asisten cerdas.
 
 ## 🚀 Memulai
 ```powershell
@@ -35,4 +36,4 @@ Untuk agen AI atau pengembang baru, harap perhatikan aturan berikut:
 ```
 
 ---
-*Dikembangkan dengan ❤️ untuk kemajuan UMKM Indonesia.*
+Dikembangkan untuk kemajuan UMKM Indonesia.

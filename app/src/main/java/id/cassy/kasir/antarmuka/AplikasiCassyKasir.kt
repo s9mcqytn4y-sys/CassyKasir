@@ -13,10 +13,10 @@ import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 /**
  * Komposabel akar aplikasi.
  *
- * Tanggung jawab file ini sederhana:
+ * Tanggung jawab file ini:
  * - mengambil ViewModel
- * - membaca status layar secara sadar siklus hidup (lifecycle-aware)
- * - meneruskan status dan aksi ke layar utama
+ * - membaca status layar secara lifecycle-aware
+ * - meneruskan status, aksi, dan efek ke layar utama
  */
 @Composable
 fun AplikasiCassyKasir(
@@ -33,6 +33,7 @@ fun AplikasiCassyKasir(
             LayarUtamaKasir(
                 modelTampilan = modelTampilan.value,
                 saatAksiDikirim = layarUtamaKasirViewModel::tanganiAksi,
+                alurEfek = layarUtamaKasirViewModel.efek,
             )
         }
     }
