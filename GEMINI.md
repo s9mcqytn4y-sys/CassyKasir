@@ -44,7 +44,7 @@ Gunakan gaya bahasa yang manusiawi, ringkas, dan langsung (*direct*):
 - Aksi Tersegel: Definisi interaksi pengguna menggunakan sealed interface atau sealed class.
 - UI Stateless: Komposabel harus murni, menerima status dan mengirim aksi melalui parameter.
 
-### 3. Standar UI
+### 4. Standar UI
 
 - Gunakan Modifier sebagai parameter opsional pertama pada Komposabel.
 - Manfaatkan MaterialTheme untuk konsistensi warna dan tipografi.
