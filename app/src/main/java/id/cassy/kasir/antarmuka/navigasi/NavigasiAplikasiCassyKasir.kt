@@ -13,10 +13,7 @@ import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 /**
  * Root navigasi aplikasi CassyKasir.
  *
- * Tanggung jawab file ini:
- * - membuat NavController
- * - menentukan start destination
- * - menghubungkan setiap destination ke composable yang sesuai
+ * File ini bertugas menghubungkan tujuan navigasi dengan composable layar.
  */
 @Composable
 fun NavigasiAplikasiCassyKasir() {
@@ -24,10 +21,10 @@ fun NavigasiAplikasiCassyKasir() {
 
     NavHost(
         navController = pengendaliNavigasi,
-        startDestination = RuteNavigasiKasir.kasirUtama,
+        startDestination = TujuanNavigasiKasir.KasirUtama.rute,
     ) {
         composable(
-            route = RuteNavigasiKasir.kasirUtama,
+            route = TujuanNavigasiKasir.KasirUtama.rute,
         ) {
             val layarUtamaKasirViewModel: LayarUtamaKasirViewModel = viewModel()
             val modelTampilan = layarUtamaKasirViewModel.modelTampilan.collectAsStateWithLifecycle()
@@ -37,15 +34,13 @@ fun NavigasiAplikasiCassyKasir() {
                 saatAksiDikirim = layarUtamaKasirViewModel::tanganiAksi,
                 alurEfek = layarUtamaKasirViewModel.efek,
                 saatBukaRiwayatTransaksi = {
-                    pengendaliNavigasi.navigate(
-                        RuteNavigasiKasir.riwayatTransaksi,
-                    )
+                    pengendaliNavigasi.bukaRiwayatTransaksi()
                 },
             )
         }
 
         composable(
-            route = RuteNavigasiKasir.riwayatTransaksi,
+            route = TujuanNavigasiKasir.RiwayatTransaksi.rute,
         ) {
             LayarRiwayatTransaksi(
                 saatKembali = {
