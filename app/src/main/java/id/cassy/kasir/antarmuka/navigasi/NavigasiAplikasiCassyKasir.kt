@@ -9,16 +9,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
+import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 
 /**
- * Komponen root navigasi yang mengelola perpindahan antar layar di seluruh aplikasi.
+ * Root navigasi aplikasi CassyKasir.
  *
- * Menggunakan [NavHost] untuk mendefinisikan grafik navigasi dan menghubungkan
- * [TujuanNavigasiKasir] dengan komponen UI (Composable) yang sesuai.
- * Navigasi dilakukan secara stateless melalui callback dari masing-masing layar.
+ * File ini hanya bertanggung jawab pada:
+ * - pemetaan destination
+ * - pembuatan ViewModel per layar
+ * - perpindahan antar layar
  */
 @Composable
 fun NavigasiAplikasiCassyKasir() {
@@ -64,11 +66,12 @@ fun NavigasiAplikasiCassyKasir() {
                     type = NavType.StringType
                 },
             ),
-        ) { entriBackStack ->
-            val produkId = entriBackStack.ambilProdukIdDetailProduk()
+        ) {
+            val layarDetailProdukViewModel: LayarDetailProdukViewModel = viewModel()
+            val modelTampilan = layarDetailProdukViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LayarDetailProduk(
-                produkId = produkId,
+                modelTampilan = modelTampilan.value,
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },

@@ -14,35 +14,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
-import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
 
 /**
- * Komposabel layar detail produk yang menampilkan informasi mendalam mengenai satu produk.
+ * Layar detail produk yang bersifat stateless.
  *
- * Layar ini mendukung navigasi berargumen untuk memuat data berdasarkan [produkId].
- * Saat ini data masih dimuat dari [KatalogProdukContoh] untuk keperluan purwarupa.
+ * Layar ini hanya merender status (state) yang sudah dibentuk oleh ViewModel.
+ * Pemisahan ini memastikan UI tetap sederhana dan mudah diuji tanpa bergantung
+ * langsung pada logika navigasi atau pengambilan data.
  *
- * @param produkId Identitas unik produk yang ingin ditampilkan.
- * @param saatKembali Callback untuk menutup layar detail dan kembali ke layar sebelumnya.
+ * @param modelTampilan Status UI yang akan ditampilkan pada layar.
+ * @param saatKembali Callback yang dipicu saat pengguna menekan tombol kembali.
  * @param modifier Modifikasi tata letak opsional.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayarDetailProduk(
-    produkId: String,
+    modelTampilan: ModelTampilanDetailProduk,
     saatKembali: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val produk = remember(produkId) {
-        KatalogProdukContoh.daftarAwal().firstOrNull { itemProduk ->
-            itemProduk.id == produkId
-        }
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -50,7 +43,7 @@ fun LayarDetailProduk(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Detail Produk",
+                        text = modelTampilan.judulLayar,
                     )
                 },
                 navigationIcon = {
@@ -65,33 +58,68 @@ fun LayarDetailProduk(
             )
         },
     ) { paddingDalam ->
-        if (produk == null) {
-            KontenProdukTidakDitemukan(
-                paddingDalam = paddingDalam,
-                produkId = produkId,
-            )
-        } else {
-            KontenDetailProduk(
-                paddingDalam = paddingDalam,
-                namaProduk = produk.nama,
-                hargaProduk = "Rp${produk.harga}",
-                stokTersedia = produk.stokTersedia,
-                deskripsiProduk = produk.deskripsi.ifBlank {
-                    "Produk ini belum memiliki deskripsi tambahan."
-                },
-            )
+        when {
+            modelTampilan.sedangMemuat -> {
+                KontenMemuatDetailProduk(
+                    paddingDalam = paddingDalam,
+                )
+            }
+
+            modelTampilan.apakahProdukDitemukan -> {
+                KontenDetailProduk(
+                    paddingDalam = paddingDalam,
+                    namaProduk = modelTampilan.namaProduk,
+                    hargaProduk = modelTampilan.hargaProduk,
+                    stokTersedia = modelTampilan.stokTersedia,
+                    deskripsiProduk = modelTampilan.deskripsiProduk,
+                )
+            }
+
+            else -> {
+                KontenProdukTidakDitemukan(
+                    paddingDalam = paddingDalam,
+                    judulStatusKosong = modelTampilan.judulStatusKosong,
+                    deskripsiStatusKosong = modelTampilan.deskripsiStatusKosong,
+                )
+            }
         }
     }
 }
 
 /**
- * Merender konten utama ketika informasi produk tersedia.
+ * Merender indikator atau pesan saat detail produk sedang dalam proses pemuatan.
  *
  * @param paddingDalam Jarak aman dari kerangka Scaffold.
- * @param namaProduk Label nama produk yang ditampilkan sebagai judul.
- * @param hargaProduk Nilai harga produk dalam format teks rupiah.
- * @param stokTersedia Jumlah sisa stok yang dapat dijual.
- * @param deskripsiProduk Penjelasan tambahan mengenai produk.
+ * @param modifier Modifikasi tata letak opsional.
+ */
+@Composable
+private fun KontenMemuatDetailProduk(
+    paddingDalam: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingDalam)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Memuat detail produk...",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+/**
+ * Merender informasi lengkap produk ketika data berhasil ditemukan.
+ *
+ * @param paddingDalam Jarak aman dari kerangka Scaffold.
+ * @param namaProduk Nama produk yang akan ditampilkan.
+ * @param hargaProduk Harga produk dalam format teks.
+ * @param stokTersedia Jumlah stok yang tersedia saat ini.
+ * @param deskripsiProduk Penjelasan atau detail tambahan mengenai produk.
  * @param modifier Modifikasi tata letak opsional.
  */
 @Composable
@@ -137,16 +165,18 @@ private fun KontenDetailProduk(
 }
 
 /**
- * Merender status kosong atau pesan kesalahan ketika [produkId] tidak ditemukan di katalog.
+ * Merender tampilan status kosong jika produk tidak ditemukan di sumber data.
  *
  * @param paddingDalam Jarak aman dari kerangka Scaffold.
- * @param produkId ID produk yang gagal ditemukan.
+ * @param judulStatusKosong Judul pesan kesalahan.
+ * @param deskripsiStatusKosong Penjelasan mengapa produk tidak ditemukan.
  * @param modifier Modifikasi tata letak opsional.
  */
 @Composable
 private fun KontenProdukTidakDitemukan(
     paddingDalam: PaddingValues,
-    produkId: String,
+    judulStatusKosong: String,
+    deskripsiStatusKosong: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -157,8 +187,8 @@ private fun KontenProdukTidakDitemukan(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         StatusKosongSederhana(
-            judul = "Produk tidak ditemukan",
-            deskripsi = "Produk dengan id $produkId tidak berhasil ditemukan dari katalog contoh.",
+            judul = judulStatusKosong,
+            deskripsi = deskripsiStatusKosong,
         )
     }
 }
