@@ -71,6 +71,7 @@ fun LayarUtamaKasir(
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
     alurEfek: Flow<EfekLayarUtamaKasir> = emptyFlow(),
     saatBukaRiwayatTransaksi: () -> Unit = {},
+    saatBukaDetailProduk: (String) -> Unit = {},
 ) {
     val keadaanHostSnackbar: SnackbarHostState = remember { SnackbarHostState() }
 
@@ -120,12 +121,14 @@ fun LayarUtamaKasir(
                     modelTampilan = modelTampilan,
                     saatAksiDikirim = saatAksiDikirim,
                     saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
+                    saatBukaDetailProduk = saatBukaDetailProduk,
                 )
             } else {
                 TataLetakPonselKasir(
                     modelTampilan = modelTampilan,
                     saatAksiDikirim = saatAksiDikirim,
                     saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
+                    saatBukaDetailProduk = saatBukaDetailProduk,
                 )
             }
         }
@@ -141,6 +144,7 @@ private fun TataLetakPonselKasir(
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
     saatBukaRiwayatTransaksi: () -> Unit,
+    saatBukaDetailProduk: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -251,12 +255,15 @@ private fun TataLetakPonselKasir(
             ) { produk ->
                 KartuProdukKasir(
                     produk = produk,
-                    saatKlikProduk = {
+                    saatTambahProduk = {
                         saatAksiDikirim(
                             AksiLayarUtamaKasir.TambahProdukKeKeranjang(
                                 produkId = produk.id,
                             ),
                         )
+                    },
+                    saatBukaDetailProduk = {
+                        saatBukaDetailProduk(produk.id)
                     },
                 )
             }
@@ -273,6 +280,7 @@ private fun TataLetakTabletKasir(
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
     saatBukaRiwayatTransaksi: () -> Unit,
+    saatBukaDetailProduk: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -330,12 +338,15 @@ private fun TataLetakTabletKasir(
                 ) { produk ->
                     KartuProdukKasir(
                         produk = produk,
-                        saatKlikProduk = {
+                        saatTambahProduk = {
                             saatAksiDikirim(
                                 AksiLayarUtamaKasir.TambahProdukKeKeranjang(
                                     produkId = produk.id,
                                 ),
                             )
+                        },
+                        saatBukaDetailProduk = {
+                            saatBukaDetailProduk(produk.id)
                         },
                     )
                 }
@@ -1002,23 +1013,20 @@ private fun DialogKonfirmasiCheckoutKasir(
  * Kartu informasi produk tunggal dalam daftar katalog.
  *
  * @param produk Data model produk.
- * @param saatKlikProduk Callback saat kartu produk diketuk.
+ * @param saatTambahProduk Callback saat tombol tambah diketuk.
+ * @param saatBukaDetailProduk Callback saat tombol detail diketuk.
  */
 @Composable
 private fun KartuProdukKasir(
     produk: Produk,
-    saatKlikProduk: () -> Unit,
+    saatTambahProduk: () -> Unit,
+    saatBukaDetailProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val produkBisaDipilih = produk.aktif && produk.stokTersedia > 0
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(
-                enabled = produkBisaDipilih,
-                onClick = saatKlikProduk,
-            ),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
@@ -1027,40 +1035,64 @@ private fun KartuProdukKasir(
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.14f),
         ),
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    text = produk.nama,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = produk.harga.sebagaiRupiahSederhana(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = if (produkBisaDipilih) {
-                        "Ketuk untuk tambah"
-                    } else {
-                        "Produk tidak tersedia"
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = produk.nama,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = produk.harga.sebagaiRupiahSederhana(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                LencanaStokKasir(
+                    stokTersedia = produk.stokTersedia,
                 )
             }
 
-            LencanaStokKasir(
-                stokTersedia = produk.stokTersedia,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedButton(
+                    onClick = saatBukaDetailProduk,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 40.dp),
+                ) {
+                    Text(
+                        text = "Detail",
+                    )
+                }
+
+                Button(
+                    onClick = saatTambahProduk,
+                    enabled = produkBisaDipilih,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 40.dp),
+                ) {
+                    Text(
+                        text = "Tambah",
+                    )
+                }
+            }
         }
     }
 }

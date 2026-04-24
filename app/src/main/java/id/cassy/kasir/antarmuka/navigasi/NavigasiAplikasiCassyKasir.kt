@@ -3,17 +3,22 @@ package id.cassy.kasir.antarmuka.navigasi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 
 /**
- * Root navigasi aplikasi CassyKasir.
+ * Komponen root navigasi yang mengelola perpindahan antar layar di seluruh aplikasi.
  *
- * File ini bertugas menghubungkan tujuan navigasi dengan composable layar.
+ * Menggunakan [NavHost] untuk mendefinisikan grafik navigasi dan menghubungkan
+ * [TujuanNavigasiKasir] dengan komponen UI (Composable) yang sesuai.
+ * Navigasi dilakukan secara stateless melalui callback dari masing-masing layar.
  */
 @Composable
 fun NavigasiAplikasiCassyKasir() {
@@ -36,6 +41,9 @@ fun NavigasiAplikasiCassyKasir() {
                 saatBukaRiwayatTransaksi = {
                     pengendaliNavigasi.bukaRiwayatTransaksi()
                 },
+                saatBukaDetailProduk = { produkId ->
+                    pengendaliNavigasi.bukaDetailProduk(produkId)
+                },
             )
         }
 
@@ -43,6 +51,24 @@ fun NavigasiAplikasiCassyKasir() {
             route = TujuanNavigasiKasir.RiwayatTransaksi.rute,
         ) {
             LayarRiwayatTransaksi(
+                saatKembali = {
+                    pengendaliNavigasi.navigateUp()
+                },
+            )
+        }
+
+        composable(
+            route = TujuanNavigasiKasir.DetailProduk.rute,
+            arguments = listOf(
+                navArgument(TujuanNavigasiKasir.DetailProduk.namaArgumenProdukId) {
+                    type = NavType.StringType
+                },
+            ),
+        ) { entriBackStack ->
+            val produkId = entriBackStack.ambilProdukIdDetailProduk()
+
+            LayarDetailProduk(
+                produkId = produkId,
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },

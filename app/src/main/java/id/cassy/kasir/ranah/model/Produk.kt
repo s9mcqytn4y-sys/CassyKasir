@@ -8,6 +8,7 @@ package id.cassy.kasir.ranah.model
  * @property harga Nilai jual produk dalam satuan mata uang terkecil (Long).
  * @property stokTersedia Kuantitas barang yang masih dapat dijual.
  * @property kodePindai Barcode atau kode SKU untuk pencarian cepat (opsional).
+ * @property deskripsi Informasi tambahan tentang produk.
  * @property aktif Status apakah produk ini dapat ditampilkan dan dijual.
  */
 data class Produk(
@@ -16,5 +17,6 @@ data class Produk(
     val harga: Long,
     val stokTersedia: Int,
     val kodePindai: String? = null,
+    val deskripsi: String = "",
     val aktif: Boolean = true,
 )
