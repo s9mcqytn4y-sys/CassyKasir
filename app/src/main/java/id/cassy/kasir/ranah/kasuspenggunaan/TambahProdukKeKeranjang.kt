@@ -12,6 +12,13 @@ import id.cassy.kasir.ranah.model.Produk
  */
 class TambahProdukKeKeranjang {
 
+    /**
+     * Menjalankan penambahan produk ke daftar keranjang.
+     *
+     * @param daftarItemKeranjang Daftar item saat ini.
+     * @param produk Data produk yang akan ditambahkan.
+     * @return Daftar item baru setelah produk ditambahkan atau jumlahnya diperbarui.
+     */
     operator fun invoke(
         daftarItemKeranjang: List<ItemKeranjang>,
         produk: Produk,

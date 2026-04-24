@@ -11,6 +11,13 @@ import id.cassy.kasir.ranah.model.ItemKeranjang
  */
 class KurangiProdukDiKeranjang {
 
+    /**
+     * Menjalankan pengurangan jumlah item di daftar keranjang.
+     *
+     * @param daftarItemKeranjang Daftar item saat ini.
+     * @param produkId ID produk yang akan dikurangi jumlahnya.
+     * @return Daftar item baru dengan jumlah yang sudah diperbarui.
+     */
     operator fun invoke(
         daftarItemKeranjang: List<ItemKeranjang>,
         produkId: String,

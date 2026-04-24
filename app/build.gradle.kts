@@ -6,17 +6,18 @@ plugins {
     // Menerapkan plugin yang didefinisikan di tingkat root
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
     // Namespace unik untuk identifikasi package di sistem Android
     namespace = "id.cassy.kasir"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "id.cassy.kasir"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
 
@@ -90,6 +91,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.foundation)
 
     // Dependensi Debug & Pengujian

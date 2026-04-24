@@ -28,6 +28,12 @@ data class HasilCheckoutLokalKasir(
  */
 class SelesaikanCheckoutLokalKasir {
 
+    /**
+     * Memproses penyelesaian transaksi lokal.
+     *
+     * @param daftarItemKeranjang Daftar item yang akan di-checkout.
+     * @return Objek hasil checkout berisi ringkasan transaksi.
+     */
     operator fun invoke(
         daftarItemKeranjang: List<ItemKeranjang>,
     ): HasilCheckoutLokalKasir {

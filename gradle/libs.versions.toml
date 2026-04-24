@@ -1,6 +1,6 @@
 [versions]
 agp = "9.1.1"
-kotlin = "2.2.10"
+kotlin = "2.3.21"
 coreKtx = "1.18.0"
 activityCompose = "1.12.4"
 composeBom = "2026.03.00"
@@ -8,10 +8,12 @@ lifecycle = "2.10.0"
 navigation = "2.9.7"
 material = "1.13.0"
 foundation = "1.10.6"
+kotlinxSerialization = "1.11.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -27,3 +29,4 @@ androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-ru
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }

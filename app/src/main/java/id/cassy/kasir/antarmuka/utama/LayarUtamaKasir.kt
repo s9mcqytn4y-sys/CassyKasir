@@ -51,6 +51,7 @@ import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.Produk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.ui.Alignment
 import kotlinx.coroutines.flow.emptyFlow
 
 /**
@@ -62,14 +63,16 @@ import kotlinx.coroutines.flow.emptyFlow
  * @param alurEfek Aliran efek sekali pakai seperti tampilan pesan singkat.
  * @param modifier Modifikasi tata letak opsional.
  */
+
 @Composable
 fun LayarUtamaKasir(
+    modifier: Modifier = Modifier,
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
     alurEfek: Flow<EfekLayarUtamaKasir> = emptyFlow(),
-    modifier: Modifier = Modifier,
+    saatBukaRiwayatTransaksi: () -> Unit = {},
 ) {
-    val keadaanHostSnackbar = remember { SnackbarHostState() }
+    val keadaanHostSnackbar: SnackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(alurEfek) {
         alurEfek.collectLatest { efek ->
@@ -116,11 +119,13 @@ fun LayarUtamaKasir(
                 TataLetakTabletKasir(
                     modelTampilan = modelTampilan,
                     saatAksiDikirim = saatAksiDikirim,
+                    saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
                 )
             } else {
                 TataLetakPonselKasir(
                     modelTampilan = modelTampilan,
                     saatAksiDikirim = saatAksiDikirim,
+                    saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
                 )
             }
         }
@@ -135,6 +140,7 @@ fun LayarUtamaKasir(
 private fun TataLetakPonselKasir(
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
+    saatBukaRiwayatTransaksi: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -146,6 +152,7 @@ private fun TataLetakPonselKasir(
             HeaderBerandaKasir(
                 namaAplikasi = modelTampilan.statusBeranda.namaAplikasi,
                 sloganAplikasi = modelTampilan.statusBeranda.sloganAplikasi,
+                saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
             )
         }
 
@@ -265,6 +272,7 @@ private fun TataLetakPonselKasir(
 private fun TataLetakTabletKasir(
     modelTampilan: ModelTampilanLayarUtamaKasir,
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
+    saatBukaRiwayatTransaksi: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -283,6 +291,7 @@ private fun TataLetakTabletKasir(
                 HeaderBerandaKasir(
                     namaAplikasi = modelTampilan.statusBeranda.namaAplikasi,
                     sloganAplikasi = modelTampilan.statusBeranda.sloganAplikasi,
+                    saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
                 )
             }
 
@@ -405,22 +414,38 @@ private fun TataLetakTabletKasir(
 private fun HeaderBerandaKasir(
     namaAplikasi: String,
     sloganAplikasi: String,
+    saatBukaRiwayatTransaksi: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
     ) {
-        Text(
-            text = namaAplikasi,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-        Text(
-            text = sloganAplikasi,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = namaAplikasi,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = sloganAplikasi,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        TextButton(
+            onClick = saatBukaRiwayatTransaksi,
+            modifier = Modifier.heightIn(min = 48.dp),
+        ) {
+            Text(
+                text = "Riwayat",
+            )
+        }
     }
 }
 
