@@ -19,10 +19,13 @@ import androidx.compose.ui.unit.dp
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 
 /**
- * Layar placeholder untuk riwayat transaksi.
+ * Layar riwayat transaksi yang menampilkan daftar aktivitas penjualan yang telah selesai.
  *
- * Pada scope ini layar masih statis.
- * Data riwayat asli akan kita bangun saat masuk scope data lokal.
+ * Saat ini layar ini masih bersifat statis (placeholder) dan akan dihubungkan
+ * ke database lokal pada tahap pengembangan selanjutnya.
+ *
+ * @param saatKembali Callback untuk navigasi balik ke layar sebelumnya.
+ * @param modifier Modifikasi tata letak opsional.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +62,10 @@ fun LayarRiwayatTransaksi(
 }
 
 /**
- * Konten kosong untuk layar riwayat transaksi.
+ * Merender tampilan status kosong untuk layar riwayat transaksi.
+ *
+ * @param paddingDalam Jarak aman dari kerangka Scaffold.
+ * @param modifier Modifikasi tata letak opsional.
  */
 @Composable
 private fun KontenRiwayatTransaksiKosong(
