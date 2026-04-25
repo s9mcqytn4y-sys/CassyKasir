@@ -56,6 +56,58 @@ fun StatusKosongSederhana(
 }
 
 /**
+ * Komponen untuk menampilkan status gagal/error saat pengambilan data.
+ * Dilengkapi dengan tombol aksi opsional untuk mencoba kembali (retry).
+ */
+@Composable
+fun StatusGagalSederhana(
+    pesan: String,
+    modifier: Modifier = Modifier,
+    saatCobaLagi: (() -> Unit)? = null,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Gagal memuat data",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Text(
+                text = pesan,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            if (saatCobaLagi != null) {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = saatCobaLagi,
+                    modifier = Modifier.padding(top = 8.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.onErrorContainer,
+                    ),
+                    colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
+                ) {
+                    Text(text = "Coba Lagi")
+                }
+            }
+        }
+    }
+}
+
+/**
  * Komponen penampung sementara (placeholder) saat data sedang dimuat.
  * Memberikan kesan responsif pada antarmuka pengguna.
  */

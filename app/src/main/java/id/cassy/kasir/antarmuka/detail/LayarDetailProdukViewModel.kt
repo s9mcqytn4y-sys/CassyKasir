@@ -34,36 +34,55 @@ class LayarDetailProdukViewModel(
     }
 
     /**
+     * Memicu pemuatan ulang data jika terjadi kesalahan.
+     */
+    fun cobaLagi() {
+        muatDetailProduk()
+    }
+
+    /**
      * Memuat detail produk dari katalog contoh berdasarkan produkId.
      *
      * Nantinya sumber data ini bisa diganti ke repository tanpa mengubah layar.
      */
     private fun muatDetailProduk() {
-        val produk = KatalogProdukContoh.daftarAwal().firstOrNull { itemProduk ->
-            itemProduk.id == produkId
-        }
+        _modelTampilan.value = _modelTampilan.value.copy(
+            sedangMemuat = true,
+            pesanKesalahan = null,
+        )
 
-        _modelTampilan.value = if (produk != null) {
-            ModelTampilanDetailProduk(
+        try {
+            val produk = KatalogProdukContoh.daftarAwal().firstOrNull { itemProduk ->
+                itemProduk.id == produkId
+            }
+
+            _modelTampilan.value = if (produk != null) {
+                ModelTampilanDetailProduk(
+                    sedangMemuat = false,
+                    produkId = produkId,
+                    judulLayar = "Detail Produk",
+                    namaProduk = produk.nama,
+                    hargaProduk = "Rp${produk.harga}",
+                    stokTersedia = produk.stokTersedia,
+                    deskripsiProduk = produk.deskripsi.ifBlank {
+                        "Produk ini belum memiliki deskripsi tambahan."
+                    },
+                    apakahProdukDitemukan = true,
+                )
+            } else {
+                ModelTampilanDetailProduk(
+                    sedangMemuat = false,
+                    produkId = produkId,
+                    judulLayar = "Detail Produk",
+                    apakahProdukDitemukan = false,
+                    judulStatusKosong = "Produk tidak ditemukan",
+                    deskripsiStatusKosong = "Produk dengan id $produkId tidak berhasil ditemukan dari katalog contoh.",
+                )
+            }
+        } catch (e: Exception) {
+            _modelTampilan.value = ModelTampilanDetailProduk(
                 sedangMemuat = false,
-                produkId = produkId,
-                judulLayar = "Detail Produk",
-                namaProduk = produk.nama,
-                hargaProduk = "Rp${produk.harga}",
-                stokTersedia = produk.stokTersedia,
-                deskripsiProduk = produk.deskripsi.ifBlank {
-                    "Produk ini belum memiliki deskripsi tambahan."
-                },
-                apakahProdukDitemukan = true,
-            )
-        } else {
-            ModelTampilanDetailProduk(
-                sedangMemuat = false,
-                produkId = produkId,
-                judulLayar = "Detail Produk",
-                apakahProdukDitemukan = false,
-                judulStatusKosong = "Produk tidak ditemukan",
-                deskripsiStatusKosong = "Produk dengan id $produkId tidak berhasil ditemukan dari katalog contoh.",
+                pesanKesalahan = "Terjadi kesalahan: ${e.message}",
             )
         }
     }

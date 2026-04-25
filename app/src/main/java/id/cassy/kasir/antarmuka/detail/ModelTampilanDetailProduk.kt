@@ -10,6 +10,7 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class ModelTampilanDetailProduk(
     val sedangMemuat: Boolean = true,
+    val pesanKesalahan: String? = null,
     val produkId: String = "",
     val judulLayar: String = "Detail Produk",
     val namaProduk: String = "",

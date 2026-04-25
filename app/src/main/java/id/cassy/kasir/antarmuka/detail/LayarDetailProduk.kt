@@ -1,12 +1,14 @@
 package id.cassy.kasir.antarmuka.detail
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -14,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import id.cassy.kasir.antarmuka.komponen.StatusGagalSederhana
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 
 /**
@@ -27,6 +31,7 @@ import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
  *
  * @param modelTampilan Status UI yang akan ditampilkan pada layar.
  * @param saatKembali Callback yang dipicu saat pengguna menekan tombol kembali.
+ * @param saatCobaLagi Callback yang dipicu saat pengguna menekan tombol coba lagi pada status gagal.
  * @param modifier Modifikasi tata letak opsional.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +39,7 @@ import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 fun LayarDetailProduk(
     modelTampilan: ModelTampilanDetailProduk,
     saatKembali: () -> Unit,
+    saatCobaLagi: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -62,6 +68,14 @@ fun LayarDetailProduk(
             modelTampilan.sedangMemuat -> {
                 KontenMemuatDetailProduk(
                     paddingDalam = paddingDalam,
+                )
+            }
+
+            modelTampilan.pesanKesalahan != null -> {
+                KontenGagalMemuatDetailProduk(
+                    paddingDalam = paddingDalam,
+                    pesan = modelTampilan.pesanKesalahan,
+                    saatCobaLagi = saatCobaLagi,
                 )
             }
 
@@ -97,17 +111,41 @@ private fun KontenMemuatDetailProduk(
     paddingDalam: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingDalam),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+/**
+ * Merender tampilan status gagal jika terjadi kesalahan saat memuat data.
+ *
+ * @param paddingDalam Jarak aman dari kerangka Scaffold.
+ * @param pesan Pesan kesalahan yang akan ditampilkan.
+ * @param saatCobaLagi Callback untuk memicu pemuatan ulang.
+ * @param modifier Modifikasi tata letak opsional.
+ */
+@Composable
+private fun KontenGagalMemuatDetailProduk(
+    paddingDalam: PaddingValues,
+    pesan: String,
+    saatCobaLagi: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(paddingDalam)
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            text = "Memuat detail produk...",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
+        StatusGagalSederhana(
+            pesan = pesan,
+            saatCobaLagi = saatCobaLagi,
         )
     }
 }

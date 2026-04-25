@@ -75,6 +75,7 @@ fun NavigasiAplikasiCassyKasir() {
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },
+                saatCobaLagi = layarDetailProdukViewModel::cobaLagi,
             )
         }
     }
