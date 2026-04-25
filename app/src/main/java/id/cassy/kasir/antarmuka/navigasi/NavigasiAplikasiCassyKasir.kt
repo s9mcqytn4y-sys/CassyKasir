@@ -14,7 +14,9 @@ import id.cassy.kasir.antarmuka.detail.EfekLayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
+import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksiViewModel
 import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksi
+import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksiViewModel
 import id.cassy.kasir.antarmuka.utama.AksiLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
@@ -65,13 +67,18 @@ fun NavigasiAplikasiCassyKasir() {
         composable(
             route = TujuanNavigasiKasir.RiwayatTransaksi.rute,
         ) {
+            val layarRiwayatTransaksiViewModel: LayarRiwayatTransaksiViewModel = viewModel()
+            val modelTampilanRiwayat = layarRiwayatTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
+
             LayarRiwayatTransaksi(
+                modelTampilan = modelTampilanRiwayat.value,
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },
                 saatBukaDetailTransaksi = { transaksiId ->
                     pengendaliNavigasi.bukaDetailTransaksi(transaksiId)
                 },
+                saatCobaMuatUlang = layarRiwayatTransaksiViewModel::muatUlang,
             )
         }
 
@@ -124,12 +131,16 @@ fun NavigasiAplikasiCassyKasir() {
                     type = NavType.StringType
                 },
             ),
-        ) { entriBackStack ->
+        ) {
+            val layarDetailTransaksiViewModel: LayarDetailTransaksiViewModel = viewModel()
+            val modelTampilanDetailTransaksi = layarDetailTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
+
             LayarDetailTransaksi(
-                transaksiId = entriBackStack.ambilTransaksiIdDetailTransaksi(),
+                modelTampilan = modelTampilanDetailTransaksi.value,
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },
+                saatCobaMuatUlang = layarDetailTransaksiViewModel::muatUlang,
             )
         }
     }

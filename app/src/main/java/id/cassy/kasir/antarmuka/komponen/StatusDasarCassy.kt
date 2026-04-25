@@ -21,6 +21,10 @@ import id.cassy.kasir.antarmuka.tema.TemaCassyKasir
 /**
  * Komponen untuk menampilkan status data kosong atau hasil pencarian nihil.
  * Membantu memberikan panduan visual kepada pengguna saat tidak ada data.
+ *
+ * @param judul Teks judul pesan kosong.
+ * @param deskripsi Teks rincian pesan kosong.
+ * @param modifier Modifikasi tata letak.
  */
 @Composable
 fun StatusKosongSederhana(
@@ -58,6 +62,10 @@ fun StatusKosongSederhana(
 /**
  * Komponen untuk menampilkan status gagal/error saat pengambilan data.
  * Dilengkapi dengan tombol aksi opsional untuk mencoba kembali (retry).
+ *
+ * @param pesan Teks rincian pesan kegagalan.
+ * @param modifier Modifikasi tata letak.
+ * @param saatCobaLagi Callback opsional saat tombol coba lagi ditekan.
  */
 @Composable
 fun StatusGagalSederhana(
@@ -110,6 +118,8 @@ fun StatusGagalSederhana(
 /**
  * Komponen penampung sementara (placeholder) saat data sedang dimuat.
  * Memberikan kesan responsif pada antarmuka pengguna.
+ *
+ * @param modifier Modifikasi tata letak.
  */
 @Composable
 fun PlaceholderMemuatSederhana(

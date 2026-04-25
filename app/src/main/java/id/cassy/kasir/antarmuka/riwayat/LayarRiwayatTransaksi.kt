@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,31 +27,29 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import id.cassy.kasir.ranah.contoh.RiwayatTransaksiContoh
-import id.cassy.kasir.ranah.model.Transaksi
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 
 /**
  * Layar riwayat transaksi yang menampilkan daftar aktivitas penjualan yang telah selesai.
  *
- * Pada scope ini data masih memakai contoh statis agar alur route
- * ke detail transaksi bisa dibangun dengan rapi sebelum Room masuk.
+ * Layar ini bersifat stateless, menerima data via [modelTampilan] dan mengirimkan
+ * aksi pengguna melalui berbagai callback.
  *
+ * @param modelTampilan Status data yang akan ditampilkan di layar.
  * @param saatKembali Callback untuk navigasi balik ke layar sebelumnya.
- * @param saatBukaDetailTransaksi Callback untuk membuka detail satu transaksi.
+ * @param saatBukaDetailTransaksi Callback untuk membuka detail satu transaksi berdasarkan ID.
+ * @param saatCobaMuatUlang Callback untuk memicu pemuatan ulang data jika terjadi kegagalan.
  * @param modifier Modifikasi tata letak opsional.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayarRiwayatTransaksi(
+    modelTampilan: ModelTampilanRiwayatTransaksi,
     saatKembali: () -> Unit,
     saatBukaDetailTransaksi: (String) -> Unit,
+    saatCobaMuatUlang: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val daftarRiwayat = RiwayatTransaksiContoh.daftarAwal()
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -58,7 +57,7 @@ fun LayarRiwayatTransaksi(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Riwayat Transaksi",
+                        text = modelTampilan.judulLayar,
                     )
                 },
                 navigationIcon = {
@@ -73,39 +72,35 @@ fun LayarRiwayatTransaksi(
             )
         },
     ) { paddingDalam ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingDalam),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = "Riwayat penjualan",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Text(
-                        text = "Mode awal memakai data contoh agar alur detail transaksi bisa dibangun dulu.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+        when (val statusMuat = modelTampilan.statusMuat) {
+            StatusMuatRiwayatTransaksi.Memuat -> {
+                KontenMemuatRiwayat(
+                    paddingDalam = paddingDalam,
+                )
             }
 
-            items(
-                items = daftarRiwayat,
-                key = { transaksi -> transaksi.id },
-            ) { transaksi ->
-                KartuRiwayatTransaksiAwal(
-                    transaksi = transaksi,
-                    saatBukaDetailTransaksi = {
-                        saatBukaDetailTransaksi(transaksi.id)
-                    },
+            is StatusMuatRiwayatTransaksi.Berhasil -> {
+                KontenRiwayatBerhasil(
+                    paddingDalam = paddingDalam,
+                    statusMuat = statusMuat,
+                    saatBukaDetailTransaksi = saatBukaDetailTransaksi,
+                )
+            }
+
+            is StatusMuatRiwayatTransaksi.Kosong -> {
+                KontenRiwayatKosong(
+                    paddingDalam = paddingDalam,
+                    judul = statusMuat.judul,
+                    deskripsi = statusMuat.deskripsi,
+                )
+            }
+
+            is StatusMuatRiwayatTransaksi.Gagal -> {
+                KontenRiwayatGagal(
+                    paddingDalam = paddingDalam,
+                    judul = statusMuat.judul,
+                    deskripsi = statusMuat.deskripsi,
+                    saatCobaMuatUlang = saatCobaMuatUlang,
                 )
             }
         }
@@ -113,11 +108,94 @@ fun LayarRiwayatTransaksi(
 }
 
 /**
- * Kartu informasi singkat transaksi untuk ditampilkan dalam daftar riwayat.
+ * Konten yang ditampilkan saat data riwayat transaksi sedang dimuat.
+ *
+ * @param paddingDalam Padding dari Scaffold.
+ * @param modifier Modifikasi tata letak.
  */
 @Composable
-private fun KartuRiwayatTransaksiAwal(
-    transaksi: Transaksi,
+private fun KontenMemuatRiwayat(
+    paddingDalam: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingDalam)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = "Memuat riwayat transaksi...",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+/**
+ * Konten yang ditampilkan saat data riwayat transaksi berhasil dimuat.
+ *
+ * @param paddingDalam Padding dari Scaffold.
+ * @param statusMuat Data transaksi yang berhasil dimuat.
+ * @param saatBukaDetailTransaksi Callback untuk membuka detail transaksi.
+ * @param modifier Modifikasi tata letak.
+ */
+@Composable
+private fun KontenRiwayatBerhasil(
+    paddingDalam: PaddingValues,
+    statusMuat: StatusMuatRiwayatTransaksi.Berhasil,
+    saatBukaDetailTransaksi: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingDalam),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = statusMuat.judulBagian,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Text(
+                    text = statusMuat.deskripsiBagian,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        items(
+            items = statusMuat.daftarRingkasanTransaksi,
+            key = { ringkasan -> ringkasan.transaksiId },
+        ) { ringkasan ->
+            KartuRingkasanTransaksiRiwayat(
+                ringkasan = ringkasan,
+                saatBukaDetailTransaksi = {
+                    saatBukaDetailTransaksi(ringkasan.transaksiId)
+                },
+            )
+        }
+    }
+}
+
+/**
+ * Komponen kartu untuk menampilkan ringkasan satu transaksi dalam daftar.
+ *
+ * @param ringkasan Data ringkasan transaksi.
+ * @param saatBukaDetailTransaksi Callback saat kartu diklik atau tombol detail ditekan.
+ * @param modifier Modifikasi tata letak.
+ */
+@Composable
+private fun KartuRingkasanTransaksiRiwayat(
+    ringkasan: RingkasanTransaksiRiwayat,
     saatBukaDetailTransaksi: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -140,13 +218,13 @@ private fun KartuRiwayatTransaksiAwal(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = transaksi.id,
+                text = ringkasan.transaksiId,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
             Text(
-                text = formatWaktuTransaksi(transaksi.waktuTransaksiEpochMili),
+                text = ringkasan.labelWaktu,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -156,12 +234,12 @@ private fun KartuRiwayatTransaksiAwal(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "${hitungJumlahItemTransaksi(transaksi)} item",
+                    text = ringkasan.labelJumlahItem,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = hitungTotalTransaksiContoh(transaksi).sebagaiRupiahSederhana(),
+                    text = ringkasan.labelTotalAkhir,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -181,34 +259,69 @@ private fun KartuRiwayatTransaksiAwal(
     }
 }
 
-private fun hitungJumlahItemTransaksi(
-    transaksi: Transaksi,
-): Int {
-    return transaksi.daftarItemKeranjang.sumOf { itemKeranjang ->
-        itemKeranjang.jumlah
+/**
+ * Konten yang ditampilkan saat daftar riwayat transaksi kosong.
+ *
+ * @param paddingDalam Padding dari Scaffold.
+ * @param judul Pesan judul kosong.
+ * @param deskripsi Pesan deskripsi kosong.
+ * @param modifier Modifikasi tata letak.
+ */
+@Composable
+private fun KontenRiwayatKosong(
+    paddingDalam: PaddingValues,
+    judul: String,
+    deskripsi: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingDalam)
+            .padding(16.dp),
+    ) {
+        StatusKosongSederhana(
+            judul = judul,
+            deskripsi = deskripsi,
+        )
     }
 }
 
-private fun hitungTotalTransaksiContoh(
-    transaksi: Transaksi,
-): Long {
-    val subtotal = transaksi.daftarItemKeranjang.sumOf { itemKeranjang ->
-        itemKeranjang.produk.harga * itemKeranjang.jumlah
+/**
+ * Konten yang ditampilkan saat terjadi kegagalan dalam memuat riwayat transaksi.
+ *
+ * @param paddingDalam Padding dari Scaffold.
+ * @param judul Pesan judul kegagalan.
+ * @param deskripsi Pesan rincian kegagalan.
+ * @param saatCobaMuatUlang Callback untuk mencoba memuat data kembali.
+ * @param modifier Modifikasi tata letak.
+ */
+@Composable
+private fun KontenRiwayatGagal(
+    paddingDalam: PaddingValues,
+    judul: String,
+    deskripsi: String,
+    saatCobaMuatUlang: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingDalam)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        StatusKosongSederhana(
+            judul = judul,
+            deskripsi = deskripsi,
+        )
+
+        Button(
+            onClick = saatCobaMuatUlang,
+        ) {
+            Text(
+                text = "Coba Lagi",
+            )
+        }
     }
-
-    return (subtotal - transaksi.potongan + transaksi.biayaLayanan + transaksi.pajak)
-        .coerceAtLeast(0)
-}
-
-private fun formatWaktuTransaksi(
-    waktuEpochMili: Long,
-): String {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
-    return Instant.ofEpochMilli(waktuEpochMili)
-        .atZone(ZoneId.systemDefault())
-        .format(formatter)
-}
-
-private fun Long.sebagaiRupiahSederhana(): String {
-    return "Rp$this"
 }
