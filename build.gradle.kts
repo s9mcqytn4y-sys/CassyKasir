@@ -15,3 +15,5 @@ plugins {
     // Plugin KSP: Kotlin Symbol Processing untuk efisiensi Room Compiler
     alias(libs.plugins.ksp) apply false
 }
+
+
