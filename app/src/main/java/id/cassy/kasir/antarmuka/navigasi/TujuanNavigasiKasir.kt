@@ -46,6 +46,23 @@ sealed interface TujuanNavigasiKasir {
             return "detail_produk/$produkId"
         }
     }
+
+    /**
+     * Tujuan layar detail transaksi yang memerlukan ID transaksi unik.
+     */
+    data object DetailTransaksi : TujuanNavigasiKasir {
+        /** Nama kunci argumen untuk ID transaksi. */
+        const val namaArgumenTransaksiId: String = "transaksiId"
+
+        override val rute: String = "detail_transaksi/{$namaArgumenTransaksiId}"
+
+        /**
+         * Membentuk string rute yang valid dengan menyisipkan [transaksiId].
+         */
+        fun buatRute(transaksiId: String): String {
+            return "detail_transaksi/$transaksiId"
+        }
+    }
 }
 
 /**
@@ -76,6 +93,15 @@ fun NavHostController.bukaDetailProduk(produkId: String) {
 }
 
 /**
+ * Membuka layar detail transaksi berdasarkan id transaksi.
+ */
+fun NavHostController.bukaDetailTransaksi(transaksiId: String) {
+    navigate(TujuanNavigasiKasir.DetailTransaksi.buatRute(transaksiId)) {
+        launchSingleTop = true
+    }
+}
+
+/**
  * Mengekstrak argumen [produkId] dari [NavBackStackEntry] secara aman.
  *
  * @throws IllegalArgumentException Jika argumen tidak ditemukan dalam entri navigasi.
@@ -85,5 +111,18 @@ fun NavBackStackEntry.ambilProdukIdDetailProduk(): String {
         arguments?.getString(TujuanNavigasiKasir.DetailProduk.namaArgumenProdukId),
     ) {
         "Argumen produkId wajib tersedia untuk layar detail produk."
+    }
+}
+
+/**
+ * Mengekstrak argumen [transaksiId] dari [NavBackStackEntry] secara aman.
+ *
+ * @throws IllegalArgumentException Jika argumen tidak ditemukan dalam entri navigasi.
+ */
+fun NavBackStackEntry.ambilTransaksiIdDetailTransaksi(): String {
+    return requireNotNull(
+        arguments?.getString(TujuanNavigasiKasir.DetailTransaksi.namaArgumenTransaksiId),
+    ) {
+        "Argumen transaksiId wajib tersedia untuk layar detail transaksi."
     }
 }

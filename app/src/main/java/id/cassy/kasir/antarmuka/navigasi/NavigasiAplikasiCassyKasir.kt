@@ -14,6 +14,7 @@ import id.cassy.kasir.antarmuka.detail.EfekLayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
+import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksi
 import id.cassy.kasir.antarmuka.utama.AksiLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
@@ -68,6 +69,9 @@ fun NavigasiAplikasiCassyKasir() {
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },
+                saatBukaDetailTransaksi = { transaksiId ->
+                    pengendaliNavigasi.bukaDetailTransaksi(transaksiId)
+                },
             )
         }
 
@@ -110,6 +114,22 @@ fun NavigasiAplikasiCassyKasir() {
                     pengendaliNavigasi.navigateUp()
                 },
                 saatAksiDikirim = layarDetailProdukViewModel::tanganiAksi,
+            )
+        }
+
+        composable(
+            route = TujuanNavigasiKasir.DetailTransaksi.rute,
+            arguments = listOf(
+                navArgument(TujuanNavigasiKasir.DetailTransaksi.namaArgumenTransaksiId) {
+                    type = NavType.StringType
+                },
+            ),
+        ) { entriBackStack ->
+            LayarDetailTransaksi(
+                transaksiId = entriBackStack.ambilTransaksiIdDetailTransaksi(),
+                saatKembali = {
+                    pengendaliNavigasi.navigateUp()
+                },
             )
         }
     }
