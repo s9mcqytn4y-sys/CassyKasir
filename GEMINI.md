@@ -1,72 +1,151 @@
-# Gemini & Agentic Workflow
+# Gemini & Agentic Workflow: Cassy Kasir
 
-Dokumen ini mendefinisikan protokol interaksi antara pengembang dan agen AI (Gemini) dalam proyek Cassy Kasir.
-
-## Peran Gemini
-
-Gemini bertindak sebagai pendamping rekayasa perangkat lunak yang memiliki pemahaman terhadap domain bisnis UMKM Indonesia dan arsitektur MVI-Lite.
-
-## Panduan Pengembangan
-
-Setiap perubahan kode harus mematuhi aturan berikut:
-
-### 1. Konsistensi Bahasa & Naming
-
-- **Logika & API**: Gunakan Bahasa Indonesia teknis.
-    - *Fungsi*: Kata kerja + Objek (misal: `hitungTotal()`, `muatDaftarProduk()`).
-    - *Variabel*: Kata benda/sifat yang deskriptif (misal: `hargaSatuan`, `apakahSedangMemuat`).
-    - *Kelas*: Kata benda (misal: `PengelolaKeranjang`, `RepositoriProduk`).
-    - *Boolean*: Gunakan awalan `apakah` atau `sudah` (misal: `apakahAktif`, `sudahBayar`).
-
-#### Tabel Konvensi Naming:
-
-| Bahasa Inggris      | Bahasa Indonesia (Target) | Konteks     |
-|:--------------------|:--------------------------|:------------|
-| `get` / `fetch`     | `ambil` / `muat`          | Fungsi Data |
-| `is` / `has`        | `apakah` / `punya`        | Boolean     |
-| `loading`           | `sedangMemuat`            | State       |
-| `success`           | `berhasil`                | State       |
-| `error` / `failure` | `gagal` / `salah`         | State       |
-| `update` / `edit`   | `ubah` / `perbarui`       | Fungsi      |
-| `send` / `emit`     | `kirim`                   | Fungsi Efek |
-
-### 2. Standar Copy Modern (UX Writing)
-
-Gunakan gaya bahasa yang manusiawi, ringkas, dan langsung (*direct*):
-
-- **Hindari Kata Kerja Pasif**: Gunakan "Hapus" bukan "Dihapus", "Simpan" bukan "Disimpan".
-- **Konfirmasi**: Gunakan pertanyaan langsung (misal: "Hapus item ini?" bukan "Apakah Anda yakin ingin menghapus item ini?").
-- **Error**: Fokus pada solusi (misal: "Koneksi terputus. Coba lagi?" bukan "Terjadi kesalahan pada jaringan").
-- **Empty State**: Gunakan bahasa yang memotivasi (misal: "Keranjang masih kosong. Yuk, tambah produk!" bukan "Tidak ada item di keranjang").
-
-### 3. Implementasi MVI-Lite
-
-- Status Immutable: Perbarui status hanya melalui fungsi .update pada MutableStateFlow.
-- Aksi Tersegel: Definisi interaksi pengguna menggunakan sealed interface atau sealed class.
-- UI Stateless: Komposabel harus murni, menerima status dan mengirim aksi melalui parameter.
-- **Efek Sekali Pakai**: Gunakan `SharedFlow` (misal: `EfekLayar...`) untuk kejadian sesaat seperti Snackbar atau navigasi satu arah.
-- **State Hierarkis**: Gunakan `sealed interface` untuk status layar yang saling eksklusif (misal: Memuat, Berhasil, Kosong, Gagal).
-
-### 4. Standar UI
-
-- Gunakan Modifier sebagai parameter opsional pertama pada Komposabel.
-- Manfaatkan MaterialTheme untuk konsistensi warna dan tipografi.
-- Pastikan dukungan tata letak adaptif untuk berbagai ukuran layar.
-
-## Alat Bantu Analisis
-
-Agen disarankan menggunakan alat berikut:
-
-- find_usages: Memahami dampak perubahan pada aliran data.
-- analyze_file: Memastikan validitas sintaksis.
-- code_search: Mencari pola implementasi yang sudah ada.
-
-## Alur Kerja
-
-1. Observasi: Analisis file dan dependensi.
-2. Rencana: Deskripsikan langkah dalam Bahasa Indonesia.
-3. Eksekusi: Lakukan perubahan atomik.
-4. Verifikasi: Sinkronisasi dokumentasi dengan perubahan kode.
+Dokumen ini mendefinisikan standar teknis, arsitektur, dan protokol interaksi untuk pengembangan proyek Cassy Kasir. Setiap kontribusi kode wajib mematuhi panduan ini untuk menjaga kualitas, konsistensi, dan skalabilitas.
 
 ---
-Dokumen ini diperbarui secara berkala sesuai perkembangan kapabilitas agen.
+
+## 1. Arsitektur Proyek (MVI-Lite)
+
+Proyek ini menggunakan pola arsitektur **MVI-Lite** (Model-View-Intent) yang disederhanakan dengan struktur folder sebagai berikut:
+
+- **UI Layer (`antarmuka`)**: Komposabel stateless dan UI logic.
+- **Logic Layer (`ViewModel`)**: Pengelola status layar dan pemicu aksi.
+- **Domain Layer (`ranah`)**: Logika bisnis murni, Use Cases, dan Model Data.
+- **Data Layer (`data`)**: (Akan datang) Repositori dan persistensi (Room).
+
+**Aturan Emas**:
+- Aliran data searah (UDF): View -> Intent (Aksi) -> ViewModel -> State -> View.
+- Pemisahan tegas: UI tidak boleh menyentuh database atau logika bisnis berat secara langsung.
+
+---
+
+## 2. Naming & Bahasa (Technical Indonesian)
+
+Gunakan Bahasa Indonesia teknis yang baku untuk seluruh simbol kode (kecuali istilah teknis yang tidak ada padanannya).
+
+### Konvensi Nama:
+- **Kelas/Objek**: Kata Benda (misal: `PengelolaKeranjang`, `RepositoriProduk`).
+- **Fungsi**: Kata Kerja + Objek (misal: `hitungTotal()`, `ambilDaftarProduk()`).
+- **Variabel**: Deskriptif (misal: `hargaSatuan`, `apakahMemuat`).
+- **Boolean**: Awalan `apakah` atau `sudah` (misal: `apakahAktif`, `sudahBayar`).
+
+#### Tabel Referensi Naming:
+
+| Bahasa Inggris      | Bahasa Indonesia (Target) | Konteks           |
+|:--------------------|:--------------------------|:------------------|
+| `get` / `fetch`     | `ambil` / `muat`          | Fungsi Data       |
+| `is` / `has`        | `apakah` / `punya`        | Boolean           |
+| `loading`           | `sedangMemuat`            | Status/State      |
+| `success`           | `berhasil`                | Status/State      |
+| `error` / `failure` | `gagal` / `salah`         | Status/State      |
+| `update` / `edit`   | `ubah` / `perbarui`       | Fungsi/Aksi       |
+| `send` / `emit`     | `kirim`                   | Fungsi Efek/Event |
+| `save` / `delete`   | `simpan` / `hapus`        | Fungsi Data       |
+
+---
+
+## 3. KDocs & Dokumentasi
+
+Setiap anggota publik (kelas, fungsi, properti) **wajib** memiliki dokumentasi KDoc dalam Bahasa Indonesia.
+
+- **Fungsi**: Jelaskan tujuan, parameter (@param), dan nilai balik (@return).
+- **Kelas**: Jelaskan peran utama dalam sistem.
+- **Komentar Inline**: Gunakan hanya untuk menjelaskan "mengapa" (bukan "apa") pada logika yang kompleks.
+
+---
+
+## 4. State Management & UDF
+
+- **Immutable State**: Gunakan `data class` dengan properti `val`. Jangan pernah gunakan variabel yang dapat diubah (`var`) di dalam status.
+- **StateFlow**: Gunakan `MutableStateFlow` (private) dan `StateFlow` (public) di ViewModel.
+- **Update Atomik**: Perbarui status hanya melalui fungsi `.update { ... }` untuk menjamin keamanan konkurensi.
+- **Aksi Tersegel**: Definisikan semua interaksi pengguna menggunakan `sealed interface` atau `sealed class` (misal: `AksiLayarUtama`).
+
+---
+
+## 5. Coroutine & Asynchronous
+
+- **Scope**: Gunakan `viewModelScope` di ViewModel dan `LaunchedEffect` di UI.
+- **Dispatchers**: Jangan *hardcode* Dispatchers. Suntikkan (inject) Dispatchers jika memungkinkan untuk mempermudah pengujian.
+- **Safety**: Pastikan fungsi *suspend* aman dijalankan dari Main thread (main-safe).
+- **Error Handling**: Gunakan `try-catch` di dalam coroutine untuk menangani kegagalan asinkron tanpa menghentikan aplikasi.
+
+---
+
+## 6. Commit Message
+
+Gunakan format pesan commit yang deskriptif dalam Bahasa Indonesia:
+
+**Format**: `Scope [Label]: [Deskripsi singkat]`
+
+**Contoh**:
+- `Scope E: implementasi status loading dan gagal pada layar detail`
+- `Scope F: integrasi aksi tambah ke keranjang dari layar detail`
+- `Scope G: perbaikan bug navigasi pada tablet`
+
+---
+
+## 7. Navigation & Routing
+
+- **Centralized**: Simpan rute dan argumen di satu tempat (misal: `TujuanNavigasiKasir`).
+- **Type-Safe**: Gunakan argumen navigasi yang didefinisikan secara tegas.
+- **Result Passing**: Gunakan `SavedStateHandle` untuk mengirim hasil balik antar layar (misal: pesan sukses setelah kembali).
+- **Backstack**: Kelola *backstack* dengan bijak untuk menghindari penumpukan layar yang sama.
+
+---
+
+## 8. UI/UX & Ergonomics (Phone & Tablet)
+
+- **Adaptive Layout**: Gunakan `BoxWithConstraints` atau `WindowSizeClass` untuk membedakan tata letak ponsel (kolom tunggal) dan tablet (multi-panel).
+- **Ergonomi**:
+    - Letakkan aksi utama di area yang mudah dijangkau jempol (bawah/tengah).
+    - Gunakan *spacing* (padding/margin) yang konsisten (kelipatan 4dp atau 8dp).
+- **Stateless UI**: Komposabel murni harus menerima data melalui parameter dan mengirim aksi melalui callback.
+
+---
+
+## 9. Android API & Context
+
+- **Modern API**: Gunakan API terbaru yang stabil (saat ini menargetkan Android 15/API 35 via AGP 9.x).
+- **Context Safety**: Hindari kebocoran memori dengan tidak menyimpan `Context` di ViewModel atau kelas berumur panjang.
+- **Resources**: Ambil string, warna, dan dimensi dari XML resources melalui `stringResource`, dsb.
+
+---
+
+## 10. Copywriting Constraints (UX Writing)
+
+Gunakan gaya bahasa manusiawi, ringkas, dan langsung:
+- **Aktif**: "Hapus produk" (bukan "Produk dihapus").
+- **Solutif**: "Koneksi terputus. Coba lagi?" (bukan "Error 404").
+- **Memotivasi**: "Keranjang kosong. Yuk, belanja!"
+
+---
+
+## 11. Kotlin 2.x, Material 3, & Compose Best Practices
+
+- **Kotlin 2.x**: Manfaatkan Compose Compiler terintegrasi dan performa K2.
+- **Material 3**: Gunakan `MaterialTheme` (colorScheme, typography, shapes) secara konsisten. Hindari warna *hardcoded*.
+- **Compose Performance**:
+    - Gunakan `@Immutable` atau `@Stable` pada model data UI.
+    - Gunakan `remember` untuk komputasi berat di dalam komposabel.
+    - Letakkan `Modifier` sebagai parameter pertama (opsional) pada setiap fungsi komposabel.
+
+---
+
+## Alat Bantu Analisis Gemini
+
+Agen disarankan menggunakan:
+- `find_usages`: Memahami dampak perubahan.
+- `analyze_file`: Memastikan validitas sintaksis.
+- `code_search`: Mencari pola implementasi yang sudah ada.
+
+---
+
+## 12. Manajemen Dependensi (Version Catalog)
+
+- **Single Source of Truth**: Semua versi library dan plugin **wajib** dikelola melalui `gradle/libs.versions.toml`.
+- **Update Berkala**: Gunakan `version_lookup` atau cek manual untuk memastikan dependensi (seperti Compose BOM, AGP, dan Kotlin) tetap berada di versi stabil terbaru yang kompatibel.
+- **Grouping**: Kelompokkan library yang terkait (misal: `androidx-compose-...`) untuk menjaga keterbacaan.
+
+---
+*Dokumen ini merupakan kontrak hidup yang diperbarui seiring perkembangan kapabilitas tim dan teknologi.*

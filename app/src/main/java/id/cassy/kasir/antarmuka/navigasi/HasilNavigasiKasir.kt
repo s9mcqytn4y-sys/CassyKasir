@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
  * setelah user menambah produk dari layar detail lalu kembali ke layar utama.
  */
 object HasilNavigasiKasir {
-    const val KUNCI_PESAN_TAMBAH_PRODUK_DARI_DETAIL: String = "kunci_pesan_tambah_produk_dari_detail"
+    const val kunciPesanTambahProdukDariDetail: String = "kunci_pesan_tambah_produk_dari_detail"
 }
 
 /**
@@ -20,7 +20,7 @@ fun SavedStateHandle.simpanPesanTambahProdukDariDetail(
     pesan: String,
 ) {
     set(
-        HasilNavigasiKasir.KUNCI_PESAN_TAMBAH_PRODUK_DARI_DETAIL,
+        HasilNavigasiKasir.kunciPesanTambahProdukDariDetail,
         pesan,
     )
 }
@@ -30,7 +30,7 @@ fun SavedStateHandle.simpanPesanTambahProdukDariDetail(
  */
 fun SavedStateHandle.ambilAlurPesanTambahProdukDariDetail(): StateFlow<String?> {
     return getStateFlow(
-        HasilNavigasiKasir.KUNCI_PESAN_TAMBAH_PRODUK_DARI_DETAIL,
+        HasilNavigasiKasir.kunciPesanTambahProdukDariDetail,
         null,
     )
 }
@@ -40,7 +40,7 @@ fun SavedStateHandle.ambilAlurPesanTambahProdukDariDetail(): StateFlow<String?> 
  */
 fun SavedStateHandle.konsumsiPesanTambahProdukDariDetail() {
     set(
-        HasilNavigasiKasir.KUNCI_PESAN_TAMBAH_PRODUK_DARI_DETAIL,
+        HasilNavigasiKasir.kunciPesanTambahProdukDariDetail,
         null,
     )
 }
