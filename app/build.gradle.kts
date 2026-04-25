@@ -107,3 +107,4 @@ dependencies {
     // Dependensi Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+// Trigger sinkronisasi IDE

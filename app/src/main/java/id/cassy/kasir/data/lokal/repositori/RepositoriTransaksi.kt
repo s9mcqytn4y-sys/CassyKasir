@@ -44,6 +44,23 @@ class RepositoriTransaksi(
     }
 
     /**
+     * Mengamati satu transaksi berdasarkan ID.
+     *
+     * Dipakai untuk layar detail transaksi yang perlu tetap sinkron
+     * dengan perubahan data lokal.
+     *
+     * @param id ID unik transaksi.
+     * @return Aliran objek domain Transaksi atau null jika tidak ditemukan.
+     */
+    fun amatiTransaksiBerdasarkanId(
+        id: String,
+    ): Flow<Transaksi?> {
+        return dao.amatiTransaksiBerdasarkanId(id).map { transaksiLokal ->
+            transaksiLokal?.keDomain()
+        }
+    }
+
+    /**
      * Mengambil rincian transaksi tunggal berdasarkan ID unik.
      *
      * @param id ID unik transaksi (UUID).
