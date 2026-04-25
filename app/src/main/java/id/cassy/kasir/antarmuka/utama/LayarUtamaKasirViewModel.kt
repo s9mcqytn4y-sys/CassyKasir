@@ -259,6 +259,19 @@ class LayarUtamaKasirViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Menampilkan pesan operasional singkat pada layar utama.
+     *
+     * Fungsi ini dipakai untuk hasil aksi lintas layar yang perlu
+     * ditampilkan sebagai snackbar setelah user kembali ke layar utama.
+     */
+    fun tampilkanPesanOperasional(
+        pesan: String,
+    ) {
+        if (pesan.isBlank()) return
+        kirimPesanSingkat(pesan)
+    }
+
     private fun kirimPesanSingkat(pesan: String) {
         _efek.tryEmit(
             EfekLayarUtamaKasir.TampilkanPesanSingkat(

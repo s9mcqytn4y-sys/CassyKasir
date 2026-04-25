@@ -1,6 +1,7 @@
 package id.cassy.kasir.antarmuka.navigasi
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -10,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
+import id.cassy.kasir.antarmuka.detail.StatusMuatDetailProduk
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
 import id.cassy.kasir.antarmuka.utama.AksiLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
@@ -37,7 +39,22 @@ fun NavigasiAplikasiCassyKasir() {
     ) {
         composable(
             route = TujuanNavigasiKasir.KasirUtama.rute,
-        ) {
+        ) { entriBackStack ->
+            val pesanTambahProdukDariDetail = entriBackStack
+                .savedStateHandle
+                .ambilAlurPesanTambahProdukDariDetail()
+                .collectAsStateWithLifecycle()
+
+            LaunchedEffect(pesanTambahProdukDariDetail.value) {
+                val pesan = pesanTambahProdukDariDetail.value ?: return@LaunchedEffect
+
+                layarUtamaKasirViewModel.tampilkanPesanOperasional(
+                    pesan = pesan,
+                )
+
+                entriBackStack.savedStateHandle.konsumsiPesanTambahProdukDariDetail()
+            }
+
             LayarUtamaKasir(
                 modelTampilan = modelTampilanKasir.value,
                 saatAksiDikirim = layarUtamaKasirViewModel::tanganiAksi,
@@ -84,6 +101,23 @@ fun NavigasiAplikasiCassyKasir() {
                             produkId = produkId,
                         ),
                     )
+
+                    val pesanHasil = when (val statusMuat = modelTampilanDetail.value.statusMuat) {
+                        is StatusMuatDetailProduk.Berhasil -> {
+                            "${statusMuat.namaProduk} ditambahkan ke keranjang."
+                        }
+
+                        else -> {
+                            "Produk ditambahkan ke keranjang."
+                        }
+                    }
+
+                    pengendaliNavigasi.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.simpanPesanTambahProdukDariDetail(
+                            pesan = pesanHasil,
+                        )
+
                     pengendaliNavigasi.navigateUp()
                 },
             )

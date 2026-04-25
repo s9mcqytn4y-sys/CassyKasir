@@ -28,6 +28,7 @@ Setiap perubahan kode harus mematuhi aturan berikut:
 | `success`           | `berhasil`                | State       |
 | `error` / `failure` | `gagal` / `salah`         | State       |
 | `update` / `edit`   | `ubah` / `perbarui`       | Fungsi      |
+| `send` / `emit`     | `kirim`                   | Fungsi Efek |
 
 ### 2. Standar Copy Modern (UX Writing)
 
@@ -43,6 +44,8 @@ Gunakan gaya bahasa yang manusiawi, ringkas, dan langsung (*direct*):
 - Status Immutable: Perbarui status hanya melalui fungsi .update pada MutableStateFlow.
 - Aksi Tersegel: Definisi interaksi pengguna menggunakan sealed interface atau sealed class.
 - UI Stateless: Komposabel harus murni, menerima status dan mengirim aksi melalui parameter.
+- **Efek Sekali Pakai**: Gunakan `SharedFlow` (misal: `EfekLayar...`) untuk kejadian sesaat seperti Snackbar atau navigasi satu arah.
+- **State Hierarkis**: Gunakan `sealed interface` untuk status layar yang saling eksklusif (misal: Memuat, Berhasil, Kosong, Gagal).
 
 ### 4. Standar UI
 
