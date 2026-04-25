@@ -2,17 +2,22 @@ package id.cassy.kasir.antarmuka.detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
 import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * Pengelola status untuk layar detail produk.
  *
- * Pada scope ini ViewModel membaca produkId dari argumen navigasi,
- * lalu membentuk state layar detail secara terpusat.
+ * ViewModel ini:
+ * - membaca produkId dari argumen navigasi
+ * - memuat detail produk
+ * - membentuk state layar yang tegas: memuat, berhasil, kosong, atau gagal
  */
 class LayarDetailProdukViewModel(
     statusTersimpan: SavedStateHandle,
@@ -26,7 +31,13 @@ class LayarDetailProdukViewModel(
         "Argumen produkId wajib tersedia pada layar detail produk."
     }
 
-    private val _modelTampilan = MutableStateFlow(ModelTampilanDetailProduk())
+    private val _modelTampilan = MutableStateFlow(
+        ModelTampilanDetailProduk(
+            produkId = produkId,
+            judulLayar = "Detail Produk",
+            statusMuat = StatusMuatDetailProduk.Memuat,
+        ),
+    )
     val modelTampilan: StateFlow<ModelTampilanDetailProduk> = _modelTampilan.asStateFlow()
 
     init {
@@ -34,56 +45,67 @@ class LayarDetailProdukViewModel(
     }
 
     /**
-     * Memicu pemuatan ulang data jika terjadi kesalahan.
+     * Memuat ulang detail produk.
+     *
+     * Fungsi ini akan berguna saat nanti sumber data berpindah ke repository
+     * lokal atau remote.
      */
-    fun cobaLagi() {
+    fun muatUlang() {
         muatDetailProduk()
     }
 
     /**
      * Memuat detail produk dari katalog contoh berdasarkan produkId.
      *
-     * Nantinya sumber data ini bisa diganti ke repository tanpa mengubah layar.
+     * Pada tahap ini sumber data masih lokal dan sangat cepat,
+     * sehingga status memuat bisa berlangsung sangat singkat saat runtime.
      */
     private fun muatDetailProduk() {
-        _modelTampilan.value = _modelTampilan.value.copy(
-            sedangMemuat = true,
-            pesanKesalahan = null,
-        )
-
-        try {
-            val produk = KatalogProdukContoh.daftarAwal().firstOrNull { itemProduk ->
-                itemProduk.id == produkId
-            }
-
-            _modelTampilan.value = if (produk != null) {
-                ModelTampilanDetailProduk(
-                    sedangMemuat = false,
-                    produkId = produkId,
-                    judulLayar = "Detail Produk",
-                    namaProduk = produk.nama,
-                    hargaProduk = "Rp${produk.harga}",
-                    stokTersedia = produk.stokTersedia,
-                    deskripsiProduk = produk.deskripsi.ifBlank {
-                        "Produk ini belum memiliki deskripsi tambahan."
-                    },
-                    apakahProdukDitemukan = true,
-                )
-            } else {
-                ModelTampilanDetailProduk(
-                    sedangMemuat = false,
-                    produkId = produkId,
-                    judulLayar = "Detail Produk",
-                    apakahProdukDitemukan = false,
-                    judulStatusKosong = "Produk tidak ditemukan",
-                    deskripsiStatusKosong = "Produk dengan id $produkId tidak berhasil ditemukan dari katalog contoh.",
+        viewModelScope.launch {
+            _modelTampilan.update { statusLama ->
+                statusLama.copy(
+                    statusMuat = StatusMuatDetailProduk.Memuat,
                 )
             }
-        } catch (e: Exception) {
-            _modelTampilan.value = ModelTampilanDetailProduk(
-                sedangMemuat = false,
-                pesanKesalahan = "Terjadi kesalahan: ${e.message}",
-            )
+
+            try {
+                val produk = KatalogProdukContoh.daftarAwal().firstOrNull { itemProduk ->
+                    itemProduk.id == produkId
+                }
+
+                _modelTampilan.value = if (produk != null) {
+                    ModelTampilanDetailProduk(
+                        produkId = produkId,
+                        judulLayar = "Detail Produk",
+                        statusMuat = StatusMuatDetailProduk.Berhasil(
+                            namaProduk = produk.nama,
+                            hargaProduk = "Rp${produk.harga}",
+                            stokTersedia = produk.stokTersedia,
+                            deskripsiProduk = produk.deskripsi.ifBlank {
+                                "Produk ini belum memiliki deskripsi tambahan."
+                            },
+                        ),
+                    )
+                } else {
+                    ModelTampilanDetailProduk(
+                        produkId = produkId,
+                        judulLayar = "Detail Produk",
+                        statusMuat = StatusMuatDetailProduk.Kosong(
+                            judul = "Produk tidak ditemukan",
+                            deskripsi = "Produk dengan id $produkId tidak berhasil ditemukan dari katalog contoh.",
+                        ),
+                    )
+                }
+            } catch (_: Exception) {
+                _modelTampilan.value = ModelTampilanDetailProduk(
+                    produkId = produkId,
+                    judulLayar = "Detail Produk",
+                    statusMuat = StatusMuatDetailProduk.Gagal(
+                        judul = "Gagal memuat detail produk",
+                        deskripsi = "Terjadi gangguan saat memuat detail produk. Silakan coba lagi.",
+                    ),
+                )
+            }
         }
     }
 }

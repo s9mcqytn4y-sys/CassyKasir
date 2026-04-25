@@ -1,13 +1,13 @@
 package id.cassy.kasir.antarmuka.detail
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -19,27 +19,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import id.cassy.kasir.antarmuka.komponen.StatusGagalSederhana
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 
 /**
- * Layar detail produk yang bersifat stateless.
+ * Layar detail produk.
  *
- * Layar ini hanya merender status (state) yang sudah dibentuk oleh ViewModel.
- * Pemisahan ini memastikan UI tetap sederhana dan mudah diuji tanpa bergantung
- * langsung pada logika navigasi atau pengambilan data.
- *
- * @param modelTampilan Status UI yang akan ditampilkan pada layar.
- * @param saatKembali Callback yang dipicu saat pengguna menekan tombol kembali.
- * @param saatCobaLagi Callback yang dipicu saat pengguna menekan tombol coba lagi pada status gagal.
- * @param modifier Modifikasi tata letak opsional.
+ * Layar ini hanya merender status yang sudah dibentuk oleh ViewModel.
+ * Ia tidak membaca argumen navigasi secara langsung.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayarDetailProduk(
     modelTampilan: ModelTampilanDetailProduk,
     saatKembali: () -> Unit,
-    saatCobaLagi: () -> Unit,
+    saatCobaMuatUlang: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -64,36 +57,37 @@ fun LayarDetailProduk(
             )
         },
     ) { paddingDalam ->
-        when {
-            modelTampilan.sedangMemuat -> {
+        when (val statusMuat = modelTampilan.statusMuat) {
+            StatusMuatDetailProduk.Memuat -> {
                 KontenMemuatDetailProduk(
                     paddingDalam = paddingDalam,
                 )
             }
 
-            modelTampilan.pesanKesalahan != null -> {
-                KontenGagalMemuatDetailProduk(
-                    paddingDalam = paddingDalam,
-                    pesan = modelTampilan.pesanKesalahan,
-                    saatCobaLagi = saatCobaLagi,
-                )
-            }
-
-            modelTampilan.apakahProdukDitemukan -> {
+            is StatusMuatDetailProduk.Berhasil -> {
                 KontenDetailProduk(
                     paddingDalam = paddingDalam,
-                    namaProduk = modelTampilan.namaProduk,
-                    hargaProduk = modelTampilan.hargaProduk,
-                    stokTersedia = modelTampilan.stokTersedia,
-                    deskripsiProduk = modelTampilan.deskripsiProduk,
+                    namaProduk = statusMuat.namaProduk,
+                    hargaProduk = statusMuat.hargaProduk,
+                    stokTersedia = statusMuat.stokTersedia,
+                    deskripsiProduk = statusMuat.deskripsiProduk,
                 )
             }
 
-            else -> {
+            is StatusMuatDetailProduk.Kosong -> {
                 KontenProdukTidakDitemukan(
                     paddingDalam = paddingDalam,
-                    judulStatusKosong = modelTampilan.judulStatusKosong,
-                    deskripsiStatusKosong = modelTampilan.deskripsiStatusKosong,
+                    judulStatusKosong = statusMuat.judul,
+                    deskripsiStatusKosong = statusMuat.deskripsi,
+                )
+            }
+
+            is StatusMuatDetailProduk.Gagal -> {
+                KontenGagalMemuatDetailProduk(
+                    paddingDalam = paddingDalam,
+                    judulStatusGagal = statusMuat.judul,
+                    deskripsiStatusGagal = statusMuat.deskripsi,
+                    saatCobaMuatUlang = saatCobaMuatUlang,
                 )
             }
         }
@@ -101,39 +95,11 @@ fun LayarDetailProduk(
 }
 
 /**
- * Merender indikator atau pesan saat detail produk sedang dalam proses pemuatan.
- *
- * @param paddingDalam Jarak aman dari kerangka Scaffold.
- * @param modifier Modifikasi tata letak opsional.
+ * Konten saat detail produk sedang dimuat.
  */
 @Composable
 private fun KontenMemuatDetailProduk(
     paddingDalam: PaddingValues,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(paddingDalam),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-/**
- * Merender tampilan status gagal jika terjadi kesalahan saat memuat data.
- *
- * @param paddingDalam Jarak aman dari kerangka Scaffold.
- * @param pesan Pesan kesalahan yang akan ditampilkan.
- * @param saatCobaLagi Callback untuk memicu pemuatan ulang.
- * @param modifier Modifikasi tata letak opsional.
- */
-@Composable
-private fun KontenGagalMemuatDetailProduk(
-    paddingDalam: PaddingValues,
-    pesan: String,
-    saatCobaLagi: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -142,23 +108,20 @@ private fun KontenGagalMemuatDetailProduk(
             .padding(paddingDalam)
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        StatusGagalSederhana(
-            pesan = pesan,
-            saatCobaLagi = saatCobaLagi,
+        CircularProgressIndicator()
+        Text(
+            text = "Memuat detail produk...",
+            modifier = Modifier.padding(top = 16.dp),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
         )
     }
 }
 
 /**
- * Merender informasi lengkap produk ketika data berhasil ditemukan.
- *
- * @param paddingDalam Jarak aman dari kerangka Scaffold.
- * @param namaProduk Nama produk yang akan ditampilkan.
- * @param hargaProduk Harga produk dalam format teks.
- * @param stokTersedia Jumlah stok yang tersedia saat ini.
- * @param deskripsiProduk Penjelasan atau detail tambahan mengenai produk.
- * @param modifier Modifikasi tata letak opsional.
+ * Konten ketika produk berhasil ditemukan.
  */
 @Composable
 private fun KontenDetailProduk(
@@ -203,12 +166,7 @@ private fun KontenDetailProduk(
 }
 
 /**
- * Merender tampilan status kosong jika produk tidak ditemukan di sumber data.
- *
- * @param paddingDalam Jarak aman dari kerangka Scaffold.
- * @param judulStatusKosong Judul pesan kesalahan.
- * @param deskripsiStatusKosong Penjelasan mengapa produk tidak ditemukan.
- * @param modifier Modifikasi tata letak opsional.
+ * Konten ketika produk tidak ditemukan.
  */
 @Composable
 private fun KontenProdukTidakDitemukan(
@@ -228,5 +186,38 @@ private fun KontenProdukTidakDitemukan(
             judul = judulStatusKosong,
             deskripsi = deskripsiStatusKosong,
         )
+    }
+}
+
+/**
+ * Konten ketika terjadi kegagalan memuat detail produk.
+ */
+@Composable
+private fun KontenGagalMemuatDetailProduk(
+    paddingDalam: PaddingValues,
+    judulStatusGagal: String,
+    deskripsiStatusGagal: String,
+    saatCobaMuatUlang: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingDalam)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        StatusKosongSederhana(
+            judul = judulStatusGagal,
+            deskripsi = deskripsiStatusGagal,
+        )
+
+        Button(
+            onClick = saatCobaMuatUlang,
+        ) {
+            Text(
+                text = "Coba Lagi",
+            )
+        }
     }
 }
