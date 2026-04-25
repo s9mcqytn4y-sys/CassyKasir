@@ -1,6 +1,7 @@
 package id.cassy.kasir.antarmuka.detail
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -119,6 +121,20 @@ private fun KontenMemuatDetailProduk(
     }
 }
 
+/**
+ * Konten utama layar detail produk saat data berhasil dimuat.
+ *
+ * Menggunakan lebar konten maksimum (720dp) agar tampilan tablet tidak terlalu renggang
+ * dan elemen CTA tetap fokus di area yang mudah dijangkau.
+ *
+ * @param paddingDalam Padding dari Scaffold induk.
+ * @param namaProduk Nama produk yang ditampilkan.
+ * @param hargaProduk Harga produk dalam format Rupiah.
+ * @param stokTersedia Jumlah stok tersedia.
+ * @param deskripsiProduk Deskripsi lengkap produk.
+ * @param statusAksi Status tombol aksi (aktif/nonaktif, label, keterangan).
+ * @param saatTambahKeKeranjang Callback saat tombol tambah diketuk.
+ */
 @Composable
 private fun KontenDetailProduk(
     paddingDalam: PaddingValues,
@@ -130,55 +146,62 @@ private fun KontenDetailProduk(
     saatTambahKeKeranjang: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(paddingDalam)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(paddingDalam),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        Text(
-            text = namaProduk,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-
-        Text(
-            text = "Harga: $hargaProduk",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-
-        Text(
-            text = "Stok tersedia: $stokTersedia",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Text(
-            text = deskripsiProduk,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-
-        statusAksi.keterangan?.let { keterangan ->
-            Text(
-                text = keterangan,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Button(
-            onClick = saatTambahKeKeranjang,
-            enabled = statusAksi.aktif,
+        Column(
             modifier = Modifier
+                .widthIn(max = 720.dp)
                 .fillMaxWidth()
-                .heightIn(min = 48.dp),
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = statusAksi.label,
+                text = namaProduk,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onBackground,
             )
+
+            Text(
+                text = "Harga: $hargaProduk",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
+            Text(
+                text = "Stok tersedia: $stokTersedia",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Text(
+                text = deskripsiProduk,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
+            statusAksi.keterangan?.let { keterangan ->
+                Text(
+                    text = keterangan,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Button(
+                onClick = saatTambahKeKeranjang,
+                enabled = statusAksi.aktif,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp),
+            ) {
+                Text(
+                    text = statusAksi.label,
+                )
+            }
         }
     }
 }

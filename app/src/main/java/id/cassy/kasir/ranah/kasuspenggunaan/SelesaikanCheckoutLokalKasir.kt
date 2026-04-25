@@ -6,8 +6,8 @@ import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.model.ItemKeranjang
 
 import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
+import id.cassy.kasir.data.lokal.identitas.PembangkitIdTransaksiLokal
 import id.cassy.kasir.ranah.model.Transaksi
-import java.util.UUID
 
 /**
  * Hasil penyelesaian checkout statis lokal.
@@ -54,7 +54,7 @@ class SelesaikanCheckoutLokalKasir(
 
         // Membuat objek domain Transaksi
         val transaksi = Transaksi(
-            id = UUID.randomUUID().toString(),
+            id = PembangkitIdTransaksiLokal.buatIdBaru(),
             daftarItemKeranjang = daftarItemKeranjang,
             uangDibayar = totalCheckout,
             potongan = 0,

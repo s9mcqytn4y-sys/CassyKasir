@@ -1108,7 +1108,7 @@ private fun KartuProdukKasir(
                     onClick = saatBukaDetailProduk,
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 40.dp),
+                        .heightIn(min = 48.dp),
                 ) {
                     Text(
                         text = "Detail",
@@ -1120,7 +1120,7 @@ private fun KartuProdukKasir(
                     enabled = produkBisaDipilih,
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 40.dp),
+                        .heightIn(min = 48.dp),
                 ) {
                     Text(
                         text = "Tambah",

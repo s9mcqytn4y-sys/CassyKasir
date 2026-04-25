@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "40946e2a28d0d0900e9e34d082402e7f",
+    "identityHash": "4a58533db7703f4286ea7b07f9b12dba",
     "entities": [
       {
         "tableName": "transaksi_lokal",
@@ -55,7 +55,18 @@
           "columnNames": [
             "id"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_transaksi_lokal_waktuTransaksiEpochMili",
+            "unique": false,
+            "columnNames": [
+              "waktuTransaksiEpochMili"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transaksi_lokal_waktuTransaksiEpochMili` ON `${TABLE_NAME}` (`waktuTransaksiEpochMili`)"
+          }
+        ]
       },
       {
         "tableName": "item_transaksi_lokal",
@@ -129,6 +140,15 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_item_transaksi_lokal_transaksiId` ON `${TABLE_NAME}` (`transaksiId`)"
+          },
+          {
+            "name": "index_item_transaksi_lokal_produkId",
+            "unique": false,
+            "columnNames": [
+              "produkId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_item_transaksi_lokal_produkId` ON `${TABLE_NAME}` (`produkId`)"
           }
         ],
         "foreignKeys": [
@@ -148,7 +168,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '40946e2a28d0d0900e9e34d082402e7f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4a58533db7703f4286ea7b07f9b12dba')"
     ]
   }
 }

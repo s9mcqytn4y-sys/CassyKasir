@@ -31,6 +31,7 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index(value = ["transaksiId"]),
+        Index(value = ["produkId"]),
     ],
 )
 data class EntitasItemTransaksiLokal(
