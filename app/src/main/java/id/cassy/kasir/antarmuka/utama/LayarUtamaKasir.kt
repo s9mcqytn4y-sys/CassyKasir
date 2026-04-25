@@ -174,6 +174,23 @@ private fun TataLetakPonselKasir(
             )
         }
 
+        if (modelTampilan.tampilkanAksiResetPencarian) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = { saatAksiDikirim(AksiLayarUtamaKasir.ResetPencarian) },
+                    ) {
+                        Text(
+                            text = "Reset pencarian",
+                        )
+                    }
+                }
+            }
+        }
+
         item {
             RingkasanKasir(
                 statusBeranda = modelTampilan.statusBeranda,
@@ -315,6 +332,23 @@ private fun TataLetakTabletKasir(
                     },
                     jumlahHasil = modelTampilan.daftarProdukTersaring.size,
                 )
+            }
+
+            if (modelTampilan.tampilkanAksiResetPencarian) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(
+                            onClick = { saatAksiDikirim(AksiLayarUtamaKasir.ResetPencarian) },
+                        ) {
+                            Text(
+                                text = "Reset pencarian",
+                            )
+                        }
+                    }
+                }
             }
 
             item {

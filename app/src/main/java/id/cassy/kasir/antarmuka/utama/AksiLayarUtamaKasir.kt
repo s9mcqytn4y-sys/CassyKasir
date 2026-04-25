@@ -66,4 +66,9 @@ sealed interface AksiLayarUtamaKasir {
      * Aksi saat pengguna menutup banner hasil checkout.
      */
     data object TutupStatusHasilCheckout : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna ingin mengosongkan kolom pencarian produk.
+     */
+    data object ResetPencarian : AksiLayarUtamaKasir
 }

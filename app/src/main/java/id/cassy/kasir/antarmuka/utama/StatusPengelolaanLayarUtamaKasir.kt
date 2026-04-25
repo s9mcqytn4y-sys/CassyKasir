@@ -22,16 +22,14 @@ data class StatusTransaksiLayarUtamaKasir(
  * Kelompok status yang merepresentasikan elemen visual dan interaksi pada layar utama.
  *
  * Memisahkan status UI dari data transaksi membantu dalam mengurangi re-komposisi yang tidak perlu
- * dan mempermudah pengelolaan status sementara seperti pencarian atau visibilitas panel.
+ * dan mempermudah pengelolaan status sementara seperti visibilitas panel.
  *
- * @property kataKunciPencarian Teks yang dimasukkan pengguna pada kolom pencarian produk.
  * @property apakahRingkasanPembayaranTampil Menentukan apakah panel detail biaya ditampilkan atau disembunyikan.
  * @property apakahDialogKonfirmasiCheckoutTampil Menentukan visibilitas dialog finalisasi transaksi.
  * @property statusHasilCheckout Pesan dan judul hasil akhir setelah aksi checkout berhasil dilakukan.
  */
 @Immutable
 data class StatusElemenLayarUtamaKasir(
-    val kataKunciPencarian: String = "",
     val apakahRingkasanPembayaranTampil: Boolean = true,
     val apakahDialogKonfirmasiCheckoutTampil: Boolean = false,
     val statusHasilCheckout: StatusHasilCheckoutKasir = StatusHasilCheckoutKasir(),

@@ -9,11 +9,14 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -21,21 +24,21 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
-/**
- * Pengelola logika dan status untuk Layar Riwayat Transaksi.
- *
- * Pada tahap ini:
- * - daftar transaksi tetap diambil dari Flow Room,
- * - filter dilakukan di ViewModel,
- * - dan loading tidak lagi bergantung pada delay buatan.
- */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class LayarRiwayatTransaksiViewModel(
     private val repositori: RepositoriTransaksi,
 ) : ViewModel() {
 
     private val _nomorPermintaanMuatUlang = MutableStateFlow(0)
     private val _kataKunciPencarian = MutableStateFlow("")
+
+    private val kataKunciPencarianEfektif =
+        _kataKunciPencarian
+            .debounce(250)
+            .map { kataKunci ->
+                kataKunci.trim()
+            }
+            .distinctUntilChanged()
 
     private val statusSumberData: StateFlow<StatusSumberDataRiwayat> =
         _nomorPermintaanMuatUlang
@@ -64,16 +67,15 @@ class LayarRiwayatTransaksiViewModel(
                 initialValue = StatusSumberDataRiwayat.Memuat,
             )
 
-    /**
-     * Aliran status tampilan yang dapat diobservasi oleh UI.
-     */
     val modelTampilan: StateFlow<ModelTampilanRiwayatTransaksi> =
         combine(
             _kataKunciPencarian,
+            kataKunciPencarianEfektif,
             statusSumberData,
-        ) { kataKunciPencarian, statusSumber ->
+        ) { kataKunciMentah, kataKunciEfektif, statusSumber ->
             bentukModelTampilan(
-                kataKunciPencarian = kataKunciPencarian,
+                kataKunciMentah = kataKunciMentah,
+                kataKunciEfektif = kataKunciEfektif,
                 statusSumber = statusSumber,
             )
         }.stateIn(
@@ -82,6 +84,7 @@ class LayarRiwayatTransaksiViewModel(
             initialValue = ModelTampilanRiwayatTransaksi(
                 judulLayar = "Riwayat Transaksi",
                 kataKunciPencarian = "",
+                tampilkanAksiResetPencarian = false,
                 statusMuat = StatusMuatRiwayatTransaksi.Memuat,
             ),
         )
@@ -90,33 +93,33 @@ class LayarRiwayatTransaksiViewModel(
         muatUlang()
     }
 
-    /**
-     * Meminta layar untuk berlangganan ulang ke aliran data riwayat transaksi.
-     */
     fun muatUlang() {
         _nomorPermintaanMuatUlang.update { nomorLama ->
             nomorLama + 1
         }
     }
 
-    /**
-     * Memperbarui kata kunci pencarian riwayat transaksi.
-     */
     fun perbaruiKataKunciPencarian(
         kataKunciBaru: String,
     ) {
         _kataKunciPencarian.value = kataKunciBaru
     }
 
+    fun resetPencarian() {
+        _kataKunciPencarian.value = ""
+    }
+
     private fun bentukModelTampilan(
-        kataKunciPencarian: String,
+        kataKunciMentah: String,
+        kataKunciEfektif: String,
         statusSumber: StatusSumberDataRiwayat,
     ): ModelTampilanRiwayatTransaksi {
         return when (statusSumber) {
             StatusSumberDataRiwayat.Memuat -> {
                 ModelTampilanRiwayatTransaksi(
                     judulLayar = "Riwayat Transaksi",
-                    kataKunciPencarian = kataKunciPencarian,
+                    kataKunciPencarian = kataKunciMentah,
+                    tampilkanAksiResetPencarian = kataKunciMentah.isNotBlank(),
                     statusMuat = StatusMuatRiwayatTransaksi.Memuat,
                 )
             }
@@ -124,7 +127,8 @@ class LayarRiwayatTransaksiViewModel(
             is StatusSumberDataRiwayat.Gagal -> {
                 ModelTampilanRiwayatTransaksi(
                     judulLayar = "Riwayat Transaksi",
-                    kataKunciPencarian = kataKunciPencarian,
+                    kataKunciPencarian = kataKunciMentah,
+                    tampilkanAksiResetPencarian = kataKunciMentah.isNotBlank(),
                     statusMuat = StatusMuatRiwayatTransaksi.Gagal(
                         judul = "Gagal memuat riwayat transaksi",
                         deskripsi = statusSumber.pesan,
@@ -133,42 +137,46 @@ class LayarRiwayatTransaksiViewModel(
             }
 
             is StatusSumberDataRiwayat.Berhasil -> {
-                val kataKunciNormal = kataKunciPencarian.trim()
                 val daftarTersaring = statusSumber.daftarTransaksi.filter { transaksi ->
                     transaksi.cocokDenganKataKunci(
-                        kataKunci = kataKunciNormal,
+                        kataKunci = kataKunciEfektif,
                     )
                 }
 
                 if (daftarTersaring.isEmpty()) {
                     ModelTampilanRiwayatTransaksi(
                         judulLayar = "Riwayat Transaksi",
-                        kataKunciPencarian = kataKunciPencarian,
+                        kataKunciPencarian = kataKunciMentah,
+                        tampilkanAksiResetPencarian = kataKunciMentah.isNotBlank(),
                         statusMuat = StatusMuatRiwayatTransaksi.Kosong(
-                            judul = if (kataKunciNormal.isBlank()) {
+                            judul = if (kataKunciEfektif.isBlank()) {
                                 "Belum ada riwayat transaksi"
                             } else {
                                 "Transaksi tidak ditemukan"
                             },
-                            deskripsi = if (kataKunciNormal.isBlank()) {
+                            deskripsi = if (kataKunciEfektif.isBlank()) {
                                 "Riwayat transaksi akan tampil di sini setelah data transaksi mulai disimpan."
                             } else {
-                                "Coba gunakan kata kunci lain yang lebih umum atau cek kembali id transaksi."
+                                "Coba reset pencarian atau gunakan kata kunci yang lebih umum."
                             },
                         ),
                     )
                 } else {
                     ModelTampilanRiwayatTransaksi(
                         judulLayar = "Riwayat Transaksi",
-                        kataKunciPencarian = kataKunciPencarian,
+                        kataKunciPencarian = kataKunciMentah,
+                        tampilkanAksiResetPencarian = kataKunciMentah.isNotBlank(),
                         statusMuat = StatusMuatRiwayatTransaksi.Berhasil(
                             judulBagian = "Riwayat penjualan",
-                            deskripsiBagian = if (kataKunciNormal.isBlank()) {
+                            deskripsiBagian = if (kataKunciEfektif.isBlank()) {
                                 "Data diambil dari database lokal."
                             } else {
                                 "Menampilkan hasil yang sesuai dengan pencarian aktif."
                             },
                             labelJumlahHasil = "${daftarTersaring.size} transaksi ditemukan",
+                            labelKataKunciAktif = kataKunciEfektif.takeIf { it.isNotBlank() }?.let { kataKunci ->
+                                "Pencarian aktif: \"$kataKunci\""
+                            },
                             daftarRingkasanTransaksi = daftarTersaring.map { transaksi ->
                                 transaksi.keRingkasanTransaksiRiwayat()
                             },

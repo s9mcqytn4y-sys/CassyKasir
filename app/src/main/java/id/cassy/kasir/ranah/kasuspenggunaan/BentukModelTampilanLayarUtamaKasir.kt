@@ -27,18 +27,21 @@ class BentukModelTampilanLayarUtamaKasir {
      * @param daftarProdukPenuh Koleksi seluruh produk yang tersedia di sistem.
      * @param statusTransaksi Data inti transaksi saat ini (keranjang dan sinkronisasi).
      * @param statusElemenLayar Status elemen visual dan interaksi pada layar.
+     * @param kataKunciMentah Nilai teks asli dari input pencarian sebelum di-debounce.
+     * @param kataKunciEfektif Nilai teks pencarian setelah di-debounce untuk memfilter katalog.
      * @return Model tampilan yang siap dikonsumsi oleh komponen Jetpack Compose.
      */
     operator fun invoke(
         daftarProdukPenuh: List<Produk>,
         statusTransaksi: StatusTransaksiLayarUtamaKasir,
         statusElemenLayar: StatusElemenLayarUtamaKasir,
+        kataKunciMentah: String,
+        kataKunciEfektif: String,
     ): ModelTampilanLayarUtamaKasir {
         val daftarItemKeranjang = statusTransaksi.daftarItemKeranjang
-        val kataKunciPencarian = statusElemenLayar.kataKunciPencarian
 
         // Optimasi: Gunakan fungsi ekstensi untuk logika pencarian dan perhitungan
-        val daftarProdukTersaring = daftarProdukPenuh.cariProduk(kataKunciPencarian)
+        val daftarProdukTersaring = daftarProdukPenuh.cariProduk(kataKunciEfektif)
         val jumlahItem = daftarItemKeranjang.hitungJumlahItem()
         val subtotal = daftarItemKeranjang.hitungSubtotalKeranjang()
 
@@ -85,7 +88,8 @@ class BentukModelTampilanLayarUtamaKasir {
                 labelKonfirmasi = "Bayar sekarang",
             ),
             statusHasilCheckout = statusElemenLayar.statusHasilCheckout,
-            kataKunciPencarian = kataKunciPencarian,
+            kataKunciPencarian = kataKunciMentah,
+            tampilkanAksiResetPencarian = kataKunciMentah.isNotBlank(),
             apakahRingkasanPembayaranTampil = statusElemenLayar.apakahRingkasanPembayaranTampil,
         )
     }

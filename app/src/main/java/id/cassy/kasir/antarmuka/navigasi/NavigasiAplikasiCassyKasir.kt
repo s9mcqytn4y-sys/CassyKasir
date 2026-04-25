@@ -89,6 +89,7 @@ fun NavigasiAplikasiCassyKasir() {
                 },
                 saatCobaMuatUlang = layarRiwayatTransaksiViewModel::muatUlang,
                 saatKataKunciPencarianBerubah = layarRiwayatTransaksiViewModel::perbaruiKataKunciPencarian,
+                saatResetPencarian = layarRiwayatTransaksiViewModel::resetPencarian,
             )
         }
 

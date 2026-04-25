@@ -91,7 +91,19 @@ data class StatusHasilCheckoutKasir(
 /**
  * Representasi seluruh status UI untuk Layar Utama Kasir.
  *
- * Model ini menjadi satu sumber kebenaran (single source of truth) untuk antarmuka.
+ * Model ini menjadi satu sumber kebenaran (single source of truth) untuk antarmuka,
+ * mengelola data produk, status keranjang, checkout, serta kontrol kata kunci pencarian.
+ *
+ * @property statusBeranda Informasi dan metrik di bagian beranda.
+ * @property daftarProdukTersaring Hasil filter katalog berdasarkan kata kunci pencarian efektif.
+ * @property daftarItemKeranjang Koleksi item yang akan dibeli.
+ * @property statusKeranjang Status panel keranjang belanja.
+ * @property ringkasanPembayaran Status rincian biaya.
+ * @property statusKonfirmasiCheckout Dialog persetujuan checkout.
+ * @property statusHasilCheckout Pesan hasil transaksi (banner).
+ * @property kataKunciPencarian Kata kunci mentah untuk sinkronisasi nilai TextField.
+ * @property tampilkanAksiResetPencarian Flag untuk menampilkan tombol x/reset di kolom pencarian.
+ * @property apakahRingkasanPembayaranTampil Flag visibilitas ringkasan bayar (khusus ponsel).
  */
 @Immutable
 data class ModelTampilanLayarUtamaKasir(
@@ -121,5 +133,6 @@ data class ModelTampilanLayarUtamaKasir(
     val statusKonfirmasiCheckout: StatusKonfirmasiCheckoutKasir = StatusKonfirmasiCheckoutKasir(),
     val statusHasilCheckout: StatusHasilCheckoutKasir = StatusHasilCheckoutKasir(),
     val kataKunciPencarian: String = "",
+    val tampilkanAksiResetPencarian: Boolean = false,
     val apakahRingkasanPembayaranTampil: Boolean = true,
 )

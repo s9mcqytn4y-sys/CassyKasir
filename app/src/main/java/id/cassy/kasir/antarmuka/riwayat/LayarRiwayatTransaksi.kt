@@ -41,6 +41,7 @@ fun LayarRiwayatTransaksi(
     saatBukaDetailTransaksi: (String) -> Unit,
     saatCobaMuatUlang: () -> Unit,
     saatKataKunciPencarianBerubah: (String) -> Unit,
+    saatResetPencarian: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -77,6 +78,21 @@ fun LayarRiwayatTransaksi(
                 petunjukPencarian = modelTampilan.petunjukPencarian,
                 saatKataKunciPencarianBerubah = saatKataKunciPencarianBerubah,
             )
+
+            if (modelTampilan.tampilkanAksiResetPencarian) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = saatResetPencarian,
+                    ) {
+                        Text(
+                            text = "Reset pencarian",
+                        )
+                    }
+                }
+            }
 
             when (val statusMuat = modelTampilan.statusMuat) {
                 StatusMuatRiwayatTransaksi.Memuat -> {
@@ -174,6 +190,7 @@ private fun KontenRiwayatBerhasil(
                 judulBagian = statusMuat.judulBagian,
                 deskripsiBagian = statusMuat.deskripsiBagian,
                 labelJumlahHasil = statusMuat.labelJumlahHasil,
+                labelKataKunciAktif = statusMuat.labelKataKunciAktif,
             )
         }
 
@@ -196,6 +213,7 @@ private fun KartuRingkasanHasilRiwayat(
     judulBagian: String,
     deskripsiBagian: String,
     labelJumlahHasil: String,
+    labelKataKunciAktif: String?,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -222,6 +240,14 @@ private fun KartuRingkasanHasilRiwayat(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
+
+            labelKataKunciAktif?.let { label ->
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

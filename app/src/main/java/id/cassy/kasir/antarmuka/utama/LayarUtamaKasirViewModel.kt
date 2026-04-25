@@ -19,13 +19,20 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
  * Pengelola status layar utama kasir dengan pola alur data satu arah (UDF).
- * Mengatur keranjang belanja dan proses checkout ke penyimpanan lokal.
+ * Mengatur keranjang belanja, proses checkout ke penyimpanan lokal, 
+ * serta fitur pencarian produk reaktif dengan debounce untuk performa optimal.
  *
  * @property repositori Sumber persistensi data transaksi.
  */
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class LayarUtamaKasirViewModel(
     private val repositori: RepositoriTransaksi,
 ) : ViewModel() {
@@ -51,17 +58,31 @@ class LayarUtamaKasirViewModel(
     )
     val efek: SharedFlow<EfekLayarUtamaKasir> = _efek.asSharedFlow()
 
+    private val _kataKunciPencarian = MutableStateFlow("")
+
+    private val kataKunciPencarianEfektif =
+        _kataKunciPencarian
+            .debounce(250)
+            .map { kataKunci ->
+                kataKunci.trim()
+            }
+            .distinctUntilChanged()
+
     /**
      * Aliran status UI publik yang dirender oleh Compose.
      */
     val modelTampilan = combine(
         _statusTransaksi,
         _statusElemenLayar,
-    ) { statusTransaksi, statusElemenLayar ->
+        _kataKunciPencarian,
+        kataKunciPencarianEfektif,
+    ) { statusTransaksi, statusElemenLayar, kataKunciMentah, kataKunciEfektif ->
         bentukModelTampilanUseCase(
             daftarProdukPenuh = daftarProdukPenuh,
             statusTransaksi = statusTransaksi,
             statusElemenLayar = statusElemenLayar,
+            kataKunciMentah = kataKunciMentah,
+            kataKunciEfektif = kataKunciEfektif,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -70,6 +91,8 @@ class LayarUtamaKasirViewModel(
             daftarProdukPenuh = daftarProdukPenuh,
             statusTransaksi = StatusTransaksiLayarUtamaKasir(),
             statusElemenLayar = StatusElemenLayarUtamaKasir(),
+            kataKunciMentah = "",
+            kataKunciEfektif = "",
         ),
     )
 
@@ -89,15 +112,16 @@ class LayarUtamaKasirViewModel(
             AksiLayarUtamaKasir.BatalkanKonfirmasiCheckout -> batalkanKonfirmasiCheckout()
             AksiLayarUtamaKasir.KonfirmasiCheckout -> konfirmasiCheckout()
             AksiLayarUtamaKasir.TutupStatusHasilCheckout -> tutupStatusHasilCheckout()
+            AksiLayarUtamaKasir.ResetPencarian -> resetPencarian()
         }
     }
 
     private fun perbaruiPencarian(kataKunciBaru: String) {
-        _statusElemenLayar.update { statusLama ->
-            statusLama.copy(
-                kataKunciPencarian = kataKunciBaru,
-            )
-        }
+        _kataKunciPencarian.value = kataKunciBaru
+    }
+
+    private fun resetPencarian() {
+        _kataKunciPencarian.value = ""
     }
 
     private fun alihkanVisibilitasPembayaran() {
