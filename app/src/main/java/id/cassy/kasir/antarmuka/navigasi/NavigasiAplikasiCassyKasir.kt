@@ -88,6 +88,7 @@ fun NavigasiAplikasiCassyKasir() {
                     pengendaliNavigasi.bukaDetailTransaksi(transaksiId)
                 },
                 saatCobaMuatUlang = layarRiwayatTransaksiViewModel::muatUlang,
+                saatKataKunciPencarianBerubah = layarRiwayatTransaksiViewModel::perbaruiKataKunciPencarian,
             )
         }
 

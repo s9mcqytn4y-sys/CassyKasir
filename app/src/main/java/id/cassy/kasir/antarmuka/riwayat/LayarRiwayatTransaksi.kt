@@ -14,33 +14,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 
-/**
- * Layar riwayat transaksi yang menampilkan daftar aktivitas penjualan yang telah selesai.
- *
- * Layar ini bersifat stateless, menerima data via [modelTampilan] dan mengirimkan
- * aksi pengguna melalui berbagai callback.
- *
- * @param modelTampilan Status data yang akan ditampilkan di layar.
- * @param saatKembali Callback untuk navigasi balik ke layar sebelumnya.
- * @param saatBukaDetailTransaksi Callback untuk membuka detail satu transaksi berdasarkan ID.
- * @param saatCobaMuatUlang Callback untuk memicu pemuatan ulang data jika terjadi kegagalan.
- * @param modifier Modifikasi tata letak opsional.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayarRiwayatTransaksi(
@@ -48,6 +40,7 @@ fun LayarRiwayatTransaksi(
     saatKembali: () -> Unit,
     saatBukaDetailTransaksi: (String) -> Unit,
     saatCobaMuatUlang: () -> Unit,
+    saatKataKunciPencarianBerubah: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -72,57 +65,89 @@ fun LayarRiwayatTransaksi(
             )
         },
     ) { paddingDalam ->
-        when (val statusMuat = modelTampilan.statusMuat) {
-            StatusMuatRiwayatTransaksi.Memuat -> {
-                KontenMemuatRiwayat(
-                    paddingDalam = paddingDalam,
-                )
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingDalam)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            BidangPencarianRiwayatTransaksi(
+                kataKunciPencarian = modelTampilan.kataKunciPencarian,
+                petunjukPencarian = modelTampilan.petunjukPencarian,
+                saatKataKunciPencarianBerubah = saatKataKunciPencarianBerubah,
+            )
 
-            is StatusMuatRiwayatTransaksi.Berhasil -> {
-                KontenRiwayatBerhasil(
-                    paddingDalam = paddingDalam,
-                    statusMuat = statusMuat,
-                    saatBukaDetailTransaksi = saatBukaDetailTransaksi,
-                )
-            }
+            when (val statusMuat = modelTampilan.statusMuat) {
+                StatusMuatRiwayatTransaksi.Memuat -> {
+                    KontenMemuatRiwayat(
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
 
-            is StatusMuatRiwayatTransaksi.Kosong -> {
-                KontenRiwayatKosong(
-                    paddingDalam = paddingDalam,
-                    judul = statusMuat.judul,
-                    deskripsi = statusMuat.deskripsi,
-                )
-            }
+                is StatusMuatRiwayatTransaksi.Berhasil -> {
+                    KontenRiwayatBerhasil(
+                        statusMuat = statusMuat,
+                        saatBukaDetailTransaksi = saatBukaDetailTransaksi,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
 
-            is StatusMuatRiwayatTransaksi.Gagal -> {
-                KontenRiwayatGagal(
-                    paddingDalam = paddingDalam,
-                    judul = statusMuat.judul,
-                    deskripsi = statusMuat.deskripsi,
-                    saatCobaMuatUlang = saatCobaMuatUlang,
-                )
+                is StatusMuatRiwayatTransaksi.Kosong -> {
+                    KontenRiwayatKosong(
+                        judul = statusMuat.judul,
+                        deskripsi = statusMuat.deskripsi,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+
+                is StatusMuatRiwayatTransaksi.Gagal -> {
+                    KontenRiwayatGagal(
+                        judul = statusMuat.judul,
+                        deskripsi = statusMuat.deskripsi,
+                        saatCobaMuatUlang = saatCobaMuatUlang,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
     }
 }
 
-/**
- * Konten yang ditampilkan saat data riwayat transaksi sedang dimuat.
- *
- * @param paddingDalam Padding dari Scaffold.
- * @param modifier Modifikasi tata letak.
- */
+@Composable
+private fun BidangPencarianRiwayatTransaksi(
+    kataKunciPencarian: String,
+    petunjukPencarian: String,
+    saatKataKunciPencarianBerubah: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = kataKunciPencarian,
+        onValueChange = saatKataKunciPencarianBerubah,
+        modifier = modifier.fillMaxWidth(),
+        singleLine = true,
+        label = {
+            Text(
+                text = "Cari riwayat transaksi",
+            )
+        },
+        placeholder = {
+            Text(
+                text = petunjukPencarian,
+            )
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Search,
+        ),
+    )
+}
+
 @Composable
 private fun KontenMemuatRiwayat(
-    paddingDalam: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(paddingDalam)
-            .padding(16.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
@@ -133,43 +158,23 @@ private fun KontenMemuatRiwayat(
     }
 }
 
-/**
- * Konten yang ditampilkan saat data riwayat transaksi berhasil dimuat.
- *
- * @param paddingDalam Padding dari Scaffold.
- * @param statusMuat Data transaksi yang berhasil dimuat.
- * @param saatBukaDetailTransaksi Callback untuk membuka detail transaksi.
- * @param modifier Modifikasi tata letak.
- */
 @Composable
 private fun KontenRiwayatBerhasil(
-    paddingDalam: PaddingValues,
     statusMuat: StatusMuatRiwayatTransaksi.Berhasil,
     saatBukaDetailTransaksi: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(paddingDalam),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier,
+        contentPadding = PaddingValues(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = statusMuat.judulBagian,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Text(
-                    text = statusMuat.deskripsiBagian,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            KartuRingkasanHasilRiwayat(
+                judulBagian = statusMuat.judulBagian,
+                deskripsiBagian = statusMuat.deskripsiBagian,
+                labelJumlahHasil = statusMuat.labelJumlahHasil,
+            )
         }
 
         items(
@@ -186,13 +191,41 @@ private fun KontenRiwayatBerhasil(
     }
 }
 
-/**
- * Komponen kartu untuk menampilkan ringkasan satu transaksi dalam daftar.
- *
- * @param ringkasan Data ringkasan transaksi.
- * @param saatBukaDetailTransaksi Callback saat kartu diklik atau tombol detail ditekan.
- * @param modifier Modifikasi tata letak.
- */
+@Composable
+private fun KartuRingkasanHasilRiwayat(
+    judulBagian: String,
+    deskripsiBagian: String,
+    labelJumlahHasil: String,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = judulBagian,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = deskripsiBagian,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = labelJumlahHasil,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+}
+
 @Composable
 private fun KartuRingkasanTransaksiRiwayat(
     ringkasan: RingkasanTransaksiRiwayat,
@@ -229,6 +262,12 @@ private fun KartuRingkasanTransaksiRiwayat(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            Text(
+                text = ringkasan.ringkasanItem,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -259,26 +298,14 @@ private fun KartuRingkasanTransaksiRiwayat(
     }
 }
 
-/**
- * Konten yang ditampilkan saat daftar riwayat transaksi kosong.
- *
- * @param paddingDalam Padding dari Scaffold.
- * @param judul Pesan judul kosong.
- * @param deskripsi Pesan deskripsi kosong.
- * @param modifier Modifikasi tata letak.
- */
 @Composable
 private fun KontenRiwayatKosong(
-    paddingDalam: PaddingValues,
     judul: String,
     deskripsi: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(paddingDalam)
-            .padding(16.dp),
+        modifier = modifier,
     ) {
         StatusKosongSederhana(
             judul = judul,
@@ -287,28 +314,15 @@ private fun KontenRiwayatKosong(
     }
 }
 
-/**
- * Konten yang ditampilkan saat terjadi kegagalan dalam memuat riwayat transaksi.
- *
- * @param paddingDalam Padding dari Scaffold.
- * @param judul Pesan judul kegagalan.
- * @param deskripsi Pesan rincian kegagalan.
- * @param saatCobaMuatUlang Callback untuk mencoba memuat data kembali.
- * @param modifier Modifikasi tata letak.
- */
 @Composable
 private fun KontenRiwayatGagal(
-    paddingDalam: PaddingValues,
     judul: String,
     deskripsi: String,
     saatCobaMuatUlang: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(paddingDalam)
-            .padding(16.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         StatusKosongSederhana(
@@ -318,6 +332,7 @@ private fun KontenRiwayatGagal(
 
         Button(
             onClick = saatCobaMuatUlang,
+            modifier = Modifier.heightIn(min = 48.dp),
         ) {
             Text(
                 text = "Coba Lagi",
