@@ -15,7 +15,6 @@ proyek:
     - data_bertahap
   prinsip:
     - production_ready
-    - testable
     - maintainable
     - scalable
     - local_first_bertahap
@@ -52,6 +51,22 @@ aturan_kode:
   domain:
     - pakai_fungsi_ranah_ulang
     - hindari_duplikasi_perhitungan
+  data_lokal:
+    - gunakan_room_dan_ksp
+    - simpan_histori_sebagai_snapshot
+    - jangan_referensi_katalog_aktif
+    - gunakan_flow_dari_dao
+    - export_skema_untuk_migrasi
+    - gunakan_pemetaan_tegas_untuk_domain_ke_lokal
+    - gunakan_transaksi_atomik_untuk_data_berelasi
+
+aturan_dokumentasi:
+  bahasa: Indonesia
+  wajib:
+    - kdoc_untuk_anggota_publik
+    - tag_param_untuk_setiap_parameter
+    - tag_return_untuk_fungsi_bernilai_balik
+    - deskripsi_atribut_pada_data_class
 
 aturan_tema:
   material3: true
@@ -112,3 +127,15 @@ aturan_output_ai:
     - tampilkan_patch_bertahap
     - tampilkan_file_yang_berubah
     - tampilkan_kode_final_lengkap
+
+verifikasi_adb:
+  alat: adb
+  folder_output: artifacts/verifikasi
+  langkah:
+    - cek_ukuran: "adb shell wm size"
+    - ambil_dump: "adb shell uiautomator dump /sdcard/view.xml && adb pull /sdcard/view.xml artifacts/view.xml"
+    - ambil_screenshot: "adb shell screencap -p /sdcard/screen.png && adb pull /sdcard/screen.png artifacts/verifikasi_{step}.png"
+  prioritas_cek:
+    - kemunculan_teks_utama
+    - bounds_tombol_aksi
+    - logcat_error: "adb logcat -d *:E"

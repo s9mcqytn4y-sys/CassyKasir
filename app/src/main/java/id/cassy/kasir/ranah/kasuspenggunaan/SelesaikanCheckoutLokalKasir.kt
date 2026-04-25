@@ -5,8 +5,17 @@ import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.model.ItemKeranjang
 
+import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
+import id.cassy.kasir.ranah.model.Transaksi
+import java.util.UUID
+
 /**
  * Hasil penyelesaian checkout statis lokal.
+ *
+ * @property daftarItemKeranjangBaru Daftar item keranjang setelah checkout (biasanya kosong).
+ * @property statusSinkronisasiBaru Label status penyimpanan transaksi.
+ * @property jumlahItemCheckout Total kuantitas item yang berhasil diproses.
+ * @property totalCheckout Nilai moneter total dari transaksi.
  */
 @Immutable
 data class HasilCheckoutLokalKasir(
@@ -17,16 +26,14 @@ data class HasilCheckoutLokalKasir(
 )
 
 /**
- * Menyelesaikan checkout lokal secara statis.
+ * Kasus Penggunaan untuk menyelesaikan proses checkout secara lokal.
+ * Bertanggung jawab membuat ID transaksi, menghitung total, dan menyimpan ke [RepositoriTransaksi].
  *
- * Pada scope ini, checkout hanya:
- * - menghitung total transaksi akhir,
- * - menyiapkan hasil informasi transaksi,
- * - dan mengosongkan keranjang.
- *
- * Belum ada penyimpanan Room, pencetakan struk, atau sinkronisasi server.
+ * @property repositori Sumber persistensi data transaksi.
  */
-class SelesaikanCheckoutLokalKasir {
+class SelesaikanCheckoutLokalKasir(
+    private val repositori: RepositoriTransaksi,
+) {
 
     /**
      * Memproses penyelesaian transaksi lokal.
@@ -34,7 +41,7 @@ class SelesaikanCheckoutLokalKasir {
      * @param daftarItemKeranjang Daftar item yang akan di-checkout.
      * @return Objek hasil checkout berisi ringkasan transaksi.
      */
-    operator fun invoke(
+    suspend fun eksekusi(
         daftarItemKeranjang: List<ItemKeranjang>,
     ): HasilCheckoutLokalKasir {
         val jumlahItemCheckout = daftarItemKeranjang.hitungJumlahItem()
@@ -45,9 +52,24 @@ class SelesaikanCheckoutLokalKasir {
             pajak = 0,
         )
 
+        // Membuat objek domain Transaksi
+        val transaksi = Transaksi(
+            id = UUID.randomUUID().toString(),
+            daftarItemKeranjang = daftarItemKeranjang,
+            uangDibayar = totalCheckout,
+            potongan = 0,
+            biayaLayanan = 0,
+            pajak = 0,
+            waktuTransaksiEpochMili = System.currentTimeMillis(),
+            catatan = null,
+        )
+
+        // Simpan ke database melalui repositori
+        repositori.simpanTransaksi(transaksi)
+
         return HasilCheckoutLokalKasir(
             daftarItemKeranjangBaru = emptyList(),
-            statusSinkronisasiBaru = "Transaksi lokal selesai",
+            statusSinkronisasiBaru = "Tersimpan di Room",
             jumlahItemCheckout = jumlahItemCheckout,
             totalCheckout = totalCheckout,
         )

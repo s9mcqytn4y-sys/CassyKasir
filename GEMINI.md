@@ -148,4 +148,17 @@ Agen disarankan menggunakan:
 - **Grouping**: Kelompokkan library yang terkait (misal: `androidx-compose-...`) untuk menjaga keterbacaan.
 
 ---
+
+## 13. Persistensi Data (Room)
+
+Gunakan Room untuk penyimpanan data terstruktur yang membutuhkan query kompleks atau relasi.
+
+### Aturan Room:
+- **Snapshot Historis**: Data riwayat transaksi wajib disimpan sebagai snapshot (salinan nilai), bukan referensi ke tabel master yang bisa berubah.
+- **Relasi**: Gunakan `@Relation` untuk menggabungkan entitas (misal: Transaksi dengan ItemTransaksi).
+- **Asinkron**: DAO wajib mengembalikan `Flow` untuk pembacaan data dan menggunakan `suspend` untuk penulisan data.
+- **Eksport Skema**: Selalu set `exportSchema = true` dan tentukan `room.schemaLocation` di Gradle untuk pelacakan migrasi.
+- **Mappers**: Buat fungsi pemetaan (mappers) antara entitas lokal dan model domain di dalam paket `pemetaan`.
+
+---
 *Dokumen ini merupakan kontrak hidup yang diperbarui seiring perkembangan kapabilitas tim dan teknologi.*

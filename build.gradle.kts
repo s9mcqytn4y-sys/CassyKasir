@@ -8,4 +8,10 @@ plugins {
 
     // Plugin Compose Compiler: Menangani optimasi fungsi @Composable di Kotlin 2.x
     alias(libs.plugins.compose.compiler) apply false
+
+    // Plugin Kotlin Serialization: Untuk serialisasi data JSON (Type-safe Navigation)
+    alias(libs.plugins.kotlin.serialization) apply false
+
+    // Plugin KSP: Kotlin Symbol Processing untuk efisiensi Room Compiler
+    alias(libs.plugins.ksp) apply false
 }

@@ -20,13 +20,20 @@ import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksiViewModel
 import id.cassy.kasir.antarmuka.utama.AksiLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
+import id.cassy.kasir.antarmuka.PenyediaViewModelKasir
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * Komposabel pengelola navigasi antar layar di seluruh aplikasi.
+ * Mendefinisikan [NavHost] dan rute untuk setiap layar seperti Utama, Riwayat, dan Detail.
+ */
 @Composable
 fun NavigasiAplikasiCassyKasir() {
     val pengendaliNavigasi = rememberNavController()
 
-    val layarUtamaKasirViewModel: LayarUtamaKasirViewModel = viewModel()
+    val layarUtamaKasirViewModel: LayarUtamaKasirViewModel = viewModel(
+        factory = PenyediaViewModelKasir.Factory,
+    )
     val modelTampilanKasir = layarUtamaKasirViewModel.modelTampilan.collectAsStateWithLifecycle()
 
     NavHost(
@@ -67,7 +74,9 @@ fun NavigasiAplikasiCassyKasir() {
         composable(
             route = TujuanNavigasiKasir.RiwayatTransaksi.rute,
         ) {
-            val layarRiwayatTransaksiViewModel: LayarRiwayatTransaksiViewModel = viewModel()
+            val layarRiwayatTransaksiViewModel: LayarRiwayatTransaksiViewModel = viewModel(
+                factory = PenyediaViewModelKasir.Factory,
+            )
             val modelTampilanRiwayat = layarRiwayatTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LayarRiwayatTransaksi(
@@ -132,7 +141,9 @@ fun NavigasiAplikasiCassyKasir() {
                 },
             ),
         ) {
-            val layarDetailTransaksiViewModel: LayarDetailTransaksiViewModel = viewModel()
+            val layarDetailTransaksiViewModel: LayarDetailTransaksiViewModel = viewModel(
+                factory = PenyediaViewModelKasir.Factory,
+            )
             val modelTampilanDetailTransaksi = layarDetailTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LayarDetailTransaksi(

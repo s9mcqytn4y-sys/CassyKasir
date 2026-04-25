@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -21,11 +22,15 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Optimasi ABI: Hanya menyertakan arsitektur yang relevan untuk efisiensi ukuran APK
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+        }
+
+        // Konfigurasi KSP untuk Room: Menentukan lokasi penyimpanan skema DB
+        ksp {
+            arg("room.schemaLocation", "$projectDir/skema-room")
         }
     }
 
@@ -94,7 +99,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.foundation)
 
-    // Dependensi Debug & Pengujian
+    // Persistensi Data Lokal (Room)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Dependensi Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
-    testImplementation(kotlin("test"))
 }

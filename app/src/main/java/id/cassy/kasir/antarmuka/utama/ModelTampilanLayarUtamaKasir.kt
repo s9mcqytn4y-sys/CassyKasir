@@ -6,6 +6,13 @@ import id.cassy.kasir.ranah.model.Produk
 
 /**
  * Status ringkasan informasi aplikasi dan metrik cepat di beranda.
+ *
+ * @property namaAplikasi Nama brand aplikasi.
+ * @property sloganAplikasi Pesan pemasaran aplikasi.
+ * @property jumlahProdukTersedia Total produk dalam katalog.
+ * @property jumlahItemKeranjang Total kuantitas item di keranjang.
+ * @property totalBelanjaSementara Estimasi nilai belanja saat ini.
+ * @property statusSinkronisasi Keterangan status penyimpanan data.
  */
 @Immutable
 data class StatusBerandaKasir(
@@ -19,6 +26,10 @@ data class StatusBerandaKasir(
 
 /**
  * Representasi status visual panel keranjang belanja.
+ *
+ * @property judul Teks judul panel keranjang.
+ * @property deskripsi Pesan informatif di panel keranjang.
+ * @property jumlahItem Label jumlah item saat ini.
  */
 @Immutable
 data class StatusKeranjangKasir(
@@ -29,6 +40,13 @@ data class StatusKeranjangKasir(
 
 /**
  * Representasi status rincian biaya dan tombol aksi pembayaran.
+ *
+ * @property subtotal Nilai kotor sebelum potongan/pajak.
+ * @property potongan Nilai diskon.
+ * @property pajak Nilai pajak.
+ * @property totalAkhir Nilai bersih yang harus dibayar.
+ * @property labelAksiUtama Teks pada tombol bayar/pilih.
+ * @property aksiUtamaAktif Status apakah tombol dapat diklik.
  */
 @Immutable
 data class RingkasanPembayaranKasir(
@@ -42,6 +60,11 @@ data class RingkasanPembayaranKasir(
 
 /**
  * Status dialog konfirmasi checkout.
+ *
+ * @property apakahTampil Status visibilitas dialog.
+ * @property judul Teks judul dialog.
+ * @property deskripsi Pesan rincian dalam dialog.
+ * @property labelKonfirmasi Teks tombol eksekusi bayar.
  */
 @Immutable
 data class StatusKonfirmasiCheckoutKasir(
@@ -53,6 +76,10 @@ data class StatusKonfirmasiCheckoutKasir(
 
 /**
  * Status hasil checkout yang ditampilkan sebagai banner.
+ *
+ * @property apakahTampil Status visibilitas banner.
+ * @property judul Teks judul banner.
+ * @property deskripsi Pesan sukses atau gagal.
  */
 @Immutable
 data class StatusHasilCheckoutKasir(

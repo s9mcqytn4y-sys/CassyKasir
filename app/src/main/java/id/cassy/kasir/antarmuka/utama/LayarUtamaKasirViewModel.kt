@@ -8,6 +8,7 @@ import id.cassy.kasir.ranah.kasuspenggunaan.HapusProdukDariKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.TambahProdukKeKeranjang
+import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
 import id.cassy.kasir.ranah.model.Produk
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,25 +18,24 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
- * Pengelola status layar utama kasir dengan pola alur data satu arah.
+ * Pengelola status layar utama kasir dengan pola alur data satu arah (UDF).
+ * Mengatur keranjang belanja dan proses checkout ke penyimpanan lokal.
  *
- * State internal dipisah menjadi:
- * - status transaksi
- * - status elemen layar
- *
- * Efek sekali pakai dipisah ke SharedFlow agar pesan sementara
- * tidak mencemari state layar persisten.
+ * @property repositori Sumber persistensi data transaksi.
  */
-class LayarUtamaKasirViewModel : ViewModel() {
+class LayarUtamaKasirViewModel(
+    private val repositori: RepositoriTransaksi,
+) : ViewModel() {
 
     private val daftarProdukPenuh: List<Produk> = KatalogProdukContoh.daftarAwal()
 
     private val tambahProdukKeKeranjangUseCase = TambahProdukKeKeranjang()
     private val kurangiProdukDiKeranjangUseCase = KurangiProdukDiKeranjang()
     private val hapusProdukDariKeranjangUseCase = HapusProdukDariKeranjang()
-    private val selesaikanCheckoutLokalKasirUseCase = SelesaikanCheckoutLokalKasir()
+    private val selesaikanCheckoutLokalKasirUseCase = SelesaikanCheckoutLokalKasir(repositori)
     private val bentukModelTampilanUseCase = BentukModelTampilanLayarUtamaKasir()
 
     private val _statusTransaksi = MutableStateFlow(
@@ -74,7 +74,9 @@ class LayarUtamaKasirViewModel : ViewModel() {
     )
 
     /**
-     * Titik masuk tunggal untuk semua aksi dari UI.
+     * Titik masuk tunggal untuk semua aksi yang dipicu oleh UI.
+     *
+     * @param aksi Objek aksi yang dikirim dari layar Compose.
      */
     fun tanganiAksi(aksi: AksiLayarUtamaKasir) {
         when (aksi) {
@@ -220,26 +222,32 @@ class LayarUtamaKasirViewModel : ViewModel() {
             return
         }
 
-        val hasilCheckout = selesaikanCheckoutLokalKasirUseCase(
-            daftarItemKeranjang = daftarKeranjangSaatIni,
-        )
+        viewModelScope.launch {
+            try {
+                val hasilCheckout = selesaikanCheckoutLokalKasirUseCase.eksekusi(
+                    daftarItemKeranjang = daftarKeranjangSaatIni,
+                )
 
-        _statusTransaksi.update {
-            StatusTransaksiLayarUtamaKasir(
-                daftarItemKeranjang = hasilCheckout.daftarItemKeranjangBaru,
-                statusSinkronisasi = hasilCheckout.statusSinkronisasiBaru,
-            )
-        }
+                _statusTransaksi.update {
+                    StatusTransaksiLayarUtamaKasir(
+                        daftarItemKeranjang = hasilCheckout.daftarItemKeranjangBaru,
+                        statusSinkronisasi = hasilCheckout.statusSinkronisasiBaru,
+                    )
+                }
 
-        _statusElemenLayar.update { statusLama ->
-            statusLama.copy(
-                apakahDialogKonfirmasiCheckoutTampil = false,
-                statusHasilCheckout = StatusHasilCheckoutKasir(
-                    apakahTampil = true,
-                    judul = "Transaksi Berhasil",
-                    deskripsi = "Sebanyak ${hasilCheckout.jumlahItemCheckout} item dengan total ${hasilCheckout.totalCheckout.sebagaiRupiahSederhana()} telah diproses.",
-                ),
-            )
+                _statusElemenLayar.update { statusLama ->
+                    statusLama.copy(
+                        apakahDialogKonfirmasiCheckoutTampil = false,
+                        statusHasilCheckout = StatusHasilCheckoutKasir(
+                            apakahTampil = true,
+                            judul = "Transaksi Berhasil",
+                            deskripsi = "Sebanyak ${hasilCheckout.jumlahItemCheckout} item dengan total ${hasilCheckout.totalCheckout.sebagaiRupiahSederhana()} telah diproses.",
+                        ),
+                    )
+                }
+            } catch (e: Exception) {
+                kirimPesanSingkat("Gagal menyimpan transaksi: ${e.message}")
+            }
         }
     }
 

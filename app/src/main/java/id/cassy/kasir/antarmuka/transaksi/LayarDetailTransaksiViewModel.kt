@@ -4,13 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
-import id.cassy.kasir.ranah.contoh.RiwayatTransaksiContoh
-import id.cassy.kasir.ranah.fungsi.hitungKembalian
-import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
+import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
 import id.cassy.kasir.ranah.model.Transaksi
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
+import id.cassy.kasir.ranah.fungsi.hitungKembalian
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,27 +18,23 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Pengelola logika dan status untuk Layar Detail Transaksi.
+ * Pengelola status untuk layar rincian transaksi tunggal.
+ * Membaca [transaksiId] dari [SavedStateHandle] untuk memuat data spesifik dari database.
  *
- * ViewModel ini mengambil [transaksiId] dari [SavedStateHandle] dan memuat data rinciannya
- * untuk dipetakan ke dalam [ModelTampilanDetailTransaksi].
+ * @property repositori Sumber data transaksi lokal.
+ * @property savedStateHandle Pengelola status state untuk navigasi dan pemulihan data.
  */
 class LayarDetailTransaksiViewModel(
-    statusTersimpan: SavedStateHandle,
+    private val repositori: RepositoriTransaksi,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val transaksiId: String = checkNotNull(
-        statusTersimpan.get<String>(
-            TujuanNavigasiKasir.DetailTransaksi.namaArgumenTransaksiId,
-        ),
-    ) {
-        "Argumen transaksiId wajib tersedia pada layar detail transaksi."
-    }
+    private val transaksiId: String? = savedStateHandle[TujuanNavigasiKasir.DetailTransaksi.namaArgumenTransaksiId]
 
     private val _modelTampilan = MutableStateFlow(ModelTampilanDetailTransaksi())
 
     /**
-     * Aliran status tampilan yang dapat diobservasi oleh UI.
+     * Aliran status tampilan detail yang diobservasi oleh UI.
      */
     val modelTampilan: StateFlow<ModelTampilanDetailTransaksi> = _modelTampilan.asStateFlow()
 
@@ -47,30 +43,34 @@ class LayarDetailTransaksiViewModel(
     }
 
     /**
-     * Mencoba memuat ulang data rincian transaksi.
+     * Memuat ulang data detail transaksi dari repositori.
      */
     fun muatUlang() {
         muatDetailTransaksi()
     }
 
     private fun muatDetailTransaksi() {
+        val id = transaksiId
+        if (id == null) {
+            _modelTampilan.value = ModelTampilanDetailTransaksi(
+                statusMuat = StatusMuatDetailTransaksi.Gagal(
+                    judul = "Data transaksi tidak ditemukan",
+                    deskripsi = "ID transaksi tidak valid atau tidak tersedia.",
+                ),
+            )
+            return
+        }
+
         viewModelScope.launch {
-            _modelTampilan.update { statusLama ->
-                statusLama.copy(
-                    statusMuat = StatusMuatDetailTransaksi.Memuat,
-                )
-            }
-
+            _modelTampilan.update { it.copy(statusMuat = StatusMuatDetailTransaksi.Memuat) }
             try {
-                // Simulasi pemuatan data (nantinya diganti dengan repository/Room)
-                val transaksi = RiwayatTransaksiContoh.temukanBerdasarkanId(transaksiId)
+                val transaksi = repositori.ambilTransaksiBerdasarkanId(id)
 
-                _modelTampilan.value = if (transaksi == null) {
-                    ModelTampilanDetailTransaksi(
-                        judulLayar = "Detail Transaksi",
-                        statusMuat = StatusMuatDetailTransaksi.Kosong(
+                if (transaksi == null) {
+                    _modelTampilan.value = ModelTampilanDetailTransaksi(
+                        statusMuat = StatusMuatDetailTransaksi.Gagal(
                             judul = "Transaksi tidak ditemukan",
-                            deskripsi = "Transaksi dengan id $transaksiId belum tersedia pada data contoh saat ini.",
+                            deskripsi = "Data untuk ID $id tidak ada di database lokal.",
                         ),
                     )
                 } else {
