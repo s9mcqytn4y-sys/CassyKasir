@@ -1,15 +1,18 @@
 package id.cassy.kasir.antarmuka.komponen
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -97,14 +100,14 @@ fun StatusGagalSederhana(
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
             if (saatCobaLagi != null) {
-                androidx.compose.material3.OutlinedButton(
+                OutlinedButton(
                     onClick = saatCobaLagi,
                     modifier = Modifier.padding(top = 8.dp),
-                    border = androidx.compose.foundation.BorderStroke(
+                    border = BorderStroke(
                         1.dp,
                         MaterialTheme.colorScheme.onErrorContainer,
                     ),
-                    colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                    colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onErrorContainer,
                     ),
                 ) {
