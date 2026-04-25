@@ -14,7 +14,7 @@ import id.cassy.kasir.data.lokal.entitas.EntitasTransaksiLokal
         EntitasTransaksiLokal::class,
         EntitasItemTransaksiLokal::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class BasisDataCassyKasir : RoomDatabase() {
