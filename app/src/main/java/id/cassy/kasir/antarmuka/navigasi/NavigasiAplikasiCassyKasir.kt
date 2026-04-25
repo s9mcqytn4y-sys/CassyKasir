@@ -9,27 +9,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import id.cassy.kasir.antarmuka.detail.AksiLayarDetailProduk
+import id.cassy.kasir.antarmuka.detail.EfekLayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
-import id.cassy.kasir.antarmuka.detail.StatusMuatDetailProduk
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
 import id.cassy.kasir.antarmuka.utama.AksiLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
+import kotlinx.coroutines.flow.collectLatest
 
-/**
- * Root navigasi aplikasi CassyKasir.
- *
- * File ini hanya bertanggung jawab pada:
- * - pemetaan destination
- * - pembuatan ViewModel per layar
- * - perpindahan antar layar
- */
 @Composable
 fun NavigasiAplikasiCassyKasir() {
     val pengendaliNavigasi = rememberNavController()
 
-    // ViewModel utama dibuat di level root agar transaksi aktif bisa dibagikan
     val layarUtamaKasirViewModel: LayarUtamaKasirViewModel = viewModel()
     val modelTampilanKasir = layarUtamaKasirViewModel.modelTampilan.collectAsStateWithLifecycle()
 
@@ -89,37 +82,34 @@ fun NavigasiAplikasiCassyKasir() {
             val layarDetailProdukViewModel: LayarDetailProdukViewModel = viewModel()
             val modelTampilanDetail = layarDetailProdukViewModel.modelTampilan.collectAsStateWithLifecycle()
 
+            LaunchedEffect(layarDetailProdukViewModel) {
+                layarDetailProdukViewModel.efek.collectLatest { efek ->
+                    when (efek) {
+                        is EfekLayarDetailProduk.MintaTambahKeKeranjang -> {
+                            layarUtamaKasirViewModel.tanganiAksi(
+                                AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                                    produkId = efek.produkId,
+                                ),
+                            )
+
+                            pengendaliNavigasi.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.simpanPesanTambahProdukDariDetail(
+                                    pesan = "${efek.namaProduk} ditambahkan ke keranjang.",
+                                )
+
+                            pengendaliNavigasi.navigateUp()
+                        }
+                    }
+                }
+            }
+
             LayarDetailProduk(
                 modelTampilan = modelTampilanDetail.value,
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },
-                saatCobaMuatUlang = layarDetailProdukViewModel::muatUlang,
-                saatTambahKeKeranjang = { produkId ->
-                    layarUtamaKasirViewModel.tanganiAksi(
-                        AksiLayarUtamaKasir.TambahProdukKeKeranjang(
-                            produkId = produkId,
-                        ),
-                    )
-
-                    val pesanHasil = when (val statusMuat = modelTampilanDetail.value.statusMuat) {
-                        is StatusMuatDetailProduk.Berhasil -> {
-                            "${statusMuat.namaProduk} ditambahkan ke keranjang."
-                        }
-
-                        else -> {
-                            "Produk ditambahkan ke keranjang."
-                        }
-                    }
-
-                    pengendaliNavigasi.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.simpanPesanTambahProdukDariDetail(
-                            pesan = pesanHasil,
-                        )
-
-                    pengendaliNavigasi.navigateUp()
-                },
+                saatAksiDikirim = layarDetailProdukViewModel::tanganiAksi,
             )
         }
     }

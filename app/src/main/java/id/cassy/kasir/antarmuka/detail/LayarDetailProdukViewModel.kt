@@ -5,20 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
 import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Pengelola status untuk layar detail produk.
- *
- * ViewModel ini:
- * - membaca produkId dari argumen navigasi
- * - memuat detail produk
- * - membentuk state layar yang tegas: memuat, berhasil, kosong, atau gagal
- */
 class LayarDetailProdukViewModel(
     statusTersimpan: SavedStateHandle,
 ) : ViewModel() {
@@ -38,28 +32,36 @@ class LayarDetailProdukViewModel(
             statusMuat = StatusMuatDetailProduk.Memuat,
         ),
     )
-    val modelTampilan: StateFlow<ModelTampilanDetailProduk> = _modelTampilan.asStateFlow()
+    val modelTampilan = _modelTampilan.asStateFlow()
+
+    private val _efek = MutableSharedFlow<EfekLayarDetailProduk>(
+        extraBufferCapacity = 1,
+    )
+    val efek: SharedFlow<EfekLayarDetailProduk> = _efek.asSharedFlow()
 
     init {
         muatDetailProduk()
     }
 
     /**
-     * Memuat ulang detail produk.
-     *
-     * Fungsi ini akan berguna saat nanti sumber data berpindah ke repository
-     * lokal atau remote.
+     * Titik masuk tunggal untuk aksi UI layar detail produk.
      */
+    fun tanganiAksi(aksi: AksiLayarDetailProduk) {
+        when (aksi) {
+            AksiLayarDetailProduk.CobaTambahKeKeranjang -> {
+                cobaTambahKeKeranjang()
+            }
+
+            AksiLayarDetailProduk.CobaMuatUlang -> {
+                muatDetailProduk()
+            }
+        }
+    }
+
     fun muatUlang() {
         muatDetailProduk()
     }
 
-    /**
-     * Memuat detail produk dari katalog contoh berdasarkan produkId.
-     *
-     * Pada tahap ini sumber data masih lokal dan sangat cepat,
-     * sehingga status memuat bisa berlangsung sangat singkat saat runtime.
-     */
     private fun muatDetailProduk() {
         viewModelScope.launch {
             _modelTampilan.update { statusLama ->
@@ -86,12 +88,19 @@ class LayarDetailProdukViewModel(
                             deskripsiProduk = produk.deskripsi.ifBlank {
                                 "Produk ini belum memiliki deskripsi tambahan."
                             },
-                            labelAksiTambah = if (aksiTambahAktif) {
-                                "Tambah ke Keranjang"
-                            } else {
-                                "Produk Tidak Tersedia"
-                            },
-                            aksiTambahAktif = aksiTambahAktif,
+                            statusAksi = StatusAksiDetailProduk(
+                                label = if (aksiTambahAktif) {
+                                    "Tambah ke Keranjang"
+                                } else {
+                                    "Produk Tidak Tersedia"
+                                },
+                                aktif = aksiTambahAktif,
+                                keterangan = if (aksiTambahAktif) {
+                                    "Produk siap ditambahkan ke transaksi aktif."
+                                } else {
+                                    "Produk ini tidak bisa ditambahkan karena sedang tidak tersedia."
+                                },
+                            ),
                         ),
                     )
                 } else {
@@ -115,5 +124,18 @@ class LayarDetailProdukViewModel(
                 )
             }
         }
+    }
+
+    private fun cobaTambahKeKeranjang() {
+        val statusMuatSaatIni = _modelTampilan.value.statusMuat
+        if (statusMuatSaatIni !is StatusMuatDetailProduk.Berhasil) return
+        if (!statusMuatSaatIni.statusAksi.aktif) return
+
+        _efek.tryEmit(
+            EfekLayarDetailProduk.MintaTambahKeKeranjang(
+                produkId = produkId,
+                namaProduk = statusMuatSaatIni.namaProduk,
+            ),
+        )
     }
 }

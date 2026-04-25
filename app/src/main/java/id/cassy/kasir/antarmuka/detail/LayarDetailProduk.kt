@@ -23,19 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 
-/**
- * Layar detail produk.
- *
- * Layar ini hanya merender status yang sudah dibentuk oleh ViewModel.
- * Ia tidak membaca argumen navigasi secara langsung.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayarDetailProduk(
     modelTampilan: ModelTampilanDetailProduk,
     saatKembali: () -> Unit,
-    saatCobaMuatUlang: () -> Unit,
-    saatTambahKeKeranjang: (String) -> Unit,
+    saatAksiDikirim: (AksiLayarDetailProduk) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -74,10 +67,9 @@ fun LayarDetailProduk(
                     hargaProduk = statusMuat.hargaProduk,
                     stokTersedia = statusMuat.stokTersedia,
                     deskripsiProduk = statusMuat.deskripsiProduk,
-                    labelAksiTambah = statusMuat.labelAksiTambah,
-                    aksiTambahAktif = statusMuat.aksiTambahAktif,
+                    statusAksi = statusMuat.statusAksi,
                     saatTambahKeKeranjang = {
-                        saatTambahKeKeranjang(modelTampilan.produkId)
+                        saatAksiDikirim(AksiLayarDetailProduk.CobaTambahKeKeranjang)
                     },
                 )
             }
@@ -95,16 +87,15 @@ fun LayarDetailProduk(
                     paddingDalam = paddingDalam,
                     judulStatusGagal = statusMuat.judul,
                     deskripsiStatusGagal = statusMuat.deskripsi,
-                    saatCobaMuatUlang = saatCobaMuatUlang,
+                    saatCobaMuatUlang = {
+                        saatAksiDikirim(AksiLayarDetailProduk.CobaMuatUlang)
+                    },
                 )
             }
         }
     }
 }
 
-/**
- * Konten saat detail produk sedang dimuat.
- */
 @Composable
 private fun KontenMemuatDetailProduk(
     paddingDalam: PaddingValues,
@@ -128,9 +119,6 @@ private fun KontenMemuatDetailProduk(
     }
 }
 
-/**
- * Konten ketika produk berhasil ditemukan.
- */
 @Composable
 private fun KontenDetailProduk(
     paddingDalam: PaddingValues,
@@ -138,8 +126,7 @@ private fun KontenDetailProduk(
     hargaProduk: String,
     stokTersedia: Int,
     deskripsiProduk: String,
-    labelAksiTambah: String,
-    aksiTambahAktif: Boolean,
+    statusAksi: StatusAksiDetailProduk,
     saatTambahKeKeranjang: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -174,23 +161,28 @@ private fun KontenDetailProduk(
             color = MaterialTheme.colorScheme.onBackground,
         )
 
+        statusAksi.keterangan?.let { keterangan ->
+            Text(
+                text = keterangan,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
         Button(
             onClick = saatTambahKeKeranjang,
-            enabled = aksiTambahAktif,
+            enabled = statusAksi.aktif,
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp),
         ) {
             Text(
-                text = labelAksiTambah,
+                text = statusAksi.label,
             )
         }
     }
 }
 
-/**
- * Konten ketika produk tidak ditemukan.
- */
 @Composable
 private fun KontenProdukTidakDitemukan(
     paddingDalam: PaddingValues,
@@ -212,9 +204,6 @@ private fun KontenProdukTidakDitemukan(
     }
 }
 
-/**
- * Konten ketika terjadi kegagalan memuat detail produk.
- */
 @Composable
 private fun KontenGagalMemuatDetailProduk(
     paddingDalam: PaddingValues,
