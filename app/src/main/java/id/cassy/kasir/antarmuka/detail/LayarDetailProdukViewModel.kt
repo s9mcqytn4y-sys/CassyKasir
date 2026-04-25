@@ -74,6 +74,8 @@ class LayarDetailProdukViewModel(
                 }
 
                 _modelTampilan.value = if (produk != null) {
+                    val aksiTambahAktif = produk.aktif && produk.stokTersedia > 0
+
                     ModelTampilanDetailProduk(
                         produkId = produkId,
                         judulLayar = "Detail Produk",
@@ -84,6 +86,12 @@ class LayarDetailProdukViewModel(
                             deskripsiProduk = produk.deskripsi.ifBlank {
                                 "Produk ini belum memiliki deskripsi tambahan."
                             },
+                            labelAksiTambah = if (aksiTambahAktif) {
+                                "Tambah ke Keranjang"
+                            } else {
+                                "Produk Tidak Tersedia"
+                            },
+                            aksiTambahAktif = aksiTambahAktif,
                         ),
                     )
                 } else {

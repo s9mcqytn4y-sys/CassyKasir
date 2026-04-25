@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
+import id.cassy.kasir.antarmuka.utama.AksiLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 
@@ -26,6 +27,10 @@ import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 fun NavigasiAplikasiCassyKasir() {
     val pengendaliNavigasi = rememberNavController()
 
+    // ViewModel utama dibuat di level root agar transaksi aktif bisa dibagikan
+    val layarUtamaKasirViewModel: LayarUtamaKasirViewModel = viewModel()
+    val modelTampilanKasir = layarUtamaKasirViewModel.modelTampilan.collectAsStateWithLifecycle()
+
     NavHost(
         navController = pengendaliNavigasi,
         startDestination = TujuanNavigasiKasir.KasirUtama.rute,
@@ -33,11 +38,8 @@ fun NavigasiAplikasiCassyKasir() {
         composable(
             route = TujuanNavigasiKasir.KasirUtama.rute,
         ) {
-            val layarUtamaKasirViewModel: LayarUtamaKasirViewModel = viewModel()
-            val modelTampilan = layarUtamaKasirViewModel.modelTampilan.collectAsStateWithLifecycle()
-
             LayarUtamaKasir(
-                modelTampilan = modelTampilan.value,
+                modelTampilan = modelTampilanKasir.value,
                 saatAksiDikirim = layarUtamaKasirViewModel::tanganiAksi,
                 alurEfek = layarUtamaKasirViewModel.efek,
                 saatBukaRiwayatTransaksi = {
@@ -68,14 +70,22 @@ fun NavigasiAplikasiCassyKasir() {
             ),
         ) {
             val layarDetailProdukViewModel: LayarDetailProdukViewModel = viewModel()
-            val modelTampilan = layarDetailProdukViewModel.modelTampilan.collectAsStateWithLifecycle()
+            val modelTampilanDetail = layarDetailProdukViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LayarDetailProduk(
-                modelTampilan = modelTampilan.value,
+                modelTampilan = modelTampilanDetail.value,
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },
                 saatCobaMuatUlang = layarDetailProdukViewModel::muatUlang,
+                saatTambahKeKeranjang = { produkId ->
+                    layarUtamaKasirViewModel.tanganiAksi(
+                        AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                            produkId = produkId,
+                        ),
+                    )
+                    pengendaliNavigasi.navigateUp()
+                },
             )
         }
     }

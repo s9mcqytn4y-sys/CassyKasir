@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Button
@@ -33,6 +35,7 @@ fun LayarDetailProduk(
     modelTampilan: ModelTampilanDetailProduk,
     saatKembali: () -> Unit,
     saatCobaMuatUlang: () -> Unit,
+    saatTambahKeKeranjang: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -71,6 +74,11 @@ fun LayarDetailProduk(
                     hargaProduk = statusMuat.hargaProduk,
                     stokTersedia = statusMuat.stokTersedia,
                     deskripsiProduk = statusMuat.deskripsiProduk,
+                    labelAksiTambah = statusMuat.labelAksiTambah,
+                    aksiTambahAktif = statusMuat.aksiTambahAktif,
+                    saatTambahKeKeranjang = {
+                        saatTambahKeKeranjang(modelTampilan.produkId)
+                    },
                 )
             }
 
@@ -130,6 +138,9 @@ private fun KontenDetailProduk(
     hargaProduk: String,
     stokTersedia: Int,
     deskripsiProduk: String,
+    labelAksiTambah: String,
+    aksiTambahAktif: Boolean,
+    saatTambahKeKeranjang: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -162,6 +173,18 @@ private fun KontenDetailProduk(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
         )
+
+        Button(
+            onClick = saatTambahKeKeranjang,
+            enabled = aksiTambahAktif,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp),
+        ) {
+            Text(
+                text = labelAksiTambah,
+            )
+        }
     }
 }
 

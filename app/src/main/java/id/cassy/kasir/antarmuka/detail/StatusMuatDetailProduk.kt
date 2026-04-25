@@ -26,6 +26,8 @@ sealed interface StatusMuatDetailProduk {
         val hargaProduk: String,
         val stokTersedia: Int,
         val deskripsiProduk: String,
+        val labelAksiTambah: String,
+        val aksiTambahAktif: Boolean,
     ) : StatusMuatDetailProduk
 
     /**
