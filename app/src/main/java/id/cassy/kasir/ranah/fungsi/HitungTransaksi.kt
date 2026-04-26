@@ -132,24 +132,15 @@ fun transaksiSiapDiproses(
     biayaLayanan: Long = 0,
     pajak: Long = 0,
 ): Boolean {
-    if (daftarItemKeranjang.isEmpty()) {
+    if (uangDibayar < 0L || potongan < 0L || biayaLayanan < 0L || pajak < 0L) {
         return false
     }
 
-    if (daftarItemKeranjang.any { itemKeranjang -> itemKeranjang.jumlah <= 0 }) {
-        return false
-    }
-
-    if (daftarItemKeranjang.any { itemKeranjang -> !itemKeranjang.produk.aktif }) {
-        return false
-    }
-
-    val totalTransaksi = hitungTotalTransaksi(
+    return validasiCheckoutDenganPajakManual(
         daftarItemKeranjang = daftarItemKeranjang,
-        potongan = potongan,
-        biayaLayanan = biayaLayanan,
-        pajak = pajak,
-    )
-
-    return uangDibayar >= totalTransaksi
+        uangDibayar = Uang.dariRupiah(uangDibayar),
+        potongan = Uang.dariRupiah(potongan),
+        biayaLayanan = Uang.dariRupiah(biayaLayanan),
+        pajak = Uang.dariRupiah(pajak),
+    ).apakahSah
 }

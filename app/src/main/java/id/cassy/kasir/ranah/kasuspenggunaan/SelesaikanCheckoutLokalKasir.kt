@@ -2,8 +2,11 @@ package id.cassy.kasir.ranah.kasuspenggunaan
 
 import id.cassy.kasir.data.lokal.identitas.PembangkitIdentitasTransaksiLokal
 import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
-import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
-import id.cassy.kasir.ranah.fungsi.transaksiSiapDiproses
+import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksiUang
+import id.cassy.kasir.ranah.fungsi.sanitasiDaftarItemKeranjangUntukCheckout
+import id.cassy.kasir.ranah.fungsi.validasiCheckout
+import id.cassy.kasir.ranah.fungsi.validasiDaftarItemCheckout
+import id.cassy.kasir.ranah.model.HasilValidasiCheckout
 import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.StatusSinkronisasi
 import id.cassy.kasir.ranah.model.Transaksi
@@ -31,31 +34,28 @@ class SelesaikanCheckoutLokalKasir(
     suspend fun eksekusi(
         daftarItemKeranjang: List<ItemKeranjang>,
     ): HasilCheckoutLokalKasir {
-        val totalCheckout = hitungTotalTransaksi(
-            daftarItemKeranjang = daftarItemKeranjang,
-            potongan = 0,
-            biayaLayanan = 0,
-            pajak = 0,
+        val daftarItemKeranjangBersih = daftarItemKeranjang
+            .sanitasiDaftarItemKeranjangUntukCheckout()
+
+        validasiDaftarItemCheckout(
+            daftarItemKeranjang = daftarItemKeranjangBersih,
+        ).pastikanSah()
+
+        val totalCheckout = hitungTotalTransaksiUang(
+            daftarItemKeranjang = daftarItemKeranjangBersih,
         )
 
-        require(
-            transaksiSiapDiproses(
-                daftarItemKeranjang = daftarItemKeranjang,
-                uangDibayar = totalCheckout,
-                potongan = 0,
-                biayaLayanan = 0,
-                pajak = 0,
-            ),
-        ) {
-            "Transaksi belum valid untuk disimpan."
-        }
+        validasiCheckout(
+            daftarItemKeranjang = daftarItemKeranjangBersih,
+            uangDibayar = totalCheckout,
+        ).pastikanSah()
 
-        val jumlahItemCheckout = daftarItemKeranjang.hitungJumlahItem()
+        val jumlahItemCheckout = daftarItemKeranjangBersih.hitungJumlahItem()
 
         val transaksi = Transaksi(
             id = PembangkitIdentitasTransaksiLokal.buatIdentitasBaru(),
-            daftarItemKeranjang = daftarItemKeranjang,
-            uangDibayar = totalCheckout,
+            daftarItemKeranjang = daftarItemKeranjangBersih,
+            uangDibayar = totalCheckout.nilaiRupiah,
             potongan = 0,
             biayaLayanan = 0,
             pajak = 0,
@@ -69,7 +69,20 @@ class SelesaikanCheckoutLokalKasir(
             daftarItemKeranjangBaru = emptyList(),
             statusSinkronisasiBaru = StatusSinkronisasi.SinkronLokal,
             jumlahItemCheckout = jumlahItemCheckout,
-            totalCheckout = totalCheckout,
+            totalCheckout = totalCheckout.nilaiRupiah,
         )
+    }
+}
+
+/**
+ * Mengubah hasil validasi tidak sah menjadi exception domain yang jelas.
+ *
+ * Untuk tahap sekarang, ViewModel masih menangkap Exception dan menampilkan
+ * pesan umum. Pesan spesifik ini disiapkan agar Scope berikutnya bisa
+ * menampilkan alasan validasi yang lebih tepat kepada kasir.
+ */
+private fun HasilValidasiCheckout.pastikanSah() {
+    if (this is HasilValidasiCheckout.TidakSah) {
+        throw IllegalArgumentException(pesan)
     }
 }
