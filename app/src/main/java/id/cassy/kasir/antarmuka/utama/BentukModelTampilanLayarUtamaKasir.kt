@@ -1,23 +1,19 @@
-package id.cassy.kasir.ranah.kasuspenggunaan
+package id.cassy.kasir.antarmuka.utama
 
-import id.cassy.kasir.antarmuka.utama.ModelTampilanLayarUtamaKasir
-import id.cassy.kasir.antarmuka.utama.RingkasanPembayaranKasir
-import id.cassy.kasir.antarmuka.utama.StatusBerandaKasir
-import id.cassy.kasir.antarmuka.utama.StatusElemenLayarUtamaKasir
-import id.cassy.kasir.antarmuka.utama.StatusKeranjangKasir
-import id.cassy.kasir.antarmuka.utama.StatusKonfirmasiCheckoutKasir
-import id.cassy.kasir.antarmuka.utama.StatusTransaksiLayarUtamaKasir
 import id.cassy.kasir.ranah.fungsi.cariProduk
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
+import id.cassy.kasir.ranah.kasuspenggunaan.HasilHitungTotalBelanja
+import id.cassy.kasir.ranah.kasuspenggunaan.HitungTotalBelanja
+import id.cassy.kasir.ranah.kasuspenggunaan.RingkasanTotalBelanja
 import id.cassy.kasir.ranah.model.Produk
 import id.cassy.kasir.ranah.model.RincianBiayaTransaksi
 import id.cassy.kasir.ranah.model.Uang
 
 /**
- * Kasus penggunaan untuk mentransformasikan data domain dan status internal menjadi model tampilan (UI State).
+ * Pembentuk model tampilan untuk layar utama kasir.
  *
- * Mengikuti pola Unidirectional Data Flow (UDF) dengan memastikan seluruh logika pembentukan
- * status antarmuka terpusat di sini, sehingga ViewModel tetap bersih dan fokus pada manajemen aliran data.
+ * File ini berada di layer antarmuka karena menghasilkan state presentasi
+ * yang langsung dipakai oleh Compose.
  */
 class BentukModelTampilanLayarUtamaKasir {
     private val hitungTotalBelanja = HitungTotalBelanja()
@@ -102,4 +98,3 @@ class BentukModelTampilanLayarUtamaKasir {
         )
     }
 }
-

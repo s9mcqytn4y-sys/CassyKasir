@@ -3,7 +3,6 @@ package id.cassy.kasir.antarmuka.utama
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
-import id.cassy.kasir.ranah.kasuspenggunaan.BentukModelTampilanLayarUtamaKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.HapusProdukDariKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
