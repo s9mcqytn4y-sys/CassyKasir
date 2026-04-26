@@ -2,6 +2,7 @@ package id.cassy.kasir.antarmuka.utama
 
 import androidx.compose.runtime.Immutable
 import id.cassy.kasir.ranah.model.ItemKeranjang
+import id.cassy.kasir.ranah.model.StatusSinkronisasi
 
 /**
  * Kelompok status yang merepresentasikan data transaksi aktif di kasir.
@@ -10,12 +11,12 @@ import id.cassy.kasir.ranah.model.ItemKeranjang
  * Digunakan untuk melacak item yang dipilih pelanggan dan status persistensi data.
  *
  * @property daftarItemKeranjang Daftar produk yang telah ditambahkan ke keranjang belanja.
- * @property statusSinkronisasi Label teks yang menunjukkan status penyimpanan data (misal: "Tersimpan Lokal").
+ * @property statusSinkronisasi Objek status yang menunjukkan kondisi sinkronisasi data.
  */
 @Immutable
 data class StatusTransaksiLayarUtamaKasir(
     val daftarItemKeranjang: List<ItemKeranjang> = emptyList(),
-    val statusSinkronisasi: String = "Tersimpan Lokal",
+    val statusSinkronisasi: StatusSinkronisasi = StatusSinkronisasi.SinkronLokal,
 )
 
 /**

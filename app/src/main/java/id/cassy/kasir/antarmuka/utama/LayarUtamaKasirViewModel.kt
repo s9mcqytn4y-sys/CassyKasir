@@ -2,13 +2,14 @@ package id.cassy.kasir.antarmuka.utama
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
 import id.cassy.kasir.ranah.kasuspenggunaan.BentukModelTampilanLayarUtamaKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.HapusProdukDariKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
+import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.TambahProdukKeKeranjang
 import id.cassy.kasir.ranah.model.Produk
+import id.cassy.kasir.ranah.model.StatusSinkronisasi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,10 +32,16 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class LayarUtamaKasirViewModel(
+    private val muatKatalogProduk: MuatKatalogProduk,
     private val selesaikanCheckoutLokalKasirUseCase: SelesaikanCheckoutLokalKasir,
 ) : ViewModel() {
 
-    private val daftarProdukPenuh: List<Produk> = KatalogProdukContoh.daftarAwal()
+    private val daftarProdukPenuh = muatKatalogProduk.eksekusi()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList(),
+        )
 
     private val tambahProdukKeKeranjangUseCase = TambahProdukKeKeranjang()
     private val kurangiProdukDiKeranjangUseCase = KurangiProdukDiKeranjang()
@@ -68,13 +75,14 @@ class LayarUtamaKasirViewModel(
      * Aliran status UI publik yang dirender oleh Compose.
      */
     val modelTampilan = combine(
+        daftarProdukPenuh,
         _statusTransaksi,
         _statusElemenLayar,
         _kataKunciPencarian,
         kataKunciPencarianEfektif,
-    ) { statusTransaksi, statusElemenLayar, kataKunciMentah, kataKunciEfektif ->
+    ) { produk, statusTransaksi, statusElemenLayar, kataKunciMentah, kataKunciEfektif ->
         bentukModelTampilanUseCase(
-            daftarProdukPenuh = daftarProdukPenuh,
+            daftarProdukPenuh = produk,
             statusTransaksi = statusTransaksi,
             statusElemenLayar = statusElemenLayar,
             kataKunciMentah = kataKunciMentah,
@@ -84,7 +92,7 @@ class LayarUtamaKasirViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = bentukModelTampilanUseCase(
-            daftarProdukPenuh = daftarProdukPenuh,
+            daftarProdukPenuh = emptyList(),
             statusTransaksi = StatusTransaksiLayarUtamaKasir(),
             statusElemenLayar = StatusElemenLayarUtamaKasir(),
             kataKunciMentah = "",
@@ -127,7 +135,7 @@ class LayarUtamaKasirViewModel(
     }
 
     private fun tambahProdukKeKeranjang(produkId: String) {
-        val produk = daftarProdukPenuh.firstOrNull { it.id == produkId } ?: return
+        val produk = daftarProdukPenuh.value.firstOrNull { it.id == produkId } ?: return
 
         var apakahStokPenuh = false
 
@@ -142,7 +150,7 @@ class LayarUtamaKasirViewModel(
 
             statusLama.copy(
                 daftarItemKeranjang = daftarBaru,
-                statusSinkronisasi = "Tersimpan Lokal",
+                statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
             )
         }
 
@@ -164,7 +172,7 @@ class LayarUtamaKasirViewModel(
                     daftarItemKeranjang = statusLama.daftarItemKeranjang,
                     produkId = produkId,
                 ),
-                statusSinkronisasi = "Tersimpan Lokal",
+                statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
             )
         }
 
@@ -178,7 +186,7 @@ class LayarUtamaKasirViewModel(
                     daftarItemKeranjang = statusLama.daftarItemKeranjang,
                     produkId = produkId,
                 ),
-                statusSinkronisasi = "Tersimpan Lokal",
+                statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
             )
         }
 

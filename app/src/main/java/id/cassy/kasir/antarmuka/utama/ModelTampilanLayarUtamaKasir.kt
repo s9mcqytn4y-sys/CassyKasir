@@ -3,6 +3,7 @@ package id.cassy.kasir.antarmuka.utama
 import androidx.compose.runtime.Immutable
 import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.Produk
+import id.cassy.kasir.ranah.model.StatusSinkronisasi
 
 /**
  * Status ringkasan informasi aplikasi dan metrik cepat di beranda.
@@ -12,7 +13,7 @@ import id.cassy.kasir.ranah.model.Produk
  * @property jumlahProdukTersedia Total produk dalam katalog.
  * @property jumlahItemKeranjang Total kuantitas item di keranjang.
  * @property totalBelanjaSementara Estimasi nilai belanja saat ini.
- * @property statusSinkronisasi Keterangan status penyimpanan data.
+ * @property statusSinkronisasi Objek status sinkronisasi data.
  */
 @Immutable
 data class StatusBerandaKasir(
@@ -21,7 +22,7 @@ data class StatusBerandaKasir(
     val jumlahProdukTersedia: Int,
     val jumlahItemKeranjang: Int,
     val totalBelanjaSementara: String,
-    val statusSinkronisasi: String,
+    val statusSinkronisasi: StatusSinkronisasi,
 )
 
 /**
@@ -113,7 +114,7 @@ data class ModelTampilanLayarUtamaKasir(
         jumlahProdukTersedia = 0,
         jumlahItemKeranjang = 0,
         totalBelanjaSementara = "Rp0",
-        statusSinkronisasi = "Tersimpan Lokal",
+        statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
     ),
     val daftarProdukTersaring: List<Produk> = emptyList(),
     val daftarItemKeranjang: List<ItemKeranjang> = emptyList(),

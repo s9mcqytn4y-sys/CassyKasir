@@ -19,6 +19,7 @@ object PenyediaViewModelKasir {
         initializer {
             val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
             LayarUtamaKasirViewModel(
+                muatKatalogProduk = aplikasi.kontainer.muatKatalogProduk,
                 selesaikanCheckoutLokalKasirUseCase = aplikasi.kontainer.selesaikanCheckoutLokalKasir,
             )
         }

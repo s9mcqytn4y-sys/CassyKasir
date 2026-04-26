@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.model.ItemKeranjang
+import id.cassy.kasir.ranah.model.StatusSinkronisasi
 
 import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
 import id.cassy.kasir.data.lokal.identitas.PembangkitIdTransaksiLokal
@@ -13,14 +14,14 @@ import id.cassy.kasir.ranah.model.Transaksi
  * Hasil penyelesaian checkout statis lokal.
  *
  * @property daftarItemKeranjangBaru Daftar item keranjang setelah checkout (biasanya kosong).
- * @property statusSinkronisasiBaru Label status penyimpanan transaksi.
+ * @property statusSinkronisasiBaru Objek status penyimpanan transaksi.
  * @property jumlahItemCheckout Total kuantitas item yang berhasil diproses.
  * @property totalCheckout Nilai moneter total dari transaksi.
  */
 @Immutable
 data class HasilCheckoutLokalKasir(
     val daftarItemKeranjangBaru: List<ItemKeranjang>,
-    val statusSinkronisasiBaru: String,
+    val statusSinkronisasiBaru: StatusSinkronisasi,
     val jumlahItemCheckout: Int,
     val totalCheckout: Long,
 )
@@ -69,7 +70,7 @@ class SelesaikanCheckoutLokalKasir(
 
         return HasilCheckoutLokalKasir(
             daftarItemKeranjangBaru = emptyList(),
-            statusSinkronisasiBaru = "Tersimpan di Room",
+            statusSinkronisasiBaru = StatusSinkronisasi.SinkronLokal,
             jumlahItemCheckout = jumlahItemCheckout,
             totalCheckout = totalCheckout,
         )
