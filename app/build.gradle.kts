@@ -110,6 +110,9 @@ dependencies {
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
 
+    // Pengujian lokal JVM untuk logika domain murni.
+    testImplementation(libs.junit)
+
     // Dependensi Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
