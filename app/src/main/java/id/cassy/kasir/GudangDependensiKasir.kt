@@ -9,6 +9,7 @@ import id.cassy.kasir.data.lokal.basisdata.BasisDataCassyKasir
 import id.cassy.kasir.data.lokal.basisdata.MigrasiBasisDataKasir
 import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
 import id.cassy.kasir.data.repositori.RepositoriProdukLokalRemote
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiProdukBerdasarkanIdentitas
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
 import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
@@ -76,6 +77,13 @@ class GudangDependensiKasir(
      */
     val muatKatalogProduk: MuatKatalogProduk by lazy {
         MuatKatalogProduk(repositoriProduk)
+    }
+
+    /**
+     * Kasus penggunaan untuk mengamati detail produk dari sumber lokal.
+     */
+    val amatiProdukBerdasarkanIdentitas: AmatiProdukBerdasarkanIdentitas by lazy {
+        AmatiProdukBerdasarkanIdentitas(repositoriProduk)
     }
 
     /**

@@ -100,7 +100,9 @@ fun NavigasiAplikasiCassyKasir() {
                 },
             ),
         ) {
-            val layarDetailProdukViewModel: LayarDetailProdukViewModel = viewModel()
+            val layarDetailProdukViewModel: LayarDetailProdukViewModel = viewModel(
+                factory = PenyediaViewModelKasir.Factory,
+            )
             val modelTampilanDetail = layarDetailProdukViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LaunchedEffect(layarDetailProdukViewModel) {

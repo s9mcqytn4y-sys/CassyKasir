@@ -20,16 +20,38 @@ interface AksesDataProdukLokal {
     fun amatiSemuaProduk(): Flow<List<EntitasProdukLokal>>
 
     /**
+     * Mengambil satu produk lokal berdasarkan identitas produk.
+     */
+    @Query("SELECT * FROM produk WHERE id = :identitasProduk LIMIT 1")
+    fun amatiProdukBerdasarkanIdentitas(
+        identitasProduk: String,
+    ): Flow<EntitasProdukLokal?>
+
+    /**
+     * Menghitung jumlah produk lokal.
+     */
+    @Query("SELECT COUNT(*) FROM produk")
+    suspend fun hitungJumlahProduk(): Int
+
+    /**
      * Mencari produk berdasarkan kata kunci di nama atau deskripsi.
      */
-    @Query("SELECT * FROM produk WHERE nama LIKE '%' || :kataKunci || '%' OR deskripsi LIKE '%' || :kataKunci || '%'")
+    @Query(
+        """
+        SELECT * FROM produk
+        WHERE nama LIKE '%' || :kataKunci || '%'
+        OR deskripsi LIKE '%' || :kataKunci || '%'
+        """,
+    )
     fun cariProduk(kataKunci: String): Flow<List<EntitasProdukLokal>>
 
     /**
-     * Menyimpan banyak produk sekaligus (misal: setelah sinkronisasi).
+     * Menyimpan banyak produk sekaligus.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun simpanBanyakProduk(daftarProduk: List<EntitasProdukLokal>)
+    suspend fun simpanBanyakProduk(
+        daftarProduk: List<EntitasProdukLokal>,
+    )
 
     /**
      * Menghapus semua produk dari tabel lokal.

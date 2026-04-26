@@ -7,6 +7,7 @@ import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
 import id.cassy.kasir.ranah.fungsi.hitungKembalian
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
+import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.Transaksi
 import java.time.Instant
 import java.time.ZoneId
@@ -115,19 +116,19 @@ private fun Transaksi?.keModelTampilanDetailTransaksi(
             transaksiId = id,
             labelWaktu = waktuTransaksiEpochMili.sebagaiLabelWaktuTransaksi(),
             labelJumlahItem = "${hitungJumlahItem()} item",
-            labelSubtotal = subtotal.sebagaiRupiahSederhana(),
-            labelPotongan = potongan.sebagaiRupiahSederhana(),
-            labelBiayaLayanan = biayaLayanan.sebagaiRupiahSederhana(),
-            labelPajak = pajak.sebagaiRupiahSederhana(),
-            labelTotalAkhir = totalAkhir.sebagaiRupiahSederhana(),
-            labelUangDibayar = uangDibayar.sebagaiRupiahSederhana(),
-            labelKembalian = kembalian.sebagaiRupiahSederhana(),
+            labelSubtotal = subtotal.sebagaiRupiah(),
+            labelPotongan = potongan.sebagaiRupiah(),
+            labelBiayaLayanan = biayaLayanan.sebagaiRupiah(),
+            labelPajak = pajak.sebagaiRupiah(),
+            labelTotalAkhir = totalAkhir.sebagaiRupiah(),
+            labelUangDibayar = uangDibayar.sebagaiRupiah(),
+            labelKembalian = kembalian.sebagaiRupiah(),
             daftarItem = daftarItemKeranjang.map { itemKeranjang ->
                 ItemTampilanDetailTransaksi(
                     namaProduk = itemKeranjang.produk.nama,
-                    labelJumlahKaliHarga = "${itemKeranjang.jumlah} x ${itemKeranjang.produk.harga.sebagaiRupiahSederhana()}",
+                    labelJumlahKaliHarga = "${itemKeranjang.jumlah} x ${itemKeranjang.produk.harga.sebagaiRupiah()}",
                     labelSubtotalItem = (itemKeranjang.produk.harga * itemKeranjang.jumlah)
-                        .sebagaiRupiahSederhana(),
+                        .sebagaiRupiah(),
                 )
             },
             catatan = catatan,
@@ -163,6 +164,3 @@ private fun Long.sebagaiLabelWaktuTransaksi(): String {
         .format(formatter)
 }
 
-private fun Long.sebagaiRupiahSederhana(): String {
-    return "Rp$this"
-}

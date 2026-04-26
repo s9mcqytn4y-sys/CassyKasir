@@ -5,6 +5,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.cassy.kasir.AplikasiKasir
+import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksiViewModel
 import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksiViewModel
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
@@ -36,6 +37,15 @@ object PenyediaViewModelKasir {
             LayarDetailTransaksiViewModel(
                 amatiTransaksiBerdasarkanId = aplikasi.kontainer.amatiTransaksiBerdasarkanId,
                 savedStateHandle = createSavedStateHandle(),
+            )
+        }
+
+        initializer {
+            val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
+
+            LayarDetailProdukViewModel(
+                amatiProdukBerdasarkanIdentitas = aplikasi.kontainer.amatiProdukBerdasarkanIdentitas,
+                statusTersimpan = createSavedStateHandle(),
             )
         }
     }

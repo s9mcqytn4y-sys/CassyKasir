@@ -11,6 +11,7 @@ import id.cassy.kasir.ranah.fungsi.cariProduk
 import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
 import id.cassy.kasir.ranah.fungsi.hitungSubtotalKeranjang
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
+import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.Produk
 
 /**
@@ -59,7 +60,7 @@ class BentukModelTampilanLayarUtamaKasir {
                 sloganAplikasi = "Solusi Digital UMKM Modern",
                 jumlahProdukTersedia = daftarProdukPenuh.size,
                 jumlahItemKeranjang = jumlahItem,
-                totalBelanjaSementara = subtotal.sebagaiRupiahSederhana(),
+                totalBelanjaSementara = subtotal.sebagaiRupiah(),
                 statusSinkronisasi = statusTransaksi.statusSinkronisasi,
             ),
             daftarProdukTersaring = daftarProdukTersaring,
@@ -74,17 +75,17 @@ class BentukModelTampilanLayarUtamaKasir {
                 jumlahItem = "$jumlahItem item",
             ),
             ringkasanPembayaran = RingkasanPembayaranKasir(
-                subtotal = subtotal.sebagaiRupiahSederhana(),
-                potongan = "Rp0",
-                pajak = "Rp0",
-                totalAkhir = total.sebagaiRupiahSederhana(),
+                subtotal = subtotal.sebagaiRupiah(),
+                potongan = 0L.sebagaiRupiah(),
+                pajak = 0L.sebagaiRupiah(),
+                totalAkhir = total.sebagaiRupiah(),
                 labelAksiUtama = if (jumlahItem > 0) "Bayar sekarang" else "Pilih produk",
                 aksiUtamaAktif = jumlahItem > 0,
             ),
             statusKonfirmasiCheckout = StatusKonfirmasiCheckoutKasir(
                 apakahTampil = statusElemenLayar.apakahDialogKonfirmasiCheckoutTampil && jumlahItem > 0,
                 judul = "Konfirmasi pembayaran",
-                deskripsi = "Bayar $jumlahItem item dengan total ${total.sebagaiRupiahSederhana()} sekarang?",
+                deskripsi = "Bayar $jumlahItem item dengan total ${total.sebagaiRupiah()} sekarang?",
                 labelKonfirmasi = "Bayar sekarang",
             ),
             statusHasilCheckout = statusElemenLayar.statusHasilCheckout,
@@ -95,9 +96,3 @@ class BentukModelTampilanLayarUtamaKasir {
     }
 }
 
-/**
- * Memformat nilai Long menjadi string representasi Rupiah sederhana.
- */
-private fun Long.sebagaiRupiahSederhana(): String {
-    return "Rp$this"
-}

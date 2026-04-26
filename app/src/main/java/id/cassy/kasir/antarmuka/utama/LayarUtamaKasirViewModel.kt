@@ -101,6 +101,10 @@ class LayarUtamaKasirViewModel(
         ),
     )
 
+    init {
+        pastikanKatalogAwalTersedia()
+    }
+
     /**
      * Titik masuk tunggal untuk semua aksi yang dipicu oleh UI.
      */
@@ -121,6 +125,16 @@ class LayarUtamaKasirViewModel(
 
     private fun perbaruiPencarian(kataKunciBaru: String) {
         _kataKunciPencarian.value = kataKunciBaru
+    }
+
+    private fun pastikanKatalogAwalTersedia() {
+        viewModelScope.launch {
+            try {
+                muatKatalogProduk.pastikanKatalogAwalTersedia()
+            } catch (_: Exception) {
+                kirimPesanSingkat("Katalog awal belum siap. Coba buka ulang aplikasi.")
+            }
+        }
     }
 
     private fun resetPencarian() {

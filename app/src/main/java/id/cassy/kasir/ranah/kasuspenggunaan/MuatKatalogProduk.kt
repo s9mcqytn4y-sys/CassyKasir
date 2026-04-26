@@ -7,16 +7,23 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Kasus penggunaan untuk memuat katalog produk dengan strategi local-first.
- * Langsung mengembalikan data lokal dan menyediakan fungsi untuk sinkronisasi.
  */
 class MuatKatalogProduk(
     private val repositori: RepositoriProduk,
 ) {
+
     /**
      * Mengambil aliran data produk dari penyimpanan lokal.
      */
     fun eksekusi(): Flow<List<Produk>> {
         return repositori.amatiSemuaProduk()
+    }
+
+    /**
+     * Memastikan katalog awal tersedia pada install baru.
+     */
+    suspend fun pastikanKatalogAwalTersedia() {
+        repositori.pastikanKatalogAwalTersedia()
     }
 
     /**

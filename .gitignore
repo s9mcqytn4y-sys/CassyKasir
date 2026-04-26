@@ -11,6 +11,7 @@ build/
 captures/
 
 # Berkas Android Studio dan IntelliJ yang bersifat lokal
+.idea/
 *.iml
 *.ipr
 *.iws

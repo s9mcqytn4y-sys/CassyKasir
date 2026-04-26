@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Kontrak repositori untuk mengelola data produk.
- * Mendefinisikan operasi baca/tulis yang diperlukan oleh use case.
  */
 interface RepositoriProduk {
 
@@ -16,13 +15,24 @@ interface RepositoriProduk {
     fun amatiSemuaProduk(): Flow<List<Produk>>
 
     /**
+     * Mengamati satu produk berdasarkan identitas produk.
+     */
+    fun amatiProdukBerdasarkanIdentitas(
+        identitasProduk: String,
+    ): Flow<Produk?>
+
+    /**
      * Mencari produk berdasarkan kata kunci di lokal.
      */
     fun cariProdukLokal(kataKunci: String): Flow<List<Produk>>
 
     /**
+     * Memastikan katalog awal tersedia untuk mode belajar dan install baru.
+     */
+    suspend fun pastikanKatalogAwalTersedia()
+
+    /**
      * Memperbarui katalog lokal dengan mengambil data terbaru dari jaringan.
-     * @return Hasil operasi jaringan yang berisi status keberhasilan atau kegagalan.
      */
     suspend fun sinkronkanKatalog(): HasilOperasiJaringan<Unit>
 }

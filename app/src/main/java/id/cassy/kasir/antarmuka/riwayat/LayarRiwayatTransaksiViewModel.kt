@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
+import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.Transaksi
 import java.time.Instant
 import java.time.ZoneId
@@ -218,7 +219,7 @@ private fun Transaksi.keRingkasanTransaksiRiwayat(): RingkasanTransaksiRiwayat {
         transaksiId = id,
         labelWaktu = waktuTransaksiEpochMili.sebagaiLabelWaktuTransaksi(),
         labelJumlahItem = "${hitungJumlahItem()} item",
-        labelTotalAkhir = hitungTotalAkhir().sebagaiRupiahSederhana(),
+        labelTotalAkhir = hitungTotalAkhir().sebagaiRupiah(),
         ringkasanItem = bentukRingkasanItem(),
     )
 }
@@ -264,6 +265,3 @@ private fun Long.sebagaiLabelWaktuTransaksi(): String {
         .format(formatter)
 }
 
-private fun Long.sebagaiRupiahSederhana(): String {
-    return "Rp$this"
-}

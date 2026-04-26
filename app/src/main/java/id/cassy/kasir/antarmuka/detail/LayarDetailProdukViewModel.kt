@@ -2,138 +2,159 @@ package id.cassy.kasir.antarmuka.detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
-import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
+import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiProdukBerdasarkanIdentitas
+import id.cassy.kasir.ranah.model.Produk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
+import androidx.lifecycle.viewModelScope
 
+/**
+ * Pengelola status layar detail produk.
+ *
+ * Detail produk membaca data dari Room melalui use case, bukan lagi dari data contoh.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
 class LayarDetailProdukViewModel(
+    private val amatiProdukBerdasarkanIdentitas: AmatiProdukBerdasarkanIdentitas,
     statusTersimpan: SavedStateHandle,
 ) : ViewModel() {
 
-    private val produkId: String = checkNotNull(
-        statusTersimpan.get<String>(
-            TujuanNavigasiKasir.DetailProduk.namaArgumenProdukId,
-        ),
+    private val identitasProduk: String = checkNotNull(
+        statusTersimpan[TujuanNavigasiKasir.DetailProduk.namaArgumenProdukId],
     ) {
-        "Argumen produkId wajib tersedia pada layar detail produk."
+        "Argumen produk wajib tersedia pada layar detail produk."
     }
 
-    private val _modelTampilan = MutableStateFlow(
-        ModelTampilanDetailProduk(
-            produkId = produkId,
-            judulLayar = "Detail Produk",
-            statusMuat = StatusMuatDetailProduk.Memuat,
-        ),
-    )
-    val modelTampilan = _modelTampilan.asStateFlow()
+    private val nomorPermintaanMuatUlang = MutableStateFlow(0)
+
+    val modelTampilan = nomorPermintaanMuatUlang
+        .flatMapLatest {
+            bentukAlurModelTampilan()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ModelTampilanDetailProduk(
+                produkId = identitasProduk,
+                judulLayar = "Detail Produk",
+                statusMuat = StatusMuatDetailProduk.Memuat,
+            ),
+        )
 
     private val _efek = MutableSharedFlow<EfekLayarDetailProduk>(
         extraBufferCapacity = 1,
     )
-    val efek: SharedFlow<EfekLayarDetailProduk> = _efek.asSharedFlow()
 
-    init {
-        muatDetailProduk()
-    }
+    val efek: SharedFlow<EfekLayarDetailProduk> = _efek.asSharedFlow()
 
     /**
      * Titik masuk tunggal untuk aksi UI layar detail produk.
      */
     fun tanganiAksi(aksi: AksiLayarDetailProduk) {
         when (aksi) {
-            AksiLayarDetailProduk.CobaTambahKeKeranjang -> {
-                cobaTambahKeKeranjang()
-            }
-
-            AksiLayarDetailProduk.CobaMuatUlang -> {
-                muatDetailProduk()
-            }
+            AksiLayarDetailProduk.CobaTambahKeKeranjang -> cobaTambahKeKeranjang()
+            AksiLayarDetailProduk.CobaMuatUlang -> muatUlang()
         }
     }
 
     fun muatUlang() {
-        muatDetailProduk()
+        nomorPermintaanMuatUlang.value = nomorPermintaanMuatUlang.value + 1
     }
 
-    private fun muatDetailProduk() {
-        viewModelScope.launch {
-            _modelTampilan.update { statusLama ->
-                statusLama.copy(
+    private fun bentukAlurModelTampilan(): Flow<ModelTampilanDetailProduk> {
+        return flow {
+            emit(
+                ModelTampilanDetailProduk(
+                    produkId = identitasProduk,
+                    judulLayar = "Detail Produk",
                     statusMuat = StatusMuatDetailProduk.Memuat,
-                )
-            }
+                ),
+            )
 
-            try {
-                val produk = KatalogProdukContoh.daftarAwal().firstOrNull { itemProduk ->
-                    itemProduk.id == produkId
-                }
-
-                _modelTampilan.value = if (produk != null) {
-                    val aksiTambahAktif = produk.aktif && produk.stokTersedia > 0
-
-                    ModelTampilanDetailProduk(
-                        produkId = produkId,
-                        judulLayar = "Detail Produk",
-                        statusMuat = StatusMuatDetailProduk.Berhasil(
-                            namaProduk = produk.nama,
-                            hargaProduk = "Rp${produk.harga}",
-                            stokTersedia = produk.stokTersedia,
-                            deskripsiProduk = produk.deskripsi.ifBlank {
-                                "Produk ini belum memiliki deskripsi tambahan."
-                            },
-                            statusAksi = StatusAksiDetailProduk(
-                                label = if (aksiTambahAktif) {
-                                    "Tambah ke Keranjang"
-                                } else {
-                                    "Produk Tidak Tersedia"
-                                },
-                                aktif = aksiTambahAktif,
-                                keterangan = if (aksiTambahAktif) {
-                                    "Produk siap ditambahkan ke transaksi aktif."
-                                } else {
-                                    "Produk ini tidak bisa ditambahkan karena sedang tidak tersedia."
-                                },
-                            ),
-                        ),
-                    )
-                } else {
-                    ModelTampilanDetailProduk(
-                        produkId = produkId,
-                        judulLayar = "Detail Produk",
-                        statusMuat = StatusMuatDetailProduk.Kosong(
-                            judul = "Produk tidak ditemukan",
-                            deskripsi = "Produk dengan id $produkId tidak berhasil ditemukan dari katalog contoh.",
-                        ),
-                    )
-                }
-            } catch (_: Exception) {
-                _modelTampilan.value = ModelTampilanDetailProduk(
-                    produkId = produkId,
+            emitAll(
+                amatiProdukBerdasarkanIdentitas(
+                    identitasProduk = identitasProduk,
+                ).map { produk ->
+                    produk.keModelTampilanDetailProduk()
+                },
+            )
+        }.catch {
+            emit(
+                ModelTampilanDetailProduk(
+                    produkId = identitasProduk,
                     judulLayar = "Detail Produk",
                     statusMuat = StatusMuatDetailProduk.Gagal(
                         judul = "Gagal memuat detail produk",
                         deskripsi = "Terjadi gangguan saat memuat detail produk. Silakan coba lagi.",
                     ),
-                )
-            }
+                ),
+            )
         }
     }
 
+    private fun Produk?.keModelTampilanDetailProduk(): ModelTampilanDetailProduk {
+        if (this == null) {
+            return ModelTampilanDetailProduk(
+                produkId = identitasProduk,
+                judulLayar = "Detail Produk",
+                statusMuat = StatusMuatDetailProduk.Kosong(
+                    judul = "Produk tidak ditemukan",
+                    deskripsi = "Produk ini belum tersedia di katalog lokal.",
+                ),
+            )
+        }
+
+        val aksiTambahAktif = aktif && stokTersedia > 0
+
+        return ModelTampilanDetailProduk(
+            produkId = id,
+            judulLayar = "Detail Produk",
+            statusMuat = StatusMuatDetailProduk.Berhasil(
+                namaProduk = nama,
+                hargaProduk = harga.sebagaiRupiah(),
+                stokTersedia = stokTersedia,
+                deskripsiProduk = deskripsi.ifBlank {
+                    "Produk ini belum memiliki deskripsi tambahan."
+                },
+                statusAksi = StatusAksiDetailProduk(
+                    label = if (aksiTambahAktif) {
+                        "Tambah ke Keranjang"
+                    } else {
+                        "Produk Tidak Tersedia"
+                    },
+                    aktif = aksiTambahAktif,
+                    keterangan = if (aksiTambahAktif) {
+                        "Produk siap ditambahkan ke transaksi aktif."
+                    } else {
+                        "Produk ini tidak bisa ditambahkan karena sedang tidak tersedia."
+                    },
+                ),
+            ),
+        )
+    }
+
     private fun cobaTambahKeKeranjang() {
-        val statusMuatSaatIni = _modelTampilan.value.statusMuat
+        val statusMuatSaatIni = modelTampilan.value.statusMuat
+
         if (statusMuatSaatIni !is StatusMuatDetailProduk.Berhasil) return
         if (!statusMuatSaatIni.statusAksi.aktif) return
 
         _efek.tryEmit(
             EfekLayarDetailProduk.MintaTambahKeKeranjang(
-                produkId = produkId,
+                produkId = identitasProduk,
                 namaProduk = statusMuatSaatIni.namaProduk,
             ),
         )
