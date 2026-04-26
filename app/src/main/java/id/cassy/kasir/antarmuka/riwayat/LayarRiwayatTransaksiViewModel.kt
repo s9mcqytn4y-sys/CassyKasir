@@ -2,7 +2,7 @@ package id.cassy.kasir.antarmuka.riwayat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.model.Transaksi
 import java.time.Instant
@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.update
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class LayarRiwayatTransaksiViewModel(
-    private val repositori: RepositoriTransaksi,
+    private val amatiRiwayatTransaksi: AmatiRiwayatTransaksi,
 ) : ViewModel() {
 
     private val _nomorPermintaanMuatUlang = MutableStateFlow(0)
@@ -47,7 +47,7 @@ class LayarRiwayatTransaksiViewModel(
                     emit(StatusSumberDataRiwayat.Memuat)
 
                     emitAll(
-                        repositori.ambilSemuaTransaksi().map { daftarTransaksi ->
+                        amatiRiwayatTransaksi().map { daftarTransaksi ->
                             StatusSumberDataRiwayat.Berhasil(
                                 daftarTransaksi = daftarTransaksi,
                             )

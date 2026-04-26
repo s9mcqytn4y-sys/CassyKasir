@@ -16,28 +16,25 @@ import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 object PenyediaViewModelKasir {
 
     val Factory = viewModelFactory {
-        // Inisialisasi untuk Layar Utama
         initializer {
-            val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir)
+            val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
             LayarUtamaKasirViewModel(
-                repositori = aplikasi.kontainer.repositoriTransaksi
+                selesaikanCheckoutLokalKasirUseCase = aplikasi.kontainer.selesaikanCheckoutLokalKasir,
             )
         }
 
-        // Inisialisasi untuk Layar Riwayat
         initializer {
-            val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir)
+            val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
             LayarRiwayatTransaksiViewModel(
-                repositori = aplikasi.kontainer.repositoriTransaksi
+                amatiRiwayatTransaksi = aplikasi.kontainer.amatiRiwayatTransaksi,
             )
         }
 
-        // Inisialisasi untuk Layar Detail Transaksi
         initializer {
-            val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir)
+            val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
             LayarDetailTransaksiViewModel(
-                repositori = aplikasi.kontainer.repositoriTransaksi,
-                savedStateHandle = createSavedStateHandle()
+                amatiTransaksiBerdasarkanId = aplikasi.kontainer.amatiTransaksiBerdasarkanId,
+                savedStateHandle = createSavedStateHandle(),
             )
         }
     }

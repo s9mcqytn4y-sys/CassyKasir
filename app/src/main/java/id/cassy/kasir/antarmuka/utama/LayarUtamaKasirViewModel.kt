@@ -8,33 +8,30 @@ import id.cassy.kasir.ranah.kasuspenggunaan.HapusProdukDariKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.TambahProdukKeKeranjang
-import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
 import id.cassy.kasir.ranah.model.Produk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * Pengelola status layar utama kasir dengan pola alur data satu arah (UDF).
- * Mengatur keranjang belanja, proses checkout ke penyimpanan lokal, 
+ * Mengatur keranjang belanja, proses checkout ke penyimpanan lokal,
  * serta fitur pencarian produk reaktif dengan debounce untuk performa optimal.
- *
- * @property repositori Sumber persistensi data transaksi.
  */
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class LayarUtamaKasirViewModel(
-    private val repositori: RepositoriTransaksi,
+    private val selesaikanCheckoutLokalKasirUseCase: SelesaikanCheckoutLokalKasir,
 ) : ViewModel() {
 
     private val daftarProdukPenuh: List<Produk> = KatalogProdukContoh.daftarAwal()
@@ -42,7 +39,6 @@ class LayarUtamaKasirViewModel(
     private val tambahProdukKeKeranjangUseCase = TambahProdukKeKeranjang()
     private val kurangiProdukDiKeranjangUseCase = KurangiProdukDiKeranjang()
     private val hapusProdukDariKeranjangUseCase = HapusProdukDariKeranjang()
-    private val selesaikanCheckoutLokalKasirUseCase = SelesaikanCheckoutLokalKasir(repositori)
     private val bentukModelTampilanUseCase = BentukModelTampilanLayarUtamaKasir()
 
     private val _statusTransaksi = MutableStateFlow(
@@ -98,8 +94,6 @@ class LayarUtamaKasirViewModel(
 
     /**
      * Titik masuk tunggal untuk semua aksi yang dipicu oleh UI.
-     *
-     * @param aksi Objek aksi yang dikirim dari layar Compose.
      */
     fun tanganiAksi(aksi: AksiLayarUtamaKasir) {
         when (aksi) {
@@ -132,12 +126,6 @@ class LayarUtamaKasirViewModel(
         }
     }
 
-    /**
-     * Menambahkan produk ke dalam keranjang belanja.
-     * Jika produk sudah ada, jumlahnya akan bertambah selama stok mencukupi.
-     *
-     * @param produkId ID unik dari produk yang ingin ditambahkan.
-     */
     private fun tambahProdukKeKeranjang(produkId: String) {
         val produk = daftarProdukPenuh.firstOrNull { it.id == produkId } ?: return
 
@@ -169,12 +157,6 @@ class LayarUtamaKasirViewModel(
         }
     }
 
-    /**
-     * Mengurangi satu satuan jumlah produk di dalam keranjang.
-     * Jika jumlah menjadi nol, item akan dihapus dari keranjang.
-     *
-     * @param produkId ID unik dari produk yang ingin dikurangi.
-     */
     private fun kurangiProdukDiKeranjang(produkId: String) {
         _statusTransaksi.update { statusLama ->
             statusLama.copy(
@@ -189,11 +171,6 @@ class LayarUtamaKasirViewModel(
         resetStatusHasil()
     }
 
-    /**
-     * Menghapus seluruh jumlah produk tertentu dari keranjang belanja.
-     *
-     * @param produkId ID unik dari produk yang ingin dihapus.
-     */
     private fun hapusProdukDariKeranjang(produkId: String) {
         _statusTransaksi.update { statusLama ->
             statusLama.copy(
@@ -208,9 +185,6 @@ class LayarUtamaKasirViewModel(
         resetStatusHasil()
     }
 
-    /**
-     * Memvalidasi keranjang sebelum menampilkan dialog konfirmasi checkout.
-     */
     private fun cobaCheckout() {
         if (_statusTransaksi.value.daftarItemKeranjang.isEmpty()) {
             kirimPesanSingkat("Keranjang masih kosong. Yuk, tambah produk!")
@@ -225,9 +199,6 @@ class LayarUtamaKasirViewModel(
         }
     }
 
-    /**
-     * Menutup dialog konfirmasi tanpa memproses transaksi.
-     */
     private fun batalkanKonfirmasiCheckout() {
         _statusElemenLayar.update { statusLama ->
             statusLama.copy(
@@ -236,9 +207,6 @@ class LayarUtamaKasirViewModel(
         }
     }
 
-    /**
-     * Memproses transaksi dari keranjang ke status selesai secara lokal.
-     */
     private fun konfirmasiCheckout() {
         val daftarKeranjangSaatIni = _statusTransaksi.value.daftarItemKeranjang
         if (daftarKeranjangSaatIni.isEmpty()) {
@@ -291,12 +259,6 @@ class LayarUtamaKasirViewModel(
         }
     }
 
-    /**
-     * Menampilkan pesan operasional singkat pada layar utama.
-     *
-     * Fungsi ini dipakai untuk hasil aksi lintas layar yang perlu
-     * ditampilkan sebagai snackbar setelah user kembali ke layar utama.
-     */
     fun tampilkanPesanOperasional(
         pesan: String,
     ) {
@@ -313,9 +275,6 @@ class LayarUtamaKasirViewModel(
     }
 }
 
-/**
- * Memformat nilai Long menjadi string representasi Rupiah sederhana.
- */
 private fun Long.sebagaiRupiahSederhana(): String {
     return "Rp$this"
 }

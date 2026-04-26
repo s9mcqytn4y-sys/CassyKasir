@@ -37,6 +37,11 @@ Thumbs.db
 # Log dan Cache
 *.log
 .kotlin/
+.vscode/
 
 # Berkas Tambahan Agent
 STUDIO_AGENT_GUIDE.md
+artifacts/
+*.artifact.md
+*.png
+*.xml

@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
-import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
 import id.cassy.kasir.ranah.fungsi.hitungKembalian
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.model.Transaksi
@@ -26,11 +26,11 @@ import kotlinx.coroutines.flow.update
  * Pengelola status untuk layar rincian transaksi tunggal.
  *
  * Pada tahap ini detail transaksi sudah reaktif terhadap perubahan Room
- * karena membaca aliran data berdasarkan transaksiId.
+ * dan membaca data melalui use case, bukan langsung ke repository.
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class LayarDetailTransaksiViewModel(
-    private val repositori: RepositoriTransaksi,
+    private val amatiTransaksiBerdasarkanId: AmatiTransaksiBerdasarkanId,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -57,7 +57,7 @@ class LayarDetailTransaksiViewModel(
                     )
 
                     emitAll(
-                        repositori.amatiTransaksiBerdasarkanId(transaksiId).map { transaksi ->
+                        amatiTransaksiBerdasarkanId(transaksiId).map { transaksi ->
                             transaksi.keModelTampilanDetailTransaksi(transaksiId)
                         },
                     )
@@ -82,11 +82,6 @@ class LayarDetailTransaksiViewModel(
                 ),
             )
 
-    /**
-     * Memaksa layar untuk berlangganan ulang ke sumber data detail transaksi.
-     *
-     * Berguna sebagai titik masuk konsisten untuk tombol "Coba Lagi".
-     */
     fun muatUlang() {
         _nomorPermintaanMuatUlang.update { nomorLama ->
             nomorLama + 1
