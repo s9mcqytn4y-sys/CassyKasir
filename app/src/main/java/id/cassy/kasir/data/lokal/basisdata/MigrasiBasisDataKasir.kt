@@ -35,4 +35,29 @@ object MigrasiBasisDataKasir {
             )
         }
     }
+
+    /**
+     * Migrasi dari versi 2 ke versi 3.
+     *
+     * Perubahan:
+     * - menambahkan tabel produk untuk mendukung local-first katalog.
+     */
+    val DARI_2_KE_3: Migration = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `produk` (
+                    `id` TEXT NOT NULL,
+                    `nama` TEXT NOT NULL,
+                    `harga` INTEGER NOT NULL,
+                    `stokTersedia` INTEGER NOT NULL,
+                    `kodePindai` TEXT,
+                    `deskripsi` TEXT NOT NULL,
+                    `apakahAktif` INTEGER NOT NULL,
+                    PRIMARY KEY(`id`)
+                )
+                """.trimIndent(),
+            )
+        }
+    }
 }

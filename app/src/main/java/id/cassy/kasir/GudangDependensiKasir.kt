@@ -8,9 +8,12 @@ import id.cassy.kasir.data.jaringan.layanan.LayananProdukJaringan
 import id.cassy.kasir.data.lokal.basisdata.BasisDataCassyKasir
 import id.cassy.kasir.data.lokal.basisdata.MigrasiBasisDataKasir
 import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
+import id.cassy.kasir.data.repositori.RepositoriProdukLokalRemote
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
+import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
+import id.cassy.kasir.ranah.repositori.RepositoriProduk
 
 /**
  * Kontainer dependensi manual (Service Locator) untuk aplikasi Cassy Kasir.
@@ -33,6 +36,7 @@ class GudangDependensiKasir(
         )
             .addMigrations(
                 MigrasiBasisDataKasir.DARI_1_KE_2,
+                MigrasiBasisDataKasir.DARI_2_KE_3,
             )
             .build()
     }
@@ -42,6 +46,16 @@ class GudangDependensiKasir(
      */
     private val repositoriTransaksi: RepositoriTransaksi by lazy {
         RepositoriTransaksi(basisData)
+    }
+
+    /**
+     * Repositori produk yang menggabungkan sumber data lokal dan jaringan.
+     */
+    private val repositoriProduk: RepositoriProduk by lazy {
+        RepositoriProdukLokalRemote(
+            basisData = basisData,
+            layananJaringan = layananProdukJaringan,
+        )
     }
 
     /**
@@ -55,6 +69,13 @@ class GudangDependensiKasir(
             alamatDasarApi = KonfigurasiJaringanKasir.alamatDasarApi,
             modeDebug = BuildConfig.DEBUG,
         )
+    }
+
+    /**
+     * Kasus penggunaan untuk memuat katalog produk dengan skema local-first.
+     */
+    val muatKatalogProduk: MuatKatalogProduk by lazy {
+        MuatKatalogProduk(repositoriProduk)
     }
 
     /**
