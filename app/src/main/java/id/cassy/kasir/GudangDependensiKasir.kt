@@ -2,6 +2,9 @@ package id.cassy.kasir
 
 import android.content.Context
 import androidx.room.Room
+import id.cassy.kasir.data.jaringan.konfigurasi.KonfigurasiJaringanKasir
+import id.cassy.kasir.data.jaringan.konfigurasi.PenyediaJaringanKasir
+import id.cassy.kasir.data.jaringan.layanan.LayananProdukJaringan
 import id.cassy.kasir.data.lokal.basisdata.BasisDataCassyKasir
 import id.cassy.kasir.data.lokal.basisdata.MigrasiBasisDataKasir
 import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
@@ -11,14 +14,16 @@ import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 
 /**
  * Kontainer dependensi manual (Service Locator) untuk aplikasi Cassy Kasir.
- * Mengelola siklus hidup singleton database, repository, dan use case.
+ * Mengelola siklus hidup singleton basis data, repositori, kasus penggunaan, dan layanan jaringan.
+ *
+ * @param konteks Konteks aplikasi untuk inisialisasi Room dan sumber daya lainnya.
  */
 class GudangDependensiKasir(
     konteks: Context,
 ) {
 
     /**
-     * Singleton instance untuk database Room.
+     * Instansi tunggal (singleton) untuk basis data Room.
      */
     private val basisData: BasisDataCassyKasir by lazy {
         Room.databaseBuilder(
@@ -33,28 +38,41 @@ class GudangDependensiKasir(
     }
 
     /**
-     * Repository transaksi sebagai sumber data transaksi lokal.
+     * Repositori transaksi sebagai sumber data tunggal untuk transaksi lokal.
      */
     private val repositoriTransaksi: RepositoriTransaksi by lazy {
         RepositoriTransaksi(basisData)
     }
 
     /**
-     * Use case untuk menyelesaikan checkout lokal.
+     * Layanan API produk untuk komunikasi jaringan.
+     *
+     * Layanan ini disiapkan sebagai fondasi awal untuk transisi ke local-first.
+     * Belum dikonsumsi oleh ViewModel untuk menjaga stabilitas migrasi bertahap.
+     */
+    val layananProdukJaringan: LayananProdukJaringan by lazy {
+        PenyediaJaringanKasir.buatLayananProdukJaringan(
+            alamatDasarApi = KonfigurasiJaringanKasir.alamatDasarApi,
+            modeDebug = BuildConfig.DEBUG,
+        )
+    }
+
+    /**
+     * Kasus penggunaan untuk menyelesaikan proses checkout di tingkat lokal.
      */
     val selesaikanCheckoutLokalKasir: SelesaikanCheckoutLokalKasir by lazy {
         SelesaikanCheckoutLokalKasir(repositoriTransaksi)
     }
 
     /**
-     * Use case untuk mengamati daftar riwayat transaksi.
+     * Kasus penggunaan untuk mengamati aliran data riwayat transaksi.
      */
     val amatiRiwayatTransaksi: AmatiRiwayatTransaksi by lazy {
         AmatiRiwayatTransaksi(repositoriTransaksi)
     }
 
     /**
-     * Use case untuk mengamati detail transaksi berdasarkan ID.
+     * Kasus penggunaan untuk mengamati detail transaksi tunggal berdasarkan ID.
      */
     val amatiTransaksiBerdasarkanId: AmatiTransaksiBerdasarkanId by lazy {
         AmatiTransaksiBerdasarkanId(repositoriTransaksi)

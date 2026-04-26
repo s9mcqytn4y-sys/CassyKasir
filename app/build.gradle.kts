@@ -59,6 +59,7 @@ android {
     buildFeatures {
         // Mengaktifkan dukungan Jetpack Compose
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -103,6 +104,11 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.okhttp.core)
+    implementation(libs.okhttp.logging)
 
     // Dependensi Debug
     debugImplementation(libs.androidx.compose.ui.tooling)

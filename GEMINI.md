@@ -161,4 +161,19 @@ Gunakan Room untuk penyimpanan data terstruktur yang membutuhkan query kompleks 
 - **Mappers**: Buat fungsi pemetaan (mappers) antara entitas lokal dan model domain di dalam paket `pemetaan`.
 
 ---
+
+## 14. Networking & API (Retrofit)
+
+Gunakan Retrofit + OkHttp untuk komunikasi dengan server.
+
+### Aturan Networking:
+- **Separation of Concerns**: Jangan gunakan model respons jaringan (DTO) langsung di UI. Selalu petakan (map) ke model domain.
+- **Naming DTO**: Gunakan akhiran `ResponsJaringan` (misal: `ResponsProdukJaringan`).
+- **Serialisasi**: Gunakan Kotlinx Serialization. Gunakan `@SerialName` jika nama field JSON berbeda dengan nama properti Kotlin (misal: `snake_case` ke `camelCase`).
+- **Layanan API**: Simpan interface Retrofit di dalam paket `layanan`.
+- **Konfigurasi**: Pusatkan Base URL dan timeout di dalam paket `konfigurasi`.
+- **Logging**: Aktifkan `HttpLoggingInterceptor` (Level.BODY) hanya untuk build `DEBUG`.
+- **Error Handling**: Tangani exception jaringan (seperti `IOException` atau `HttpException`) di lapisan repository atau use case, bukan di UI.
+
+---
 *Dokumen ini merupakan kontrak hidup yang diperbarui seiring perkembangan kapabilitas tim dan teknologi.*
