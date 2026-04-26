@@ -1,13 +1,13 @@
 package id.cassy.kasir.ranah.kasuspenggunaan
 
 import id.cassy.kasir.data.lokal.identitas.PembangkitIdentitasTransaksiLokal
-import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
 import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.fungsi.transaksiSiapDiproses
 import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.StatusSinkronisasi
 import id.cassy.kasir.ranah.model.Transaksi
+import id.cassy.kasir.ranah.repositori.RepositoriTransaksi
 
 /**
  * Hasil penyelesaian checkout lokal.

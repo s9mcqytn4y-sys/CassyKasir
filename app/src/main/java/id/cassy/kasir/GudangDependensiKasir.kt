@@ -7,7 +7,7 @@ import id.cassy.kasir.data.jaringan.konfigurasi.PenyediaJaringanKasir
 import id.cassy.kasir.data.jaringan.layanan.LayananProdukJaringan
 import id.cassy.kasir.data.lokal.basisdata.BasisDataCassyKasir
 import id.cassy.kasir.data.lokal.basisdata.MigrasiBasisDataKasir
-import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
+import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksiLokal
 import id.cassy.kasir.data.repositori.RepositoriProdukLokalRemote
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiProdukBerdasarkanIdentitas
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
@@ -15,6 +15,7 @@ import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
 import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.repositori.RepositoriProduk
+import id.cassy.kasir.ranah.repositori.RepositoriTransaksi
 
 /**
  * Kontainer dependensi manual (Service Locator) untuk aplikasi Cassy Kasir.
@@ -44,9 +45,12 @@ class GudangDependensiKasir(
 
     /**
      * Repositori transaksi sebagai sumber data tunggal untuk transaksi lokal.
+     *
+     * Kontainer menyimpan implementasi konkret, sedangkan use case menerima kontrak
+     * dari layer ranah.
      */
     private val repositoriTransaksi: RepositoriTransaksi by lazy {
-        RepositoriTransaksi(basisData)
+        RepositoriTransaksiLokal(basisData)
     }
 
     /**

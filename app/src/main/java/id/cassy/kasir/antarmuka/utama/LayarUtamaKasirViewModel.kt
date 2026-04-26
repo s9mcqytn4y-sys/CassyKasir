@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class LayarUtamaKasirViewModel(
     private val muatKatalogProduk: MuatKatalogProduk,
-    private val selesaikanCheckoutLokalKasirUseCase: SelesaikanCheckoutLokalKasir,
+    private val selesaikanCheckoutLokalKasir: SelesaikanCheckoutLokalKasir,
 ) : ViewModel() {
 
     private val daftarProdukPenuh = muatKatalogProduk.eksekusi()
@@ -239,7 +239,7 @@ class LayarUtamaKasirViewModel(
 
         viewModelScope.launch {
             try {
-                val hasilCheckout = selesaikanCheckoutLokalKasirUseCase.eksekusi(
+                val hasilCheckout = selesaikanCheckoutLokalKasir.eksekusi(
                     daftarItemKeranjang = daftarKeranjangSaatIni,
                 )
 
