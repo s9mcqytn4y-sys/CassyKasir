@@ -1,75 +1,55 @@
 package id.cassy.kasir.antarmuka.navigasi
 
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import kotlinx.serialization.Serializable
 
 /**
- * Representasi kontrak tujuan navigasi dalam aplikasi CassyKasir.
+ * Kontrak tujuan navigasi type-safe untuk Cassy Kasir.
  *
- * Menggunakan pendekatan berbasis rute (route-based) untuk mendefinisikan
- * hierarki navigasi dan argumen yang diperlukan antar layar.
+ * Setiap tujuan layar direpresentasikan sebagai tipe Kotlin, bukan string route.
+ * Ini membuat argumen navigasi lebih aman saat compile-time dan lebih mudah
+ * dirawat ketika jumlah layar bertambah.
  */
 sealed interface TujuanNavigasiKasir {
 
     /**
-     * Route mentah yang dipakai Navigation Compose.
-     */
-    val rute: String
-
-    /**
      * Tujuan layar utama kasir.
      */
-    data object KasirUtama : TujuanNavigasiKasir {
-        override val rute: String = "kasir_utama"
-    }
+    @Serializable
+    data object KasirUtama : TujuanNavigasiKasir
 
     /**
      * Tujuan layar riwayat transaksi.
      */
-    data object RiwayatTransaksi : TujuanNavigasiKasir {
-        override val rute: String = "riwayat_transaksi"
-    }
+    @Serializable
+    data object RiwayatTransaksi : TujuanNavigasiKasir
 
     /**
-     * Tujuan layar detail produk yang memerlukan identitas unik produk.
+     * Tujuan layar detail produk.
+     *
+     * @property identitasProduk Identitas unik produk yang akan dibuka.
      */
-    data object DetailProduk : TujuanNavigasiKasir {
-        /** Nama kunci argumen untuk ID produk. */
-        const val namaArgumenProdukId: String = "produkId"
-
-        override val rute: String = "detail_produk/{$namaArgumenProdukId}"
-
-        /**
-         * Membentuk string rute yang valid dengan menyisipkan [produkId].
-         */
-        fun buatRute(produkId: String): String {
-            return "detail_produk/$produkId"
-        }
-    }
+    @Serializable
+    data class DetailProduk(
+        val identitasProduk: String,
+    ) : TujuanNavigasiKasir
 
     /**
-     * Tujuan layar detail transaksi yang memerlukan ID transaksi unik.
+     * Tujuan layar detail transaksi.
+     *
+     * @property identitasTransaksi Identitas unik transaksi yang akan dibuka.
      */
-    data object DetailTransaksi : TujuanNavigasiKasir {
-        /** Nama kunci argumen untuk ID transaksi. */
-        const val namaArgumenTransaksiId: String = "transaksiId"
-
-        override val rute: String = "detail_transaksi/{$namaArgumenTransaksiId}"
-
-        /**
-         * Membentuk string rute yang valid dengan menyisipkan [transaksiId].
-         */
-        fun buatRute(transaksiId: String): String {
-            return "detail_transaksi/$transaksiId"
-        }
-    }
+    @Serializable
+    data class DetailTransaksi(
+        val identitasTransaksi: String,
+    ) : TujuanNavigasiKasir
 }
 
 /**
  * Membuka layar utama kasir.
  */
 fun NavHostController.bukaKasirUtama() {
-    navigate(TujuanNavigasiKasir.KasirUtama.rute) {
+    navigate(TujuanNavigasiKasir.KasirUtama) {
         launchSingleTop = true
     }
 }
@@ -78,51 +58,37 @@ fun NavHostController.bukaKasirUtama() {
  * Membuka layar riwayat transaksi.
  */
 fun NavHostController.bukaRiwayatTransaksi() {
-    navigate(TujuanNavigasiKasir.RiwayatTransaksi.rute) {
+    navigate(TujuanNavigasiKasir.RiwayatTransaksi) {
         launchSingleTop = true
     }
 }
 
 /**
- * Membuka layar detail produk berdasarkan id produk.
+ * Membuka layar detail produk berdasarkan identitas produk.
  */
-fun NavHostController.bukaDetailProduk(produkId: String) {
-    navigate(TujuanNavigasiKasir.DetailProduk.buatRute(produkId)) {
-        launchSingleTop = true
-    }
-}
-
-/**
- * Membuka layar detail transaksi berdasarkan id transaksi.
- */
-fun NavHostController.bukaDetailTransaksi(transaksiId: String) {
-    navigate(TujuanNavigasiKasir.DetailTransaksi.buatRute(transaksiId)) {
-        launchSingleTop = true
-    }
-}
-
-/**
- * Mengekstrak argumen [produkId] dari [NavBackStackEntry] secara aman.
- *
- * @throws IllegalArgumentException Jika argumen tidak ditemukan dalam entri navigasi.
- */
-fun NavBackStackEntry.ambilProdukIdDetailProduk(): String {
-    return requireNotNull(
-        arguments?.getString(TujuanNavigasiKasir.DetailProduk.namaArgumenProdukId),
+fun NavHostController.bukaDetailProduk(
+    identitasProduk: String,
+) {
+    navigate(
+        TujuanNavigasiKasir.DetailProduk(
+            identitasProduk = identitasProduk,
+        ),
     ) {
-        "Argumen produkId wajib tersedia untuk layar detail produk."
+        launchSingleTop = true
     }
 }
 
 /**
- * Mengekstrak argumen [transaksiId] dari [NavBackStackEntry] secara aman.
- *
- * @throws IllegalArgumentException Jika argumen tidak ditemukan dalam entri navigasi.
+ * Membuka layar detail transaksi berdasarkan identitas transaksi.
  */
-fun NavBackStackEntry.ambilTransaksiIdDetailTransaksi(): String {
-    return requireNotNull(
-        arguments?.getString(TujuanNavigasiKasir.DetailTransaksi.namaArgumenTransaksiId),
+fun NavHostController.bukaDetailTransaksi(
+    identitasTransaksi: String,
+) {
+    navigate(
+        TujuanNavigasiKasir.DetailTransaksi(
+            identitasTransaksi = identitasTransaksi,
+        ),
     ) {
-        "Argumen transaksiId wajib tersedia untuk layar detail transaksi."
+        launchSingleTop = true
     }
 }

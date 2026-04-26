@@ -2,6 +2,8 @@ package id.cassy.kasir.antarmuka.detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiProdukBerdasarkanIdentitas
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -18,8 +21,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
-import androidx.lifecycle.viewModelScope
 
 /**
  * Pengelola status layar detail produk.
@@ -32,11 +33,8 @@ class LayarDetailProdukViewModel(
     statusTersimpan: SavedStateHandle,
 ) : ViewModel() {
 
-    private val identitasProduk: String = checkNotNull(
-        statusTersimpan[TujuanNavigasiKasir.DetailProduk.namaArgumenProdukId],
-    ) {
-        "Argumen produk wajib tersedia pada layar detail produk."
-    }
+    private val identitasProduk: String =
+        statusTersimpan.toRoute<TujuanNavigasiKasir.DetailProduk>().identitasProduk
 
     private val nomorPermintaanMuatUlang = MutableStateFlow(0)
 

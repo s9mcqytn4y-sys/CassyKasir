@@ -3,6 +3,7 @@ package id.cassy.kasir.antarmuka.transaksi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
 import id.cassy.kasir.ranah.fungsi.hitungKembalian
@@ -35,11 +36,8 @@ class LayarDetailTransaksiViewModel(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val transaksiId: String = checkNotNull(
-        savedStateHandle[TujuanNavigasiKasir.DetailTransaksi.namaArgumenTransaksiId],
-    ) {
-        "Argumen transaksiId wajib tersedia pada layar detail transaksi."
-    }
+    private val identitasTransaksi: String =
+        savedStateHandle.toRoute<TujuanNavigasiKasir.DetailTransaksi>().identitasTransaksi
 
     private val _nomorPermintaanMuatUlang = MutableStateFlow(0)
 
@@ -57,11 +55,9 @@ class LayarDetailTransaksiViewModel(
                         ),
                     )
 
-                    emitAll(
-                        amatiTransaksiBerdasarkanId(transaksiId).map { transaksi ->
-                            transaksi.keModelTampilanDetailTransaksi(transaksiId)
-                        },
-                    )
+                    emitAll(amatiTransaksiBerdasarkanId(identitasTransaksi).map { transaksi ->
+                        transaksi.keModelTampilanDetailTransaksi(identitasTransaksi)
+                    })
                 }.catch {
                     emit(
                         ModelTampilanDetailTransaksi(
@@ -91,14 +87,14 @@ class LayarDetailTransaksiViewModel(
 }
 
 private fun Transaksi?.keModelTampilanDetailTransaksi(
-    transaksiId: String,
+    identitasTransaksi: String,
 ): ModelTampilanDetailTransaksi {
     if (this == null) {
         return ModelTampilanDetailTransaksi(
             judulLayar = "Detail Transaksi",
             statusMuat = StatusMuatDetailTransaksi.Kosong(
                 judul = "Transaksi tidak ditemukan",
-                deskripsi = "Data untuk ID $transaksiId tidak ada di database lokal.",
+                deskripsi = "Data untuk ID $identitasTransaksi tidak ada di database lokal.",
             ),
         )
     }
@@ -163,4 +159,3 @@ private fun Long.sebagaiLabelWaktuTransaksi(): String {
         .atZone(ZoneId.systemDefault())
         .format(formatter)
 }
-

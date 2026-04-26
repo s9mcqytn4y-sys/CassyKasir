@@ -4,12 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import id.cassy.kasir.antarmuka.detail.AksiLayarDetailProduk
+import id.cassy.kasir.antarmuka.PenyediaViewModelKasir
 import id.cassy.kasir.antarmuka.detail.EfekLayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
@@ -20,13 +18,15 @@ import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksiViewModel
 import id.cassy.kasir.antarmuka.utama.AksiLayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
-import id.cassy.kasir.antarmuka.PenyediaViewModelKasir
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 
 /**
- * Komposabel pengelola navigasi antar layar di seluruh aplikasi.
- * Mendefinisikan [NavHost] dan rute untuk setiap layar seperti Utama, Riwayat, dan Detail.
+ * Komposabel pengelola navigasi utama aplikasi Cassy Kasir.
+ *
+ * Navigasi memakai route type-safe berbasis kotlinx.serialization.
+ * Dengan cara ini, layar dan argumen navigasi direpresentasikan oleh tipe Kotlin,
+ * bukan string route manual.
  */
 @Composable
 fun NavigasiAplikasiCassyKasir() {
@@ -35,15 +35,14 @@ fun NavigasiAplikasiCassyKasir() {
     val layarUtamaKasirViewModel: LayarUtamaKasirViewModel = viewModel(
         factory = PenyediaViewModelKasir.Factory,
     )
+
     val modelTampilanKasir = layarUtamaKasirViewModel.modelTampilan.collectAsStateWithLifecycle()
 
     NavHost(
         navController = pengendaliNavigasi,
-        startDestination = TujuanNavigasiKasir.KasirUtama.rute,
+        startDestination = TujuanNavigasiKasir.KasirUtama,
     ) {
-        composable(
-            route = TujuanNavigasiKasir.KasirUtama.rute,
-        ) { entriBackStack ->
+        composable<TujuanNavigasiKasir.KasirUtama> { entriBackStack ->
             LaunchedEffect(entriBackStack) {
                 entriBackStack.savedStateHandle
                     .ambilAlurPesanTambahProdukDariDetail()
@@ -64,46 +63,46 @@ fun NavigasiAplikasiCassyKasir() {
                 saatBukaRiwayatTransaksi = {
                     pengendaliNavigasi.bukaRiwayatTransaksi()
                 },
-                saatBukaDetailProduk = { produkId ->
-                    pengendaliNavigasi.bukaDetailProduk(produkId)
+                saatBukaDetailProduk = { identitasProduk ->
+                    pengendaliNavigasi.bukaDetailProduk(
+                        identitasProduk = identitasProduk,
+                    )
                 },
             )
         }
 
-        composable(
-            route = TujuanNavigasiKasir.RiwayatTransaksi.rute,
-        ) {
+        composable<TujuanNavigasiKasir.RiwayatTransaksi> {
             val layarRiwayatTransaksiViewModel: LayarRiwayatTransaksiViewModel = viewModel(
                 factory = PenyediaViewModelKasir.Factory,
             )
-            val modelTampilanRiwayat = layarRiwayatTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
+
+            val modelTampilanRiwayat =
+                layarRiwayatTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LayarRiwayatTransaksi(
                 modelTampilan = modelTampilanRiwayat.value,
                 saatKembali = {
                     pengendaliNavigasi.navigateUp()
                 },
-                saatBukaDetailTransaksi = { transaksiId ->
-                    pengendaliNavigasi.bukaDetailTransaksi(transaksiId)
+                saatBukaDetailTransaksi = { identitasTransaksi ->
+                    pengendaliNavigasi.bukaDetailTransaksi(
+                        identitasTransaksi = identitasTransaksi,
+                    )
                 },
                 saatCobaMuatUlang = layarRiwayatTransaksiViewModel::muatUlang,
-                saatKataKunciPencarianBerubah = layarRiwayatTransaksiViewModel::perbaruiKataKunciPencarian,
+                saatKataKunciPencarianBerubah =
+                    layarRiwayatTransaksiViewModel::perbaruiKataKunciPencarian,
                 saatResetPencarian = layarRiwayatTransaksiViewModel::resetPencarian,
             )
         }
 
-        composable(
-            route = TujuanNavigasiKasir.DetailProduk.rute,
-            arguments = listOf(
-                navArgument(TujuanNavigasiKasir.DetailProduk.namaArgumenProdukId) {
-                    type = NavType.StringType
-                },
-            ),
-        ) {
+        composable<TujuanNavigasiKasir.DetailProduk> {
             val layarDetailProdukViewModel: LayarDetailProdukViewModel = viewModel(
                 factory = PenyediaViewModelKasir.Factory,
             )
-            val modelTampilanDetail = layarDetailProdukViewModel.modelTampilan.collectAsStateWithLifecycle()
+
+            val modelTampilanDetail =
+                layarDetailProdukViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LaunchedEffect(layarDetailProdukViewModel) {
                 layarDetailProdukViewModel.efek.collectLatest { efek ->
@@ -136,18 +135,13 @@ fun NavigasiAplikasiCassyKasir() {
             )
         }
 
-        composable(
-            route = TujuanNavigasiKasir.DetailTransaksi.rute,
-            arguments = listOf(
-                navArgument(TujuanNavigasiKasir.DetailTransaksi.namaArgumenTransaksiId) {
-                    type = NavType.StringType
-                },
-            ),
-        ) {
+        composable<TujuanNavigasiKasir.DetailTransaksi> {
             val layarDetailTransaksiViewModel: LayarDetailTransaksiViewModel = viewModel(
                 factory = PenyediaViewModelKasir.Factory,
             )
-            val modelTampilanDetailTransaksi = layarDetailTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
+
+            val modelTampilanDetailTransaksi =
+                layarDetailTransaksiViewModel.modelTampilan.collectAsStateWithLifecycle()
 
             LayarDetailTransaksi(
                 modelTampilan = modelTampilanDetailTransaksi.value,
