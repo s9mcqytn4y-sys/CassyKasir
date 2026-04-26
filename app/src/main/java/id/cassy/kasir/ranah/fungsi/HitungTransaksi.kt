@@ -1,19 +1,72 @@
 package id.cassy.kasir.ranah.fungsi
 
+import id.cassy.kasir.ranah.model.AturanPajak
 import id.cassy.kasir.ranah.model.ItemKeranjang
+import id.cassy.kasir.ranah.model.RincianBiayaTransaksi
+import id.cassy.kasir.ranah.model.Uang
 
 /**
- * Kumpulan logika perhitungan keuangan untuk alur transaksi.
+ * Membentuk rincian biaya transaksi dari daftar item keranjang.
+ *
+ * Fungsi ini adalah jalur kalkulasi domain utama untuk scope baru.
+ * Semua komponen biaya memakai [Uang] agar tidak tersebar sebagai Long mentah.
+ *
+ * @param daftarItemKeranjang Daftar item yang sedang dibeli.
+ * @param potongan Nilai diskon atau pengurang harga.
+ * @param biayaLayanan Biaya tambahan layanan.
+ * @param aturanPajak Aturan pajak yang diterapkan pada subtotal setelah potongan belum dikurangi.
+ * @return Rincian biaya transaksi lengkap.
  */
+fun hitungRincianBiayaTransaksi(
+    daftarItemKeranjang: List<ItemKeranjang>,
+    potongan: Uang = Uang.Nol,
+    biayaLayanan: Uang = Uang.Nol,
+    aturanPajak: AturanPajak = AturanPajak.TanpaPajak,
+): RincianBiayaTransaksi {
+    val subtotal = daftarItemKeranjang.hitungSubtotalKeranjangUang()
+    val pajak = aturanPajak.hitungDariSubtotal(subtotal)
+
+    return RincianBiayaTransaksi(
+        subtotal = subtotal,
+        potongan = potongan,
+        biayaLayanan = biayaLayanan,
+        pajak = pajak,
+    )
+}
 
 /**
- * Menghitung nominal akhir yang harus dibayarkan pelanggan.
+ * Menghitung total akhir transaksi dalam bentuk [Uang].
+ *
+ * @param daftarItemKeranjang Daftar item yang sedang dibeli.
+ * @param potongan Nilai diskon atau pengurang harga.
+ * @param biayaLayanan Biaya tambahan layanan.
+ * @param aturanPajak Aturan pajak transaksi.
+ * @return Total akhir transaksi.
+ */
+fun hitungTotalTransaksiUang(
+    daftarItemKeranjang: List<ItemKeranjang>,
+    potongan: Uang = Uang.Nol,
+    biayaLayanan: Uang = Uang.Nol,
+    aturanPajak: AturanPajak = AturanPajak.TanpaPajak,
+): Uang {
+    return hitungRincianBiayaTransaksi(
+        daftarItemKeranjang = daftarItemKeranjang,
+        potongan = potongan,
+        biayaLayanan = biayaLayanan,
+        aturanPajak = aturanPajak,
+    ).totalAkhir
+}
+
+/**
+ * Menghitung nominal akhir yang harus dibayarkan pelanggan dalam bentuk Long.
+ *
+ * Fungsi ini dipertahankan sebagai wrapper kompatibilitas untuk alur lama.
  *
  * @param daftarItemKeranjang List belanjaan.
  * @param potongan Nilai pengurangan harga.
  * @param biayaLayanan Nilai penambahan biaya.
  * @param pajak Nilai pajak.
- * @return Total akhir (minimal 0).
+ * @return Total akhir dalam Rupiah.
  */
 fun hitungTotalTransaksi(
     daftarItemKeranjang: List<ItemKeranjang>,
@@ -21,26 +74,54 @@ fun hitungTotalTransaksi(
     biayaLayanan: Long,
     pajak: Long,
 ): Long {
-    val subTotal = daftarItemKeranjang.hitungSubtotalKeranjang()
-    return (subTotal - potongan + biayaLayanan + pajak).coerceAtLeast(0)
+    val rincianBiayaTransaksi = RincianBiayaTransaksi(
+        subtotal = daftarItemKeranjang.hitungSubtotalKeranjangUang(),
+        potongan = Uang.dariRupiah(potongan),
+        biayaLayanan = Uang.dariRupiah(biayaLayanan),
+        pajak = Uang.dariRupiah(pajak),
+    )
+
+    return rincianBiayaTransaksi.totalAkhir.nilaiRupiah
 }
 
 /**
- * Menghitung sisa uang yang harus dikembalikan ke pelanggan.
+ * Menghitung sisa uang yang harus dikembalikan ke pelanggan dalam bentuk [Uang].
  *
  * @param uangDibayar Nominal uang dari pelanggan.
  * @param totalTransaksi Kewajiban bayar.
- * @return Nilai kembalian (minimal 0).
+ * @return Nilai kembalian.
+ */
+fun hitungKembalianUang(
+    uangDibayar: Uang,
+    totalTransaksi: Uang,
+): Uang {
+    return uangDibayar.kurangi(totalTransaksi)
+}
+
+/**
+ * Menghitung sisa uang yang harus dikembalikan ke pelanggan dalam bentuk Long.
+ *
+ * Fungsi ini dipertahankan sebagai wrapper kompatibilitas untuk kode lama.
+ *
+ * @param uangDibayar Nominal uang dari pelanggan.
+ * @param totalTransaksi Kewajiban bayar.
+ * @return Nilai kembalian dalam Rupiah.
  */
 fun hitungKembalian(
     uangDibayar: Long,
     totalTransaksi: Long,
 ): Long {
-    return (uangDibayar - totalTransaksi).coerceAtLeast(0)
+    return hitungKembalianUang(
+        uangDibayar = Uang.dariRupiah(uangDibayar),
+        totalTransaksi = Uang.dariRupiah(totalTransaksi),
+    ).nilaiRupiah
 }
 
 /**
  * Memvalidasi apakah sebuah transaksi sudah sah secara logika untuk disimpan.
+ *
+ * Fungsi ini masih memakai Long agar kompatibel dengan alur checkout sekarang.
+ * Validasi domain yang lebih ekspresif akan dirapikan di Scope C.
  *
  * @return True jika keranjang tidak kosong, semua item valid, dan uang pembayaran mencukupi.
  */
@@ -55,11 +136,11 @@ fun transaksiSiapDiproses(
         return false
     }
 
-    if (daftarItemKeranjang.any { it.jumlah <= 0 }) {
+    if (daftarItemKeranjang.any { itemKeranjang -> itemKeranjang.jumlah <= 0 }) {
         return false
     }
 
-    if (daftarItemKeranjang.any { !it.produk.aktif }) {
+    if (daftarItemKeranjang.any { itemKeranjang -> !itemKeranjang.produk.aktif }) {
         return false
     }
 
@@ -72,4 +153,3 @@ fun transaksiSiapDiproses(
 
     return uangDibayar >= totalTransaksi
 }
-

@@ -2,31 +2,63 @@ package id.cassy.kasir.ranah.fungsi
 
 import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.Produk
+import id.cassy.kasir.ranah.model.Uang
 import java.text.NumberFormat
 import java.util.Locale
 
 /**
- * Menghitung nilai subtotal untuk satu baris item keranjang.
+ * Menghitung nilai subtotal untuk satu baris item keranjang dalam bentuk Long.
+ *
+ * Fungsi ini dipertahankan sebagai kompatibilitas untuk UI dan mapper lama.
  */
 fun ItemKeranjang.hitungSubTotal(): Long {
-    return produk.harga * jumlah
+    return hitungSubtotalUang().nilaiRupiah
+}
+
+/**
+ * Menghitung nilai subtotal untuk satu baris item keranjang dalam bentuk [Uang].
+ *
+ * @return Subtotal item berdasarkan harga produk dikali jumlah.
+ */
+fun ItemKeranjang.hitungSubtotalUang(): Uang {
+    return Uang.dariRupiah(
+        nilaiRupiah = produk.harga * jumlah,
+    )
 }
 
 /**
  * Menghitung total seluruh jumlah item dalam keranjang.
  */
 fun List<ItemKeranjang>.hitungJumlahItem(): Int {
-    return sumOf { it.jumlah }
+    return sumOf { itemKeranjang ->
+        itemKeranjang.jumlah
+    }
 }
 
 /**
  * Menghitung total nilai uang seluruh item dalam keranjang sebelum potongan,
- * pajak, atau biaya layanan.
+ * pajak, atau biaya layanan dalam bentuk Long.
+ *
+ * Fungsi ini dipertahankan agar kode lama tetap aman selama migrasi bertahap.
  */
 fun List<ItemKeranjang>.hitungSubtotalKeranjang(): Long {
-    return sumOf { itemKeranjang ->
-        itemKeranjang.hitungSubTotal()
+    return hitungSubtotalKeranjangUang().nilaiRupiah
+}
+
+/**
+ * Menghitung total nilai uang seluruh item dalam keranjang sebelum potongan,
+ * pajak, atau biaya layanan dalam bentuk [Uang].
+ *
+ * @return Subtotal keranjang sebagai value object uang.
+ */
+fun List<ItemKeranjang>.hitungSubtotalKeranjangUang(): Uang {
+    val subtotal = sumOf { itemKeranjang ->
+        itemKeranjang.hitungSubtotalUang().nilaiRupiah
     }
+
+    return Uang.dariRupiah(
+        nilaiRupiah = subtotal,
+    )
 }
 
 /**
@@ -65,4 +97,14 @@ fun Long.sebagaiRupiah(): String {
     pembuatFormatRupiah.maximumFractionDigits = 0
 
     return pembuatFormatRupiah.format(this)
+}
+
+/**
+ * Mengubah value object [Uang] menjadi format Rupiah.
+ *
+ * Fungsi ini menjadi jembatan aman agar UI tidak perlu membaca nilai mentah
+ * terlalu sering saat domain sudah mulai memakai [Uang].
+ */
+fun Uang.sebagaiRupiah(): String {
+    return nilaiRupiah.sebagaiRupiah()
 }
