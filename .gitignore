@@ -1,8 +1,8 @@
 # ====================================================================
-# Cassy Kasir - Pengaturan Pengabaian Git (Git Ignore)
+# Cassy Kasir - Pengaturan Pengabaian Git
 # ====================================================================
 
-# Build dan Output Gradle
+# Build dan keluaran Gradle
 .gradle/
 build/
 **/build/
@@ -10,7 +10,7 @@ build/
 .cxx/
 captures/
 
-# Berkas IDE (Android Studio / IntelliJ)
+# Berkas Android Studio dan IntelliJ yang bersifat lokal
 *.iml
 *.ipr
 *.iws
@@ -22,7 +22,7 @@ captures/
 .idea/assetWizardSettings.xml
 .navigation/
 
-# Konfigurasi Lokal dan Rahasia
+# Konfigurasi lokal dan rahasia
 local.properties
 *.jks
 *.keystore
@@ -30,18 +30,24 @@ local.properties
 *.pem
 google-services.json
 
-# Berkas Sistem Operasi
+# Berkas sistem operasi
 .DS_Store
 Thumbs.db
 
-# Log dan Cache
+# Log dan cache
 *.log
 .kotlin/
+
+# Konfigurasi editor lokal
 .vscode/
 
-# Berkas Tambahan Agent
+# Artefak lokal dari agen atau eksperimen
 STUDIO_AGENT_GUIDE.md
 artifacts/
 *.artifact.md
-*.png
-*.xml
+
+# Artefak build Android
+*.apk
+*.aab
+*.ap_
+*.hprof

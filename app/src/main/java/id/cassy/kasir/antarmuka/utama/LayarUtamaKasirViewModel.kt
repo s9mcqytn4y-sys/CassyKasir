@@ -2,6 +2,7 @@ package id.cassy.kasir.antarmuka.utama
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.kasuspenggunaan.BentukModelTampilanLayarUtamaKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.HapusProdukDariKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
@@ -241,12 +242,18 @@ class LayarUtamaKasirViewModel(
                         statusHasilCheckout = StatusHasilCheckoutKasir(
                             apakahTampil = true,
                             judul = "Transaksi Berhasil",
-                            deskripsi = "Sebanyak ${hasilCheckout.jumlahItemCheckout} item dengan total ${hasilCheckout.totalCheckout.sebagaiRupiahSederhana()} telah diproses.",
+                            deskripsi = "Sebanyak ${hasilCheckout.jumlahItemCheckout} item dengan total ${hasilCheckout.totalCheckout.sebagaiRupiah()} telah diproses.",
                         ),
                     )
                 }
-            } catch (e: Exception) {
-                kirimPesanSingkat("Gagal menyimpan transaksi: ${e.message}")
+            } catch (_: Exception) {
+                _statusElemenLayar.update { statusLama ->
+                    statusLama.copy(
+                        apakahDialogKonfirmasiCheckoutTampil = false,
+                    )
+                }
+
+                kirimPesanSingkat("Transaksi belum tersimpan. Coba lagi.")
             }
         }
     }
@@ -283,6 +290,3 @@ class LayarUtamaKasirViewModel(
     }
 }
 
-private fun Long.sebagaiRupiahSederhana(): String {
-    return "Rp$this"
-}

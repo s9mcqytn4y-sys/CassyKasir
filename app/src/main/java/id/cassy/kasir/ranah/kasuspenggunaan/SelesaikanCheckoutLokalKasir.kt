@@ -1,24 +1,17 @@
 package id.cassy.kasir.ranah.kasuspenggunaan
 
-import androidx.compose.runtime.Immutable
+import id.cassy.kasir.data.lokal.identitas.PembangkitIdentitasTransaksiLokal
+import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
 import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
+import id.cassy.kasir.ranah.fungsi.transaksiSiapDiproses
 import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.StatusSinkronisasi
-
-import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksi
-import id.cassy.kasir.data.lokal.identitas.PembangkitIdTransaksiLokal
 import id.cassy.kasir.ranah.model.Transaksi
 
 /**
- * Hasil penyelesaian checkout statis lokal.
- *
- * @property daftarItemKeranjangBaru Daftar item keranjang setelah checkout (biasanya kosong).
- * @property statusSinkronisasiBaru Objek status penyimpanan transaksi.
- * @property jumlahItemCheckout Total kuantitas item yang berhasil diproses.
- * @property totalCheckout Nilai moneter total dari transaksi.
+ * Hasil penyelesaian checkout lokal.
  */
-@Immutable
 data class HasilCheckoutLokalKasir(
     val daftarItemKeranjangBaru: List<ItemKeranjang>,
     val statusSinkronisasiBaru: StatusSinkronisasi,
@@ -27,25 +20,17 @@ data class HasilCheckoutLokalKasir(
 )
 
 /**
- * Kasus Penggunaan untuk menyelesaikan proses checkout secara lokal.
- * Bertanggung jawab membuat ID transaksi, menghitung total, dan menyimpan ke [RepositoriTransaksi].
+ * Kasus penggunaan untuk menyelesaikan checkout secara lokal.
  *
- * @property repositori Sumber persistensi data transaksi.
+ * Use case ini menjadi pagar domain sebelum transaksi disimpan ke Room.
  */
 class SelesaikanCheckoutLokalKasir(
     private val repositori: RepositoriTransaksi,
 ) {
 
-    /**
-     * Memproses penyelesaian transaksi lokal.
-     *
-     * @param daftarItemKeranjang Daftar item yang akan di-checkout.
-     * @return Objek hasil checkout berisi ringkasan transaksi.
-     */
     suspend fun eksekusi(
         daftarItemKeranjang: List<ItemKeranjang>,
     ): HasilCheckoutLokalKasir {
-        val jumlahItemCheckout = daftarItemKeranjang.hitungJumlahItem()
         val totalCheckout = hitungTotalTransaksi(
             daftarItemKeranjang = daftarItemKeranjang,
             potongan = 0,
@@ -53,9 +38,22 @@ class SelesaikanCheckoutLokalKasir(
             pajak = 0,
         )
 
-        // Membuat objek domain Transaksi
+        require(
+            transaksiSiapDiproses(
+                daftarItemKeranjang = daftarItemKeranjang,
+                uangDibayar = totalCheckout,
+                potongan = 0,
+                biayaLayanan = 0,
+                pajak = 0,
+            ),
+        ) {
+            "Transaksi belum valid untuk disimpan."
+        }
+
+        val jumlahItemCheckout = daftarItemKeranjang.hitungJumlahItem()
+
         val transaksi = Transaksi(
-            id = PembangkitIdTransaksiLokal.buatIdBaru(),
+            id = PembangkitIdentitasTransaksiLokal.buatIdentitasBaru(),
             daftarItemKeranjang = daftarItemKeranjang,
             uangDibayar = totalCheckout,
             potongan = 0,
@@ -65,7 +63,6 @@ class SelesaikanCheckoutLokalKasir(
             catatan = null,
         )
 
-        // Simpan ke database melalui repositori
         repositori.simpanTransaksi(transaksi)
 
         return HasilCheckoutLokalKasir(

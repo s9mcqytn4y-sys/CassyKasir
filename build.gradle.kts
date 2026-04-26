@@ -1,22 +1,12 @@
 /**
- * Konfigurasi Build Tingkat Proyek (Root).
- * Mengatur plugin yang akan dibagikan ke seluruh modul di bawahnya tanpa langsung menerapkannya.
+ * Konfigurasi build tingkat proyek.
+ *
+ * Plugin di sini disediakan untuk modul, tetapi tidak langsung diterapkan
+ * pada tingkat root.
  */
 plugins {
-    // Plugin Android Application: Dasar untuk membangun aplikasi Android
     alias(libs.plugins.android.application) apply false
-
-    // Plugin Kotlin Android: Menghubungkan Kotlin dengan Android Build System
-    alias(libs.plugins.kotlin.android) apply false
-
-    // Plugin Compose Compiler: Menangani optimasi fungsi @Composable di Kotlin 2.x
     alias(libs.plugins.compose.compiler) apply false
-
-    // Plugin Kotlin Serialization: Untuk serialisasi data JSON (Type-safe Navigation)
     alias(libs.plugins.kotlin.serialization) apply false
-
-    // Plugin KSP: Kotlin Symbol Processing untuk efisiensi Room Compiler
     alias(libs.plugins.ksp) apply false
 }
-
-
