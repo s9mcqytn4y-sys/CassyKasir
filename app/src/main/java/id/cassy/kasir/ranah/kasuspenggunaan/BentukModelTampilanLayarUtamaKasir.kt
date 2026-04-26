@@ -8,11 +8,10 @@ import id.cassy.kasir.antarmuka.utama.StatusKeranjangKasir
 import id.cassy.kasir.antarmuka.utama.StatusKonfirmasiCheckoutKasir
 import id.cassy.kasir.antarmuka.utama.StatusTransaksiLayarUtamaKasir
 import id.cassy.kasir.ranah.fungsi.cariProduk
-import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
-import id.cassy.kasir.ranah.fungsi.hitungSubtotalKeranjang
-import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.Produk
+import id.cassy.kasir.ranah.model.RincianBiayaTransaksi
+import id.cassy.kasir.ranah.model.Uang
 
 /**
  * Kasus penggunaan untuk mentransformasikan data domain dan status internal menjadi model tampilan (UI State).
@@ -21,6 +20,7 @@ import id.cassy.kasir.ranah.model.Produk
  * status antarmuka terpusat di sini, sehingga ViewModel tetap bersih dan fokus pada manajemen aliran data.
  */
 class BentukModelTampilanLayarUtamaKasir {
+    private val hitungTotalBelanja = HitungTotalBelanja()
 
     /**
      * Membentuk [ModelTampilanLayarUtamaKasir] berdasarkan status terkini.
@@ -41,18 +41,25 @@ class BentukModelTampilanLayarUtamaKasir {
     ): ModelTampilanLayarUtamaKasir {
         val daftarItemKeranjang = statusTransaksi.daftarItemKeranjang
 
-        // Optimasi: Gunakan fungsi ekstensi untuk logika pencarian dan perhitungan
         val daftarProdukTersaring = daftarProdukPenuh.cariProduk(kataKunciEfektif)
-        val jumlahItem = daftarItemKeranjang.hitungJumlahItem()
-        val subtotal = daftarItemKeranjang.hitungSubtotalKeranjang()
-
-        // Menghitung total transaksi dengan parameter default (potongan/pajak bisa dikembangkan di masa depan)
-        val total = hitungTotalTransaksi(
+        val hasilHitungTotalBelanja = hitungTotalBelanja(
             daftarItemKeranjang = daftarItemKeranjang,
-            potongan = 0,
-            biayaLayanan = 0,
-            pajak = 0,
         )
+        val ringkasanTotalBelanja = when (hasilHitungTotalBelanja) {
+            is HasilHitungTotalBelanja.Berhasil -> hasilHitungTotalBelanja.ringkasanTotalBelanja
+            is HasilHitungTotalBelanja.Gagal -> RingkasanTotalBelanja(
+                daftarItemKeranjangBersih = emptyList(),
+                jumlahItem = 0,
+                rincianBiayaTransaksi = RincianBiayaTransaksi(
+                    subtotal = Uang.Nol,
+                ),
+                totalAkhir = Uang.Nol,
+                kembalian = Uang.Nol,
+            )
+        }
+        val jumlahItem = ringkasanTotalBelanja.jumlahItem
+        val rincianBiayaTransaksi = ringkasanTotalBelanja.rincianBiayaTransaksi
+        val totalAkhir = ringkasanTotalBelanja.totalAkhir
 
         return ModelTampilanLayarUtamaKasir(
             statusBeranda = StatusBerandaKasir(
@@ -60,7 +67,7 @@ class BentukModelTampilanLayarUtamaKasir {
                 sloganAplikasi = "Solusi Digital UMKM Modern",
                 jumlahProdukTersedia = daftarProdukPenuh.size,
                 jumlahItemKeranjang = jumlahItem,
-                totalBelanjaSementara = subtotal.sebagaiRupiah(),
+                totalBelanjaSementara = rincianBiayaTransaksi.subtotal.sebagaiRupiah(),
                 statusSinkronisasi = statusTransaksi.statusSinkronisasi,
             ),
             daftarProdukTersaring = daftarProdukTersaring,
@@ -75,17 +82,17 @@ class BentukModelTampilanLayarUtamaKasir {
                 jumlahItem = "$jumlahItem item",
             ),
             ringkasanPembayaran = RingkasanPembayaranKasir(
-                subtotal = subtotal.sebagaiRupiah(),
-                potongan = 0L.sebagaiRupiah(),
-                pajak = 0L.sebagaiRupiah(),
-                totalAkhir = total.sebagaiRupiah(),
+                subtotal = rincianBiayaTransaksi.subtotal.sebagaiRupiah(),
+                potongan = rincianBiayaTransaksi.potongan.sebagaiRupiah(),
+                pajak = rincianBiayaTransaksi.pajak.sebagaiRupiah(),
+                totalAkhir = totalAkhir.sebagaiRupiah(),
                 labelAksiUtama = if (jumlahItem > 0) "Bayar sekarang" else "Pilih produk",
                 aksiUtamaAktif = jumlahItem > 0,
             ),
             statusKonfirmasiCheckout = StatusKonfirmasiCheckoutKasir(
                 apakahTampil = statusElemenLayar.apakahDialogKonfirmasiCheckoutTampil && jumlahItem > 0,
                 judul = "Konfirmasi pembayaran",
-                deskripsi = "Bayar $jumlahItem item dengan total ${total.sebagaiRupiah()} sekarang?",
+                deskripsi = "Bayar $jumlahItem item dengan total ${totalAkhir.sebagaiRupiah()} sekarang?",
                 labelKonfirmasi = "Bayar sekarang",
             ),
             statusHasilCheckout = statusElemenLayar.statusHasilCheckout,

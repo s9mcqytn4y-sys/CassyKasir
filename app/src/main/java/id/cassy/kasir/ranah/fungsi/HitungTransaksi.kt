@@ -120,8 +120,8 @@ fun hitungKembalian(
 /**
  * Memvalidasi apakah sebuah transaksi sudah sah secara logika untuk disimpan.
  *
- * Fungsi ini masih memakai Long agar kompatibel dengan alur checkout sekarang.
- * Validasi domain yang lebih ekspresif akan dirapikan di Scope C.
+ * Fungsi ini masih memakai Long agar kompatibel dengan alur lama.
+ * Validasi sebenarnya sudah diarahkan ke hasil validasi checkout eksplisit.
  *
  * @return True jika keranjang tidak kosong, semua item valid, dan uang pembayaran mencukupi.
  */
