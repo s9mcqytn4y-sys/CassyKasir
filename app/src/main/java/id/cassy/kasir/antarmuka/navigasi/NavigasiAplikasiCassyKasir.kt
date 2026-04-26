@@ -22,6 +22,7 @@ import id.cassy.kasir.antarmuka.utama.LayarUtamaKasir
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
 import id.cassy.kasir.antarmuka.PenyediaViewModelKasir
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * Komposabel pengelola navigasi antar layar di seluruh aplikasi.
@@ -43,19 +44,17 @@ fun NavigasiAplikasiCassyKasir() {
         composable(
             route = TujuanNavigasiKasir.KasirUtama.rute,
         ) { entriBackStack ->
-            val pesanTambahProdukDariDetail = entriBackStack
-                .savedStateHandle
-                .ambilAlurPesanTambahProdukDariDetail()
-                .collectAsStateWithLifecycle()
+            LaunchedEffect(entriBackStack) {
+                entriBackStack.savedStateHandle
+                    .ambilAlurPesanTambahProdukDariDetail()
+                    .filterNotNull()
+                    .collectLatest { pesan ->
+                        layarUtamaKasirViewModel.tampilkanPesanOperasional(
+                            pesan = pesan,
+                        )
 
-            LaunchedEffect(pesanTambahProdukDariDetail.value) {
-                val pesan = pesanTambahProdukDariDetail.value ?: return@LaunchedEffect
-
-                layarUtamaKasirViewModel.tampilkanPesanOperasional(
-                    pesan = pesan,
-                )
-
-                entriBackStack.savedStateHandle.konsumsiPesanTambahProdukDariDetail()
+                        entriBackStack.savedStateHandle.konsumsiPesanTambahProdukDariDetail()
+                    }
             }
 
             LayarUtamaKasir(

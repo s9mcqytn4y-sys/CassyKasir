@@ -4,7 +4,7 @@
 
     <!-- Konfigurasi Aplikasi Utama -->
     <application
-        android:name=".AplikasiKasir"
+        android:name="id.cassy.kasir.AplikasiKasir"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -17,7 +17,7 @@
 
         <!-- Aktivitas Utama: Titik Masuk Aplikasi -->
         <activity
-            android:name=".antarmuka.utama.AktivitasUtama"
+            android:name="id.cassy.kasir.antarmuka.utama.AktivitasUtama"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

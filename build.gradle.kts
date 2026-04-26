@@ -6,6 +6,9 @@ plugins {
     // Plugin Android Application: Dasar untuk membangun aplikasi Android
     alias(libs.plugins.android.application) apply false
 
+    // Plugin Kotlin Android: Menghubungkan Kotlin dengan Android Build System
+    alias(libs.plugins.kotlin.android) apply false
+
     // Plugin Compose Compiler: Menangani optimasi fungsi @Composable di Kotlin 2.x
     alias(libs.plugins.compose.compiler) apply false
 

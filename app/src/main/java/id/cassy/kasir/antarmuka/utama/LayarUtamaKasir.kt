@@ -161,7 +161,7 @@ private fun TataLetakPonselKasir(
         }
 
         item {
-            BidangPencarianProdukKasir(
+            BagianPencarianProdukKasir(
                 nilaiPencarian = modelTampilan.kataKunciPencarian,
                 saatNilaiPencarianBerubah = { kataKunciBaru ->
                     saatAksiDikirim(
@@ -171,24 +171,11 @@ private fun TataLetakPonselKasir(
                     )
                 },
                 jumlahHasil = modelTampilan.daftarProdukTersaring.size,
+                tampilkanAksiResetPencarian = modelTampilan.tampilkanAksiResetPencarian,
+                saatResetPencarian = {
+                    saatAksiDikirim(AksiLayarUtamaKasir.ResetPencarian)
+                },
             )
-        }
-
-        if (modelTampilan.tampilkanAksiResetPencarian) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = { saatAksiDikirim(AksiLayarUtamaKasir.ResetPencarian) },
-                    ) {
-                        Text(
-                            text = "Reset pencarian",
-                        )
-                    }
-                }
-            }
         }
 
         item {
@@ -321,7 +308,7 @@ private fun TataLetakTabletKasir(
             }
 
             item {
-                BidangPencarianProdukKasir(
+                BagianPencarianProdukKasir(
                     nilaiPencarian = modelTampilan.kataKunciPencarian,
                     saatNilaiPencarianBerubah = { kataKunciBaru ->
                         saatAksiDikirim(
@@ -331,24 +318,11 @@ private fun TataLetakTabletKasir(
                         )
                     },
                     jumlahHasil = modelTampilan.daftarProdukTersaring.size,
+                    tampilkanAksiResetPencarian = modelTampilan.tampilkanAksiResetPencarian,
+                    saatResetPencarian = {
+                        saatAksiDikirim(AksiLayarUtamaKasir.ResetPencarian)
+                    },
                 )
-            }
-
-            if (modelTampilan.tampilkanAksiResetPencarian) {
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                    ) {
-                        TextButton(
-                            onClick = { saatAksiDikirim(AksiLayarUtamaKasir.ResetPencarian) },
-                        ) {
-                            Text(
-                                text = "Reset pencarian",
-                            )
-                        }
-                    }
-                }
             }
 
             item {
@@ -445,6 +419,46 @@ private fun TataLetakTabletKasir(
                     saatAksiDikirim(AksiLayarUtamaKasir.CobaCheckout)
                 },
             )
+        }
+    }
+}
+
+/**
+ * Bagian UI pencarian produk yang menggabungkan bidang input dan tombol reset.
+ */
+@Composable
+private fun BagianPencarianProdukKasir(
+    nilaiPencarian: String,
+    saatNilaiPencarianBerubah: (String) -> Unit,
+    jumlahHasil: Int,
+    tampilkanAksiResetPencarian: Boolean,
+    saatResetPencarian: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        BidangPencarianProdukKasir(
+            nilaiPencarian = nilaiPencarian,
+            saatNilaiPencarianBerubah = saatNilaiPencarianBerubah,
+            jumlahHasil = jumlahHasil,
+        )
+
+        if (tampilkanAksiResetPencarian) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                TextButton(
+                    onClick = saatResetPencarian,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) {
+                    Text(
+                        text = "Reset pencarian",
+                    )
+                }
+            }
         }
     }
 }
