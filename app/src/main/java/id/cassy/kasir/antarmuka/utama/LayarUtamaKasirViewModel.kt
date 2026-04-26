@@ -259,6 +259,17 @@ class LayarUtamaKasirViewModel(
                         ),
                     )
                 }
+            } catch (kesalahanValidasi: IllegalArgumentException) {
+                _statusElemenLayar.update { statusLama ->
+                    statusLama.copy(
+                        apakahDialogKonfirmasiCheckoutTampil = false,
+                    )
+                }
+
+                kirimPesanSingkat(
+                    pesan = kesalahanValidasi.message
+                        ?: "Transaksi belum valid untuk disimpan.",
+                )
             } catch (_: Exception) {
                 _statusElemenLayar.update { statusLama ->
                     statusLama.copy(
