@@ -35,7 +35,7 @@ object PenyediaViewModelKasir {
         initializer {
             val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
             LayarDetailTransaksiViewModel(
-                amatiTransaksiBerdasarkanId = aplikasi.kontainer.amatiTransaksiBerdasarkanId,
+                amatiTransaksiBerdasarkanIdentitas = aplikasi.kontainer.amatiTransaksiBerdasarkanIdentitas,
                 savedStateHandle = createSavedStateHandle(),
             )
         }

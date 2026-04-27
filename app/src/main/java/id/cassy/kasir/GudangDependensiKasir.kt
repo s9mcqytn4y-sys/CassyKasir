@@ -11,7 +11,7 @@ import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksiLokal
 import id.cassy.kasir.data.repositori.RepositoriProdukLokalRemote
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiProdukBerdasarkanIdentitas
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
-import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanIdentitas
 import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.repositori.RepositoriProduk
@@ -107,7 +107,7 @@ class GudangDependensiKasir(
     /**
      * Kasus penggunaan untuk mengamati detail transaksi tunggal berdasarkan ID.
      */
-    val amatiTransaksiBerdasarkanId: AmatiTransaksiBerdasarkanId by lazy {
-        AmatiTransaksiBerdasarkanId(repositoriTransaksi)
+    val amatiTransaksiBerdasarkanIdentitas: AmatiTransaksiBerdasarkanIdentitas by lazy {
+        AmatiTransaksiBerdasarkanIdentitas(repositoriTransaksi)
     }
 }

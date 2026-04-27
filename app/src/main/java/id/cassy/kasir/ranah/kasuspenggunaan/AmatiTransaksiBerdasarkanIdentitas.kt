@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
  * Dipakai oleh layar detail transaksi agar pembacaan detail tidak
  * menembus repository langsung dari ViewModel.
  */
-class AmatiTransaksiBerdasarkanId(
+class AmatiTransaksiBerdasarkanIdentitas(
     private val repositoriTransaksi: RepositoriTransaksi,
 ) {
     operator fun invoke(

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
-import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanId
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanIdentitas
 import id.cassy.kasir.ranah.fungsi.hitungKembalian
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.update
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class LayarDetailTransaksiViewModel(
-    private val amatiTransaksiBerdasarkanId: AmatiTransaksiBerdasarkanId,
+    private val amatiTransaksiBerdasarkanIdentitas: AmatiTransaksiBerdasarkanIdentitas,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -55,7 +55,7 @@ class LayarDetailTransaksiViewModel(
                         ),
                     )
 
-                    emitAll(amatiTransaksiBerdasarkanId(identitasTransaksi).map { transaksi ->
+                    emitAll(amatiTransaksiBerdasarkanIdentitas(identitasTransaksi).map { transaksi ->
                         transaksi.keModelTampilanDetailTransaksi(identitasTransaksi)
                     })
                 }.catch {
