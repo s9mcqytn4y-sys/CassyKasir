@@ -1,6 +1,6 @@
 package id.cassy.kasir.ranah.kasuspenggunaan
 
-import id.cassy.kasir.data.lokal.identitas.PembangkitIdentitasTransaksiLokal
+import id.cassy.kasir.ranah.identitas.PembangkitIdentitasTransaksi
 import id.cassy.kasir.ranah.fungsi.hitungJumlahItem
 import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksiUang
 import id.cassy.kasir.ranah.fungsi.sanitasiDaftarItemKeranjangUntukCheckout
@@ -53,8 +53,10 @@ class SelesaikanCheckoutLokalKasir(
         val jumlahItemCheckout = daftarItemKeranjangBersih.hitungJumlahItem()
 
         val transaksi = Transaksi(
-            id = PembangkitIdentitasTransaksiLokal.buatIdentitasBaru(),
+            id = PembangkitIdentitasTransaksi.buatIdentitasBaru(),
             daftarItemKeranjang = daftarItemKeranjangBersih,
+            // Untuk tahap sekarang, checkout tunai dianggap memakai uang pas karena
+            // layar belum memiliki input nominal pembayaran.
             uangDibayar = totalCheckout.nilaiRupiah,
             potongan = 0,
             biayaLayanan = 0,
@@ -63,7 +65,7 @@ class SelesaikanCheckoutLokalKasir(
             catatan = null,
         )
 
-        repositori.simpanTransaksi(transaksi)
+        repositori.simpanTransaksiDanKurangiStok(transaksi)
 
         return HasilCheckoutLokalKasir(
             daftarItemKeranjangBaru = emptyList(),
@@ -77,9 +79,8 @@ class SelesaikanCheckoutLokalKasir(
 /**
  * Mengubah hasil validasi tidak sah menjadi exception domain yang jelas.
  *
- * Untuk tahap sekarang, ViewModel masih menangkap Exception dan menampilkan
- * pesan umum. Pesan spesifik ini disiapkan agar Scope berikutnya bisa
- * menampilkan alasan validasi yang lebih tepat kepada kasir.
+ * ViewModel menangkap [IllegalArgumentException] agar pesan validasi bisa
+ * ditampilkan sebagai pesan singkat kepada kasir.
  */
 private fun HasilValidasiCheckout.pastikanSah() {
     if (this is HasilValidasiCheckout.TidakSah) {

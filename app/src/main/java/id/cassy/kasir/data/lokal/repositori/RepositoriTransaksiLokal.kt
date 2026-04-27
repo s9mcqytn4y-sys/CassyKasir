@@ -1,5 +1,6 @@
 package id.cassy.kasir.data.lokal.repositori
 
+import androidx.room.withTransaction
 import id.cassy.kasir.data.lokal.basisdata.BasisDataCassyKasir
 import id.cassy.kasir.data.lokal.pemetaan.keDomain
 import id.cassy.kasir.data.lokal.pemetaan.keLokal
@@ -22,6 +23,7 @@ class RepositoriTransaksiLokal(
 ) : RepositoriTransaksi {
 
     private val aksesDataTransaksi = basisData.aksesDataTransaksiLokal()
+    private val aksesDataProduk = basisData.aksesDataProdukLokal()
 
     /**
      * Menyimpan transaksi baru beserta seluruh item terkait ke database secara atomik.
@@ -29,6 +31,66 @@ class RepositoriTransaksiLokal(
      * @param transaksi Objek domain transaksi yang akan disimpan.
      */
     override suspend fun simpanTransaksi(
+        transaksi: Transaksi,
+    ) {
+        simpanTransaksiTanpaMengubahStok(
+            transaksi = transaksi,
+        )
+    }
+
+    /**
+     * Menyimpan transaksi dan mengurangi stok produk secara atomik.
+     *
+     * @param transaksi Transaksi yang akan dicatat.
+     */
+    override suspend fun simpanTransaksiDanKurangiStok(
+        transaksi: Transaksi,
+    ) {
+        val daftarJumlahProduk = transaksi.daftarItemKeranjang
+            .groupBy { itemKeranjang -> itemKeranjang.produk.id }
+            .mapValues { (_, daftarItemKeranjang) ->
+                daftarItemKeranjang.sumOf { itemKeranjang -> itemKeranjang.jumlah }
+            }
+
+        basisData.withTransaction {
+            val daftarProdukLokal = aksesDataProduk
+                .ambilProdukBerdasarkanDaftarIdentitas(
+                    daftarIdentitasProduk = daftarJumlahProduk.keys.toList(),
+                )
+                .associateBy { produkLokal -> produkLokal.id }
+
+            daftarJumlahProduk.forEach { (identitasProduk, jumlahDiminta) ->
+                val produkLokal = daftarProdukLokal[identitasProduk]
+                    ?: throw IllegalArgumentException("Produk tidak ditemukan.")
+
+                if (!produkLokal.apakahAktif) {
+                    throw IllegalArgumentException("Produk ${produkLokal.nama} sedang tidak aktif.")
+                }
+
+                if (produkLokal.stokTersedia < jumlahDiminta) {
+                    throw IllegalArgumentException("Stok ${produkLokal.nama} tidak cukup.")
+                }
+            }
+
+            simpanTransaksiTanpaMengubahStok(
+                transaksi = transaksi,
+            )
+
+            daftarJumlahProduk.forEach { (identitasProduk, jumlahPengurang) ->
+                val jumlahBarisBerubah = aksesDataProduk.kurangiStokJikaCukup(
+                    identitasProduk = identitasProduk,
+                    jumlahPengurang = jumlahPengurang,
+                )
+
+                if (jumlahBarisBerubah != 1) {
+                    val namaProduk = daftarProdukLokal[identitasProduk]?.nama ?: "produk"
+                    throw IllegalArgumentException("Stok $namaProduk tidak cukup.")
+                }
+            }
+        }
+    }
+
+    private suspend fun simpanTransaksiTanpaMengubahStok(
         transaksi: Transaksi,
     ) {
         val entitasTransaksi = transaksi.keLokal()

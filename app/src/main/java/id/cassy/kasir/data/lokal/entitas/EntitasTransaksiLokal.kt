@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
  * urutan waktu tetap performan seiring pertumbuhan data.
  *
  * @property id Identitas unik transaksi dalam bentuk UUID string dari
- * [id.cassy.kasir.data.lokal.identitas.PembangkitIdentitasTransaksiLokal].
+ * [id.cassy.kasir.ranah.identitas.PembangkitIdentitasTransaksi].
  * @property uangDibayar Jumlah uang tunai yang diterima dari pelanggan.
  * @property potongan Total diskon atau potongan harga.
  * @property biayaLayanan Biaya tambahan layanan.

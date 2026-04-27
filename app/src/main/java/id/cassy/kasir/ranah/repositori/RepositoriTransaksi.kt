@@ -24,6 +24,18 @@ interface RepositoriTransaksi {
     )
 
     /**
+     * Menyimpan transaksi dan mengurangi stok produk terkait secara atomik.
+     *
+     * Implementasi wajib memastikan transaksi tidak tersimpan jika stok produk
+     * tidak cukup, produk tidak aktif, atau produk tidak ditemukan.
+     *
+     * @param transaksi Transaksi final yang akan dicatat.
+     */
+    suspend fun simpanTransaksiDanKurangiStok(
+        transaksi: Transaksi,
+    )
+
+    /**
      * Mengamati semua transaksi yang sudah tersimpan.
      *
      * @return Aliran daftar transaksi dari sumber data aktif.

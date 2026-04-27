@@ -54,6 +54,34 @@ interface AksesDataProdukLokal {
     )
 
     /**
+     * Mengambil daftar produk lokal berdasarkan kumpulan identitas produk.
+     */
+    @Query("SELECT * FROM produk WHERE id IN (:daftarIdentitasProduk)")
+    suspend fun ambilProdukBerdasarkanDaftarIdentitas(
+        daftarIdentitasProduk: List<String>,
+    ): List<EntitasProdukLokal>
+
+    /**
+     * Mengurangi stok produk jika stok tersedia masih mencukupi.
+     *
+     * @return Jumlah baris yang berhasil diperbarui. Nilai 1 berarti sukses,
+     * nilai 0 berarti produk tidak ditemukan, tidak aktif, atau stok tidak cukup.
+     */
+    @Query(
+        """
+        UPDATE produk
+        SET stokTersedia = stokTersedia - :jumlahPengurang
+        WHERE id = :identitasProduk
+        AND apakahAktif = 1
+        AND stokTersedia >= :jumlahPengurang
+        """,
+    )
+    suspend fun kurangiStokJikaCukup(
+        identitasProduk: String,
+        jumlahPengurang: Int,
+    ): Int
+
+    /**
      * Menghapus semua produk dari tabel lokal.
      */
     @Query("DELETE FROM produk")
