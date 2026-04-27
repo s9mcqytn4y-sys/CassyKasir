@@ -277,7 +277,7 @@ private fun KartuRingkasanTransaksiRiwayat(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = ringkasan.transaksiId,
+                text = ringkasan.labelIdentitasTransaksi,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )

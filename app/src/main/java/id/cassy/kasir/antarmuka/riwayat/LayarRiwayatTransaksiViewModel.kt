@@ -2,13 +2,13 @@ package id.cassy.kasir.antarmuka.riwayat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.cassy.kasir.antarmuka.format.hitungJumlahItemTransaksi
+import id.cassy.kasir.antarmuka.format.hitungTotalAkhirTransaksi
+import id.cassy.kasir.antarmuka.format.sebagaiLabelIdentitasTransaksi
+import id.cassy.kasir.antarmuka.format.sebagaiLabelWaktuTransaksi
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
-import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.Transaksi
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -217,9 +217,10 @@ private fun Transaksi.cocokDenganKataKunci(
 private fun Transaksi.keRingkasanTransaksiRiwayat(): RingkasanTransaksiRiwayat {
     return RingkasanTransaksiRiwayat(
         transaksiId = id,
+        labelIdentitasTransaksi = id.sebagaiLabelIdentitasTransaksi(),
         labelWaktu = waktuTransaksiEpochMili.sebagaiLabelWaktuTransaksi(),
-        labelJumlahItem = "${hitungJumlahItem()} item",
-        labelTotalAkhir = hitungTotalAkhir().sebagaiRupiah(),
+        labelJumlahItem = "${hitungJumlahItemTransaksi()} item",
+        labelTotalAkhir = hitungTotalAkhirTransaksi().sebagaiRupiah(),
         ringkasanItem = bentukRingkasanItem(),
     )
 }
@@ -243,25 +244,4 @@ private fun Transaksi.bentukRingkasanItem(): String {
     }
 }
 
-private fun Transaksi.hitungJumlahItem(): Int {
-    return daftarItemKeranjang.sumOf { itemKeranjang ->
-        itemKeranjang.jumlah
-    }
-}
-
-private fun Transaksi.hitungTotalAkhir(): Long {
-    return hitungTotalTransaksi(
-        daftarItemKeranjang = daftarItemKeranjang,
-        potongan = potongan,
-        biayaLayanan = biayaLayanan,
-        pajak = pajak,
-    )
-}
-
-private fun Long.sebagaiLabelWaktuTransaksi(): String {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
-    return Instant.ofEpochMilli(this)
-        .atZone(ZoneId.systemDefault())
-        .format(formatter)
-}
 

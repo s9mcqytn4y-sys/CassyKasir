@@ -152,7 +152,7 @@ private fun KontenDetailTransaksiBerhasil(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = statusMuat.transaksiId,
+                    text = statusMuat.labelIdentitasTransaksi,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                 )

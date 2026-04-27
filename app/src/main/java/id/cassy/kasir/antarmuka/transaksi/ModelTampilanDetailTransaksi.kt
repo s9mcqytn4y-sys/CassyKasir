@@ -29,7 +29,8 @@ sealed interface StatusMuatDetailTransaksi {
     /**
      * Berhasil mengambil rincian transaksi lengkap.
      *
-     * @property transaksiId ID transaksi yang ditampilkan.
+     * @property transaksiId ID internal transaksi.
+     * @property labelIdentitasTransaksi Label transaksi yang ramah dibaca manusia.
      * @property labelWaktu Waktu transaksi terformat.
      * @property labelJumlahItem Deskripsi total kuantitas item.
      * @property labelSubtotal Nilai subtotal terformat.
@@ -45,6 +46,7 @@ sealed interface StatusMuatDetailTransaksi {
     @Immutable
     data class Berhasil(
         val transaksiId: String,
+        val labelIdentitasTransaksi: String,
         val labelWaktu: String,
         val labelJumlahItem: String,
         val labelSubtotal: String,

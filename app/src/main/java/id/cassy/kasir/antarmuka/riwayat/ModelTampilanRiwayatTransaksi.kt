@@ -42,6 +42,7 @@ sealed interface StatusMuatRiwayatTransaksi {
 @Immutable
 data class RingkasanTransaksiRiwayat(
     val transaksiId: String,
+    val labelIdentitasTransaksi: String,
     val labelWaktu: String,
     val labelJumlahItem: String,
     val labelTotalAkhir: String,

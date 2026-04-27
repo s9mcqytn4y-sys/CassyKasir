@@ -4,15 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import id.cassy.kasir.antarmuka.format.hitungJumlahItemTransaksi
+import id.cassy.kasir.antarmuka.format.hitungKembalianTransaksi
+import id.cassy.kasir.antarmuka.format.hitungSubtotalTransaksi
+import id.cassy.kasir.antarmuka.format.hitungTotalAkhirTransaksi
+import id.cassy.kasir.antarmuka.format.sebagaiLabelIdentitasTransaksi
+import id.cassy.kasir.antarmuka.format.sebagaiLabelWaktuTransaksi
 import id.cassy.kasir.antarmuka.navigasi.TujuanNavigasiKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanIdentitas
-import id.cassy.kasir.ranah.fungsi.hitungKembalian
-import id.cassy.kasir.ranah.fungsi.hitungTotalTransaksi
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.Transaksi
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -99,19 +100,17 @@ private fun Transaksi?.keModelTampilanDetailTransaksi(
         )
     }
 
-    val subtotal = hitungSubtotal()
-    val totalAkhir = hitungTotalAkhir()
-    val kembalian = hitungKembalian(
-        uangDibayar = uangDibayar,
-        totalTransaksi = totalAkhir,
-    )
+    val subtotal = hitungSubtotalTransaksi()
+    val totalAkhir = hitungTotalAkhirTransaksi()
+    val kembalian = hitungKembalianTransaksi()
 
     return ModelTampilanDetailTransaksi(
         judulLayar = "Detail Transaksi",
         statusMuat = StatusMuatDetailTransaksi.Berhasil(
             transaksiId = id,
+            labelIdentitasTransaksi = id.sebagaiLabelIdentitasTransaksi(),
             labelWaktu = waktuTransaksiEpochMili.sebagaiLabelWaktuTransaksi(),
-            labelJumlahItem = "${hitungJumlahItem()} item",
+            labelJumlahItem = "${hitungJumlahItemTransaksi()} item",
             labelSubtotal = subtotal.sebagaiRupiah(),
             labelPotongan = potongan.sebagaiRupiah(),
             labelBiayaLayanan = biayaLayanan.sebagaiRupiah(),
@@ -132,30 +131,3 @@ private fun Transaksi?.keModelTampilanDetailTransaksi(
     )
 }
 
-private fun Transaksi.hitungJumlahItem(): Int {
-    return daftarItemKeranjang.sumOf { itemKeranjang ->
-        itemKeranjang.jumlah
-    }
-}
-
-private fun Transaksi.hitungSubtotal(): Long {
-    return daftarItemKeranjang.sumOf { itemKeranjang ->
-        itemKeranjang.produk.harga * itemKeranjang.jumlah
-    }
-}
-
-private fun Transaksi.hitungTotalAkhir(): Long {
-    return hitungTotalTransaksi(
-        daftarItemKeranjang = daftarItemKeranjang,
-        potongan = potongan,
-        biayaLayanan = biayaLayanan,
-        pajak = pajak,
-    )
-}
-
-private fun Long.sebagaiLabelWaktuTransaksi(): String {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
-    return Instant.ofEpochMilli(this)
-        .atZone(ZoneId.systemDefault())
-        .format(formatter)
-}
