@@ -3,222 +3,411 @@ package id.cassy.kasir.ranah.contoh
 import id.cassy.kasir.ranah.model.Produk
 
 /**
- * Objek penyedia data tiruan (mock data) untuk keperluan pengembangan dan demonstrasi.
+ * Penyedia katalog produk awal untuk mode belajar dan instalasi baru.
+ *
+ * Data di sini bersifat seed lokal, bukan data harga resmi. Produk dipilih agar
+ * terasa dekat dengan UMKM Indonesia seperti warung, kedai kopi, angkringan,
+ * toko sembako, dan minuman kemasan.
  */
 object KatalogProdukContoh {
 
     /**
-     * Menghasilkan daftar awal produk yang beragam (Kopi, Makanan, Retail).
+     * Menghasilkan daftar awal produk yang stabil dan siap disimpan ke Room.
      *
-     * @return List berisi objek [Produk].
+     * Identitas produk seed dibuat deterministik agar mudah diuji, mudah
+     * ditelusuri, dan tidak berubah antar build.
      */
     fun daftarAwal(): List<Produk> {
+        return daftarMinumanKedai() +
+            daftarMakananKedai() +
+            daftarSembakoWarung() +
+            daftarMinumanKemasan() +
+            daftarJajananIndonesia() +
+            daftarKebutuhanHarian()
+    }
+
+    private fun daftarMinumanKedai(): List<Produk> {
         return listOf(
-            // --- DATA ASLI ---
-            Produk(
-                id = "produk-kopi-hitam",
-                nama = "Kopi Hitam",
-                harga = 18000,
-                stokTersedia = 40,
-                kodePindai = "899001",
-                deskripsi = "Kopi hitam robusta murni dengan rasa yang kuat dan berani.",
-            ),
-            Produk(
-                id = "produk-es-teh",
-                nama = "Es Teh",
-                harga = 8000,
-                stokTersedia = 60,
-                kodePindai = "899002",
-                deskripsi = "Teh melati segar yang disajikan dengan es batu kristal.",
-            ),
-            Produk(
-                id = "produk-roti-bakar",
-                nama = "Roti Bakar",
-                harga = 15000,
-                stokTersedia = 25,
-                kodePindai = null,
-                deskripsi = "Roti bakar dengan pilihan selai coklat, keju, atau kacang.",
-            ),
-
-            // --- MENU KOPI (ESPRESSO BASED) ---
-            Produk(
-                id = "produk-kopi-susu-gula-aren",
-                nama = "Kopi Susu Gula Aren",
-                harga = 22000,
-                stokTersedia = 50,
-                kodePindai = null,
-                deskripsi = "Perpaduan espresso premium, susu segar, dan gula aren asli.",
-            ),
-            Produk(
-                id = "produk-cappuccino",
-                nama = "Cappuccino (Hot/Ice)",
-                harga = 25000,
-                stokTersedia = 30,
-                kodePindai = null,
-                deskripsi = "Klasik cappuccino dengan foam susu yang tebal dan creamy.",
-            ),
-            Produk(
-                id = "produk-americano",
-                nama = "Americano",
-                harga = 20000,
-                stokTersedia = 45,
-                kodePindai = null,
-                deskripsi = "Espresso ganda yang dilarutkan dalam air panas untuk rasa yang lebih ringan.",
-            ),
-            Produk(
-                id = "produk-caramel-macchiato",
-                nama = "Caramel Macchiato",
-                harga = 28000,
-                stokTersedia = 20,
-                kodePindai = null,
-                deskripsi = "Espresso dengan susu steamed dan sirup karamel yang manis.",
-            ),
-
-            // --- MENU NON-KOPI ---
-            Produk(
-                id = "produk-matcha-latte",
-                nama = "Matcha Latte",
-                harga = 25000,
-                stokTersedia = 35,
-                kodePindai = null,
-                deskripsi = "Bubuk teh hijau Jepang premium yang dicampur dengan susu hangat.",
-            ),
-            Produk(
-                id = "produk-red-velvet",
-                nama = "Red Velvet Latte",
-                harga = 24000,
-                stokTersedia = 25,
-                kodePindai = null,
-                deskripsi = "Minuman rasa red velvet yang manis dan lembut dengan aroma coklat.",
-            ),
-            Produk(
-                id = "produk-es-coklat",
-                nama = "Es Coklat Signature",
-                harga = 22000,
-                stokTersedia = 40,
-                kodePindai = null,
-                deskripsi = "Coklat hitam pilihan dengan susu segar dan es batu.",
-            ),
-            Produk(
-                id = "produk-lemon-tea",
-                nama = "Ice Lemon Tea",
-                harga = 15000,
-                stokTersedia = 30,
-                kodePindai = null,
-                deskripsi = "Teh segar dengan perasan jeruk lemon asli yang menyegarkan.",
-            ),
-
-            // --- MAKANAN & CAMILAN (KITCHEN) ---
-            Produk(
-                id = "produk-kentang-goreng",
-                nama = "Kentang Goreng",
-                harga = 18000,
-                stokTersedia = 30,
-                kodePindai = null,
-                deskripsi = "Kentang goreng renyah dengan bumbu garam atau keju.",
-            ),
-            Produk(
-                id = "produk-cireng-rujak",
-                nama = "Cireng Bumbu Rujak",
-                harga = 15000,
-                stokTersedia = 25,
-                kodePindai = null,
-                deskripsi = "Cireng goreng hangat disajikan dengan sambal rujak pedas manis.",
-            ),
-            Produk(
-                id = "produk-dimsum-ayam",
-                nama = "Dimsum Ayam (Isi 4)",
-                harga = 20000,
-                stokTersedia = 40,
-                kodePindai = null,
-                deskripsi = "Dimsum ayam kukus yang lembut disajikan dengan saus sambal.",
-            ),
-            Produk(
-                id = "produk-pisang-bakar-keju",
-                nama = "Pisang Bakar Keju",
-                harga = 18000,
-                stokTersedia = 20,
-                kodePindai = null,
-                deskripsi = "Pisang bakar dengan taburan keju parut dan susu kental manis.",
-            ),
-            Produk(
-                id = "produk-nasi-goreng",
-                nama = "Nasi Goreng Spesial",
-                harga = 30000,
-                stokTersedia = 15,
-                kodePindai = null,
-                deskripsi = "Nasi goreng dengan telur, ayam, dan kerupuk udang.",
-            ),
-            Produk(
-                id = "produk-mie-goreng-telur",
-                nama = "Mie Goreng Telur",
-                harga = 20000,
-                stokTersedia = 20,
-                kodePindai = null,
-                deskripsi = "Mie goreng dengan telur mata sapi dan sayuran segar.",
-            ),
-
-            // --- PASTRY / BAKERY ---
-            Produk(
-                id = "produk-croissant-butter",
-                nama = "Butter Croissant",
-                harga = 22000,
-                stokTersedia = 10,
-                kodePindai = null,
-                deskripsi = "Kue kering khas Perancis yang berlapis-lapis dan kaya akan mentega.",
-            ),
-            Produk(
-                id = "produk-brownies",
-                nama = "Fudgy Brownies Slice",
-                harga = 15000,
-                stokTersedia = 12,
-                kodePindai = null,
-                deskripsi = "Potongan brownies coklat yang padat, lembap, dan sangat nyoklat.",
-            ),
-
-            // --- MINUMAN KEMASAN (RETAIL / BARCODE) ---
-            Produk(
-                id = "produk-air-mineral-600",
-                nama = "Air Mineral 600ml",
-                harga = 5000,
-                stokTersedia = 100,
-                kodePindai = "8991234567890",
-                deskripsi = "Air mineral murni dalam kemasan botol 600ml.",
-            ),
-            Produk(
-                id = "produk-air-mineral-330",
-                nama = "Air Mineral 330ml",
-                harga = 3500,
+            produk(
+                id = "produk-minuman-kopi-tubruk",
+                nama = "Kopi Tubruk",
+                harga = 8_000,
                 stokTersedia = 80,
-                kodePindai = "8991234567891",
-                deskripsi = "Air mineral murni dalam kemasan botol kecil 330ml.",
+                kodePindai = "kode-minuman-001",
+                deskripsi = "Kopi hitam seduh tradisional yang umum dijual di warung dan kedai kecil.",
             ),
-            Produk(
-                id = "produk-teh-kotak",
-                nama = "Teh Kotak 300ml",
-                harga = 6000,
+            produk(
+                id = "produk-minuman-kopi-susu-gula-aren",
+                nama = "Kopi Susu Gula Aren",
+                harga = 18_000,
+                stokTersedia = 60,
+                kodePindai = "kode-minuman-002",
+                deskripsi = "Kopi susu dengan gula aren, cocok untuk katalog kedai kopi modern.",
+            ),
+            produk(
+                id = "produk-minuman-es-teh-manis",
+                nama = "Es Teh Manis",
+                harga = 5_000,
+                stokTersedia = 100,
+                kodePindai = "kode-minuman-003",
+                deskripsi = "Minuman teh manis dingin yang umum tersedia di warung makan Indonesia.",
+            ),
+            produk(
+                id = "produk-minuman-teh-tawar-hangat",
+                nama = "Teh Tawar Hangat",
+                harga = 3_000,
+                stokTersedia = 100,
+                kodePindai = "kode-minuman-004",
+                deskripsi = "Teh hangat tanpa gula untuk pendamping makanan.",
+            ),
+            produk(
+                id = "produk-minuman-jeruk-peras",
+                nama = "Jeruk Peras",
+                harga = 10_000,
+                stokTersedia = 40,
+                kodePindai = "kode-minuman-005",
+                deskripsi = "Minuman jeruk segar yang biasa dijual di rumah makan dan kedai.",
+            ),
+            produk(
+                id = "produk-minuman-es-cokelat",
+                nama = "Es Cokelat",
+                harga = 15_000,
+                stokTersedia = 45,
+                kodePindai = "kode-minuman-006",
+                deskripsi = "Minuman cokelat dingin untuk variasi menu kedai.",
+            ),
+            produk(
+                id = "produk-minuman-susu-jahe",
+                nama = "Susu Jahe",
+                harga = 12_000,
+                stokTersedia = 35,
+                kodePindai = "kode-minuman-007",
+                deskripsi = "Minuman hangat berbahan susu dan jahe untuk menu malam atau angkringan.",
+            ),
+            produk(
+                id = "produk-minuman-es-kopi-hitam",
+                nama = "Es Kopi Hitam",
+                harga = 12_000,
                 stokTersedia = 50,
-                kodePindai = "8990099887766",
-                deskripsi = "Minuman teh melati dalam kemasan kotak 300ml.",
+                kodePindai = "kode-minuman-008",
+                deskripsi = "Kopi hitam dingin tanpa susu untuk pelanggan yang menyukai rasa kopi kuat.",
             ),
+        )
+    }
 
-            // --- ADD-ONS / TAMBAHAN ---
-            Produk(
-                id = "produk-addon-espresso",
-                nama = "Extra Shot Espresso",
-                harga = 5000,
-                stokTersedia = 999,
-                kodePindai = null,
-                deskripsi = "Tambahan satu shot espresso untuk rasa kopi yang lebih mantap.",
+    private fun daftarMakananKedai(): List<Produk> {
+        return listOf(
+            produk(
+                id = "produk-makanan-nasi-goreng-telur",
+                nama = "Nasi Goreng Telur",
+                harga = 18_000,
+                stokTersedia = 30,
+                kodePindai = "kode-makanan-001",
+                deskripsi = "Nasi goreng sederhana dengan telur, cocok untuk warung makan.",
             ),
-            Produk(
-                id = "produk-addon-oatmilk",
-                nama = "Upgrade Oat Milk",
-                harga = 8000,
+            produk(
+                id = "produk-makanan-mie-goreng-telur",
+                nama = "Mie Goreng Telur",
+                harga = 16_000,
+                stokTersedia = 30,
+                kodePindai = "kode-makanan-002",
+                deskripsi = "Mie goreng dengan telur dan sayuran sederhana.",
+            ),
+            produk(
+                id = "produk-makanan-ayam-geprek",
+                nama = "Ayam Geprek",
+                harga = 20_000,
+                stokTersedia = 25,
+                kodePindai = "kode-makanan-003",
+                deskripsi = "Ayam goreng tepung dengan sambal geprek khas Indonesia.",
+            ),
+            produk(
+                id = "produk-makanan-pecel-ayam",
+                nama = "Pecel Ayam",
+                harga = 24_000,
+                stokTersedia = 20,
+                kodePindai = "kode-makanan-004",
+                deskripsi = "Ayam goreng dengan sambal, lalapan, dan nasi.",
+            ),
+            produk(
+                id = "produk-makanan-soto-ayam",
+                nama = "Soto Ayam",
+                harga = 18_000,
+                stokTersedia = 25,
+                kodePindai = "kode-makanan-005",
+                deskripsi = "Soto ayam kuah kuning dengan isian ayam dan bihun.",
+            ),
+            produk(
+                id = "produk-makanan-bakso-kuah",
+                nama = "Bakso Kuah",
+                harga = 18_000,
+                stokTersedia = 25,
+                kodePindai = "kode-makanan-006",
+                deskripsi = "Bakso kuah dengan mie dan pelengkap sederhana.",
+            ),
+            produk(
+                id = "produk-makanan-nasi-uduk",
+                nama = "Nasi Uduk",
+                harga = 12_000,
+                stokTersedia = 35,
+                kodePindai = "kode-makanan-007",
+                deskripsi = "Nasi gurih dengan lauk sederhana untuk menu pagi.",
+            ),
+            produk(
+                id = "produk-makanan-bubur-ayam",
+                nama = "Bubur Ayam",
+                harga = 15_000,
+                stokTersedia = 30,
+                kodePindai = "kode-makanan-008",
+                deskripsi = "Bubur ayam dengan suwiran ayam dan kerupuk.",
+            ),
+        )
+    }
+
+    private fun daftarSembakoWarung(): List<Produk> {
+        return listOf(
+            produk(
+                id = "produk-sembako-beras-premium-lima-kilogram",
+                nama = "Beras Premium 5 Kilogram",
+                harga = 78_000,
+                stokTersedia = 20,
+                kodePindai = "kode-sembako-001",
+                deskripsi = "Beras kemasan lima kilogram untuk kebutuhan rumah tangga.",
+            ),
+            produk(
+                id = "produk-sembako-gula-pasir-satu-kilogram",
+                nama = "Gula Pasir 1 Kilogram",
+                harga = 18_000,
+                stokTersedia = 40,
+                kodePindai = "kode-sembako-002",
+                deskripsi = "Gula pasir kemasan satu kilogram untuk kebutuhan harian.",
+            ),
+            produk(
+                id = "produk-sembako-minyak-goreng-satu-liter",
+                nama = "Minyak Goreng 1 Liter",
+                harga = 19_000,
+                stokTersedia = 35,
+                kodePindai = "kode-sembako-003",
+                deskripsi = "Minyak goreng kemasan satu liter untuk warung sembako.",
+            ),
+            produk(
+                id = "produk-sembako-telur-ayam-satu-kilogram",
+                nama = "Telur Ayam 1 Kilogram",
+                harga = 30_000,
+                stokTersedia = 25,
+                kodePindai = "kode-sembako-004",
+                deskripsi = "Telur ayam curah satu kilogram.",
+            ),
+            produk(
+                id = "produk-sembako-tepung-terigu-satu-kilogram",
+                nama = "Tepung Terigu 1 Kilogram",
+                harga = 13_000,
+                stokTersedia = 30,
+                kodePindai = "kode-sembako-005",
+                deskripsi = "Tepung terigu kemasan satu kilogram.",
+            ),
+            produk(
+                id = "produk-sembako-garam-dapur",
+                nama = "Garam Dapur",
+                harga = 5_000,
                 stokTersedia = 50,
-                kodePindai = null,
-                deskripsi = "Ganti susu sapi dengan susu oat yang sehat dan gurih.",
-            )
+                kodePindai = "kode-sembako-006",
+                deskripsi = "Garam dapur kemasan kecil untuk kebutuhan rumah tangga.",
+            ),
+            produk(
+                id = "produk-sembako-kecap-manis",
+                nama = "Kecap Manis",
+                harga = 12_000,
+                stokTersedia = 35,
+                kodePindai = "kode-sembako-007",
+                deskripsi = "Kecap manis botol kecil untuk pelengkap masakan.",
+            ),
+            produk(
+                id = "produk-sembako-saus-sambal",
+                nama = "Saus Sambal",
+                harga = 11_000,
+                stokTersedia = 35,
+                kodePindai = "kode-sembako-008",
+                deskripsi = "Saus sambal botol kecil untuk kebutuhan warung.",
+            ),
+        )
+    }
+
+    private fun daftarMinumanKemasan(): List<Produk> {
+        return listOf(
+            produk(
+                id = "produk-kemasan-air-mineral-enam-ratus-mililiter",
+                nama = "Air Mineral 600 Mililiter",
+                harga = 5_000,
+                stokTersedia = 120,
+                kodePindai = "kode-kemasan-001",
+                deskripsi = "Air mineral botol ukuran sedang untuk minimarket dan warung.",
+            ),
+            produk(
+                id = "produk-kemasan-air-mineral-seribu-lima-ratus-mililiter",
+                nama = "Air Mineral 1500 Mililiter",
+                harga = 8_000,
+                stokTersedia = 80,
+                kodePindai = "kode-kemasan-002",
+                deskripsi = "Air mineral botol besar untuk kebutuhan perjalanan atau rumah.",
+            ),
+            produk(
+                id = "produk-kemasan-teh-melati-kotak",
+                nama = "Teh Melati Kotak",
+                harga = 6_000,
+                stokTersedia = 60,
+                kodePindai = "kode-kemasan-003",
+                deskripsi = "Minuman teh melati kemasan kotak.",
+            ),
+            produk(
+                id = "produk-kemasan-minuman-isotonik",
+                nama = "Minuman Isotonik",
+                harga = 8_000,
+                stokTersedia = 50,
+                kodePindai = "kode-kemasan-004",
+                deskripsi = "Minuman kemasan untuk aktivitas harian dan olahraga ringan.",
+            ),
+            produk(
+                id = "produk-kemasan-susu-cokelat-kotak",
+                nama = "Susu Cokelat Kotak",
+                harga = 7_000,
+                stokTersedia = 50,
+                kodePindai = "kode-kemasan-005",
+                deskripsi = "Susu rasa cokelat kemasan kotak kecil.",
+            ),
+            produk(
+                id = "produk-kemasan-kopi-susu-kaleng",
+                nama = "Kopi Susu Kaleng",
+                harga = 10_000,
+                stokTersedia = 45,
+                kodePindai = "kode-kemasan-006",
+                deskripsi = "Kopi susu siap minum dalam kemasan kaleng.",
+            ),
+        )
+    }
+
+    private fun daftarJajananIndonesia(): List<Produk> {
+        return listOf(
+            produk(
+                id = "produk-jajanan-pisang-goreng",
+                nama = "Pisang Goreng",
+                harga = 3_000,
+                stokTersedia = 60,
+                kodePindai = "kode-jajanan-001",
+                deskripsi = "Gorengan pisang yang umum dijual di warung dan kantin.",
+            ),
+            produk(
+                id = "produk-jajanan-bakwan-sayur",
+                nama = "Bakwan Sayur",
+                harga = 2_500,
+                stokTersedia = 80,
+                kodePindai = "kode-jajanan-002",
+                deskripsi = "Gorengan bakwan sayur untuk jajanan harian.",
+            ),
+            produk(
+                id = "produk-jajanan-risol-mayo",
+                nama = "Risol Mayo",
+                harga = 5_000,
+                stokTersedia = 40,
+                kodePindai = "kode-jajanan-003",
+                deskripsi = "Risol isi mayo dan telur, cocok untuk kantin dan kedai.",
+            ),
+            produk(
+                id = "produk-jajanan-martabak-mini",
+                nama = "Martabak Mini",
+                harga = 6_000,
+                stokTersedia = 35,
+                kodePindai = "kode-jajanan-004",
+                deskripsi = "Martabak ukuran kecil dengan rasa manis.",
+            ),
+            produk(
+                id = "produk-jajanan-klepon",
+                nama = "Klepon",
+                harga = 5_000,
+                stokTersedia = 30,
+                kodePindai = "kode-jajanan-005",
+                deskripsi = "Jajanan pasar berisi gula merah dengan taburan kelapa.",
+            ),
+            produk(
+                id = "produk-jajanan-lemper-ayam",
+                nama = "Lemper Ayam",
+                harga = 5_000,
+                stokTersedia = 30,
+                kodePindai = "kode-jajanan-006",
+                deskripsi = "Ketan isi ayam suwir yang cocok untuk jajanan pagi.",
+            ),
+        )
+    }
+
+    private fun daftarKebutuhanHarian(): List<Produk> {
+        return listOf(
+            produk(
+                id = "produk-harian-sabun-mandi-batang",
+                nama = "Sabun Mandi Batang",
+                harga = 5_000,
+                stokTersedia = 50,
+                kodePindai = "kode-harian-001",
+                deskripsi = "Sabun mandi batang untuk kebutuhan harian.",
+            ),
+            produk(
+                id = "produk-harian-sampo-saset",
+                nama = "Sampo Saset",
+                harga = 1_500,
+                stokTersedia = 100,
+                kodePindai = "kode-harian-002",
+                deskripsi = "Sampo saset satu kali pakai untuk warung kecil.",
+            ),
+            produk(
+                id = "produk-harian-pasta-gigi-kecil",
+                nama = "Pasta Gigi Kecil",
+                harga = 7_000,
+                stokTersedia = 45,
+                kodePindai = "kode-harian-003",
+                deskripsi = "Pasta gigi ukuran kecil untuk kebutuhan rumah tangga.",
+            ),
+            produk(
+                id = "produk-harian-tisu-wajah",
+                nama = "Tisu Wajah",
+                harga = 10_000,
+                stokTersedia = 40,
+                kodePindai = "kode-harian-004",
+                deskripsi = "Tisu wajah kemasan kotak kecil.",
+            ),
+            produk(
+                id = "produk-harian-deterjen-saset",
+                nama = "Deterjen Saset",
+                harga = 2_000,
+                stokTersedia = 100,
+                kodePindai = "kode-harian-005",
+                deskripsi = "Deterjen saset untuk kebutuhan cuci harian.",
+            ),
+            produk(
+                id = "produk-harian-obat-nyamuk-bakar",
+                nama = "Obat Nyamuk Bakar",
+                harga = 6_000,
+                stokTersedia = 45,
+                kodePindai = "kode-harian-006",
+                deskripsi = "Obat nyamuk bakar kemasan kecil untuk warung harian.",
+            ),
+        )
+    }
+
+    private fun produk(
+        id: String,
+        nama: String,
+        harga: Long,
+        stokTersedia: Int,
+        kodePindai: String?,
+        deskripsi: String,
+    ): Produk {
+        return Produk(
+            id = id,
+            nama = nama,
+            harga = harga,
+            stokTersedia = stokTersedia,
+            kodePindai = kodePindai,
+            deskripsi = deskripsi,
+            aktif = true,
         )
     }
 }
