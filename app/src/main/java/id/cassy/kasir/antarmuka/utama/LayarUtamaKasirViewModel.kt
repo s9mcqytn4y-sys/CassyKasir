@@ -43,10 +43,10 @@ class LayarUtamaKasirViewModel(
             initialValue = emptyList(),
         )
 
-    private val tambahProdukKeKeranjangUseCase = TambahProdukKeKeranjang()
-    private val kurangiProdukDiKeranjangUseCase = KurangiProdukDiKeranjang()
-    private val hapusProdukDariKeranjangUseCase = HapusProdukDariKeranjang()
-    private val bentukModelTampilanUseCase = BentukModelTampilanLayarUtamaKasir()
+    private val tambahProdukKeKeranjang = TambahProdukKeKeranjang()
+    private val kurangiProdukDiKeranjang = KurangiProdukDiKeranjang()
+    private val hapusProdukDariKeranjang = HapusProdukDariKeranjang()
+    private val bentukModelTampilan = BentukModelTampilanLayarUtamaKasir()
 
     private val _statusTransaksi = MutableStateFlow(
         StatusTransaksiLayarUtamaKasir(),
@@ -81,7 +81,7 @@ class LayarUtamaKasirViewModel(
         _kataKunciPencarian,
         kataKunciPencarianEfektif,
     ) { produk, statusTransaksi, statusElemenLayar, kataKunciMentah, kataKunciEfektif ->
-        bentukModelTampilanUseCase(
+        bentukModelTampilan(
             daftarProdukPenuh = produk,
             statusTransaksi = statusTransaksi,
             statusElemenLayar = statusElemenLayar,
@@ -91,7 +91,7 @@ class LayarUtamaKasirViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = bentukModelTampilanUseCase(
+        initialValue = bentukModelTampilan(
             daftarProdukPenuh = emptyList(),
             statusTransaksi = StatusTransaksiLayarUtamaKasir(),
             statusElemenLayar = StatusElemenLayarUtamaKasir(),
@@ -155,7 +155,7 @@ class LayarUtamaKasirViewModel(
 
         _statusTransaksi.update { statusLama ->
             val daftarLama = statusLama.daftarItemKeranjang
-            val daftarBaru = tambahProdukKeKeranjangUseCase(
+            val daftarBaru = tambahProdukKeKeranjang(
                 daftarItemKeranjang = daftarLama,
                 produk = produk,
             )
@@ -182,7 +182,7 @@ class LayarUtamaKasirViewModel(
     private fun kurangiProdukDiKeranjang(produkId: String) {
         _statusTransaksi.update { statusLama ->
             statusLama.copy(
-                daftarItemKeranjang = kurangiProdukDiKeranjangUseCase(
+                daftarItemKeranjang = kurangiProdukDiKeranjang(
                     daftarItemKeranjang = statusLama.daftarItemKeranjang,
                     produkId = produkId,
                 ),
@@ -196,7 +196,7 @@ class LayarUtamaKasirViewModel(
     private fun hapusProdukDariKeranjang(produkId: String) {
         _statusTransaksi.update { statusLama ->
             statusLama.copy(
-                daftarItemKeranjang = hapusProdukDariKeranjangUseCase(
+                daftarItemKeranjang = hapusProdukDariKeranjang(
                     daftarItemKeranjang = statusLama.daftarItemKeranjang,
                     produkId = produkId,
                 ),
