@@ -7,13 +7,19 @@ import id.cassy.kasir.data.jaringan.konfigurasi.PenyediaJaringanKasir
 import id.cassy.kasir.data.jaringan.layanan.LayananProdukJaringan
 import id.cassy.kasir.data.lokal.basisdata.BasisDataCassyKasir
 import id.cassy.kasir.data.lokal.basisdata.MigrasiBasisDataKasir
+import id.cassy.kasir.data.lokal.preferensi.RepositoriPreferensiTokoDataStore
 import id.cassy.kasir.data.lokal.repositori.RepositoriTransaksiLokal
 import id.cassy.kasir.data.repositori.RepositoriProdukLokalRemote
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiPreferensiToko
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiProdukBerdasarkanIdentitas
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiRiwayatTransaksi
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiTransaksiBerdasarkanIdentitas
+import id.cassy.kasir.ranah.kasuspenggunaan.HapusProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
+import id.cassy.kasir.ranah.kasuspenggunaan.SimpanPreferensiToko
+import id.cassy.kasir.ranah.kasuspenggunaan.SimpanProduk
+import id.cassy.kasir.ranah.repositori.RepositoriPreferensiToko
 import id.cassy.kasir.ranah.repositori.RepositoriProduk
 import id.cassy.kasir.ranah.repositori.RepositoriTransaksi
 
@@ -64,6 +70,13 @@ class GudangDependensiKasir(
     }
 
     /**
+     * Repositori preferensi toko berbasis DataStore Preferences.
+     */
+    private val repositoriPreferensiToko: RepositoriPreferensiToko by lazy {
+        RepositoriPreferensiTokoDataStore(konteks.applicationContext)
+    }
+
+    /**
      * Layanan API produk untuk komunikasi jaringan.
      *
      * Layanan ini disiapkan sebagai fondasi awal untuk transisi ke local-first.
@@ -109,5 +122,33 @@ class GudangDependensiKasir(
      */
     val amatiTransaksiBerdasarkanIdentitas: AmatiTransaksiBerdasarkanIdentitas by lazy {
         AmatiTransaksiBerdasarkanIdentitas(repositoriTransaksi)
+    }
+
+    /**
+     * Kasus penggunaan untuk mengamati preferensi toko secara reaktif.
+     */
+    val amatiPreferensiToko: AmatiPreferensiToko by lazy {
+        AmatiPreferensiToko(repositoriPreferensiToko)
+    }
+
+    /**
+     * Kasus penggunaan untuk menyimpan preferensi toko.
+     */
+    val simpanPreferensiToko: SimpanPreferensiToko by lazy {
+        SimpanPreferensiToko(repositoriPreferensiToko)
+    }
+
+    /**
+     * Kasus penggunaan untuk menyimpan atau memperbarui produk.
+     */
+    val simpanProduk: SimpanProduk by lazy {
+        SimpanProduk(repositoriProduk)
+    }
+
+    /**
+     * Kasus penggunaan untuk menghapus produk dari katalog.
+     */
+    val hapusProduk: HapusProduk by lazy {
+        HapusProduk(repositoriProduk)
     }
 }

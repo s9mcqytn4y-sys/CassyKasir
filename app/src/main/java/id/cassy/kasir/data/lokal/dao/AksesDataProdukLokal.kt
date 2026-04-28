@@ -54,6 +54,18 @@ interface AksesDataProdukLokal {
     )
 
     /**
+     * Menyimpan satu produk.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun simpanProduk(produk: EntitasProdukLokal)
+
+    /**
+     * Menghapus produk berdasarkan identitas unik.
+     */
+    @Query("DELETE FROM produk WHERE id = :identitasProduk")
+    suspend fun hapusProduk(identitasProduk: String)
+
+    /**
      * Mengambil daftar produk lokal berdasarkan kumpulan identitas produk.
      */
     @Query("SELECT * FROM produk WHERE id IN (:daftarIdentitasProduk)")

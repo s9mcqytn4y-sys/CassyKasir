@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.google.android.material)
 
     // Arsitektur & Navigasi
@@ -100,10 +101,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.foundation)
 
-    // Persistensi Data Lokal (Room)
+    // Persistensi Data Lokal (Room & DataStore)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.kotlinx.serialization)

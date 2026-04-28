@@ -11,6 +11,10 @@ import id.cassy.kasir.antarmuka.PenyediaViewModelKasir
 import id.cassy.kasir.antarmuka.detail.EfekLayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProduk
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
+import id.cassy.kasir.antarmuka.kelola.LayarFormProduk
+import id.cassy.kasir.antarmuka.kelola.LayarKelolaProduk
+import id.cassy.kasir.antarmuka.kelola.ViewModelFormProduk
+import id.cassy.kasir.antarmuka.kelola.ViewModelKelolaProduk
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksi
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksiViewModel
 import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksi
@@ -67,6 +71,9 @@ fun NavigasiAplikasiCassyKasir() {
                     pengendaliNavigasi.bukaDetailProduk(
                         identitasProduk = identitasProduk,
                     )
+                },
+                saatBukaKelolaProduk = {
+                    pengendaliNavigasi.bukaKelolaProduk()
                 },
             )
         }
@@ -149,6 +156,28 @@ fun NavigasiAplikasiCassyKasir() {
                     pengendaliNavigasi.navigateUp()
                 },
                 saatCobaMuatUlang = layarDetailTransaksiViewModel::muatUlang,
+            )
+        }
+
+        composable<TujuanNavigasiKasir.KelolaProduk> {
+            val viewModel: ViewModelKelolaProduk = viewModel(
+                factory = PenyediaViewModelKasir.Factory,
+            )
+            LayarKelolaProduk(
+                viewModel = viewModel,
+                navigasiKembali = { pengendaliNavigasi.navigateUp() },
+                navigasiKeTambahProduk = { pengendaliNavigasi.bukaFormProduk() },
+                navigasiKeUbahProduk = { id -> pengendaliNavigasi.bukaFormProduk(id) }
+            )
+        }
+
+        composable<TujuanNavigasiKasir.FormProduk> {
+            val viewModel: ViewModelFormProduk = viewModel(
+                factory = PenyediaViewModelKasir.Factory,
+            )
+            LayarFormProduk(
+                viewModel = viewModel,
+                navigasiKembali = { pengendaliNavigasi.navigateUp() }
             )
         }
     }

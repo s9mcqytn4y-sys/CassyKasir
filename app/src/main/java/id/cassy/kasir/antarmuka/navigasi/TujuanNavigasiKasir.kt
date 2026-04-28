@@ -43,6 +43,22 @@ sealed interface TujuanNavigasiKasir {
     data class DetailTransaksi(
         val identitasTransaksi: String,
     ) : TujuanNavigasiKasir
+
+    /**
+     * Tujuan layar kelola produk.
+     */
+    @Serializable
+    data object KelolaProduk : TujuanNavigasiKasir
+
+    /**
+     * Tujuan layar formulir produk (Tambah/Ubah).
+     *
+     * @property identitasProduk ID produk untuk mode ubah, null untuk mode tambah.
+     */
+    @Serializable
+    data class FormProduk(
+        val identitasProduk: String? = null,
+    ) : TujuanNavigasiKasir
 }
 
 /**
@@ -89,6 +105,24 @@ fun NavHostController.bukaDetailTransaksi(
             identitasTransaksi = identitasTransaksi,
         ),
     ) {
+        launchSingleTop = true
+    }
+}
+
+/**
+ * Membuka layar kelola produk.
+ */
+fun NavHostController.bukaKelolaProduk() {
+    navigate(TujuanNavigasiKasir.KelolaProduk) {
+        launchSingleTop = true
+    }
+}
+
+/**
+ * Membuka layar formulir produk (Tambah atau Ubah).
+ */
+fun NavHostController.bukaFormProduk(identitasProduk: String? = null) {
+    navigate(TujuanNavigasiKasir.FormProduk(identitasProduk)) {
         launchSingleTop = true
     }
 }

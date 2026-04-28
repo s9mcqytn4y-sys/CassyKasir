@@ -31,6 +31,7 @@ internal fun TataLetakPonselKasir(
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
     saatBukaRiwayatTransaksi: () -> Unit,
     saatBukaDetailProduk: (String) -> Unit,
+    saatBukaKelolaProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -43,6 +44,7 @@ internal fun TataLetakPonselKasir(
                 namaAplikasi = modelTampilan.statusBeranda.namaAplikasi,
                 sloganAplikasi = modelTampilan.statusBeranda.sloganAplikasi,
                 saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
+                saatBukaKelolaProduk = saatBukaKelolaProduk,
             )
         }
 
@@ -176,6 +178,7 @@ internal fun TataLetakTabletKasir(
     saatAksiDikirim: (AksiLayarUtamaKasir) -> Unit,
     saatBukaRiwayatTransaksi: () -> Unit,
     saatBukaDetailProduk: (String) -> Unit,
+    saatBukaKelolaProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -195,6 +198,7 @@ internal fun TataLetakTabletKasir(
                     namaAplikasi = modelTampilan.statusBeranda.namaAplikasi,
                     sloganAplikasi = modelTampilan.statusBeranda.sloganAplikasi,
                     saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
+                    saatBukaKelolaProduk = saatBukaKelolaProduk,
                 )
             }
 

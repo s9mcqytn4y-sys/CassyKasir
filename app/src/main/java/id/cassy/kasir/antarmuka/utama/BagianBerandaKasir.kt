@@ -23,6 +23,7 @@ import id.cassy.kasir.ranah.model.StatusSinkronisasi
  * @param namaAplikasi Nama aplikasi yang akan ditampilkan.
  * @param sloganAplikasi Slogan atau deskripsi singkat aplikasi.
  * @param saatBukaRiwayatTransaksi Callback saat tombol riwayat diklik.
+ * @param saatBukaKelolaProduk Callback saat tombol kelola produk diklik.
  * @param modifier Modifier untuk kustomisasi tata letak.
  */
 @Composable
@@ -30,6 +31,7 @@ internal fun HeaderBerandaKasir(
     namaAplikasi: String,
     sloganAplikasi: String,
     saatBukaRiwayatTransaksi: () -> Unit,
+    saatBukaKelolaProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -50,6 +52,15 @@ internal fun HeaderBerandaKasir(
                 text = sloganAplikasi,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        TextButton(
+            onClick = saatBukaKelolaProduk,
+            modifier = Modifier.heightIn(min = 48.dp),
+        ) {
+            Text(
+                text = "Kelola",
             )
         }
 

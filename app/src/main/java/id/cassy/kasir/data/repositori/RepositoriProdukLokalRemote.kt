@@ -86,4 +86,12 @@ class RepositoriProdukLokalRemote(
             )
         }
     }
+
+    override suspend fun simpanProduk(produk: Produk) {
+        aksesDataProduk.simpanProduk(produk.keLokal())
+    }
+
+    override suspend fun hapusProduk(identitasProduk: String) {
+        aksesDataProduk.hapusProduk(identitasProduk)
+    }
 }

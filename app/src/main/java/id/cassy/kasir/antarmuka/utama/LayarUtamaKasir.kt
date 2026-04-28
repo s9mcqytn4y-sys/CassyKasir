@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.emptyFlow
  * @param modifier Modifikasi tata letak opsional.
  * @param saatBukaRiwayatTransaksi Aksi saat tombol riwayat diklik.
  * @param saatBukaDetailProduk Aksi saat kartu produk diklik untuk melihat detail.
+ * @param saatBukaKelolaProduk Aksi saat tombol kelola produk diklik.
  */
 @Composable
 fun LayarUtamaKasir(
@@ -43,6 +44,7 @@ fun LayarUtamaKasir(
     alurEfek: Flow<EfekLayarUtamaKasir> = emptyFlow(),
     saatBukaRiwayatTransaksi: () -> Unit = {},
     saatBukaDetailProduk: (String) -> Unit = {},
+    saatBukaKelolaProduk: () -> Unit = {},
 ) {
     val keadaanHostSnackbar: SnackbarHostState = remember { SnackbarHostState() }
 
@@ -93,6 +95,7 @@ fun LayarUtamaKasir(
                     saatAksiDikirim = saatAksiDikirim,
                     saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
                     saatBukaDetailProduk = saatBukaDetailProduk,
+                    saatBukaKelolaProduk = saatBukaKelolaProduk,
                 )
             } else {
                 TataLetakPonselKasir(
@@ -100,6 +103,7 @@ fun LayarUtamaKasir(
                     saatAksiDikirim = saatAksiDikirim,
                     saatBukaRiwayatTransaksi = saatBukaRiwayatTransaksi,
                     saatBukaDetailProduk = saatBukaDetailProduk,
+                    saatBukaKelolaProduk = saatBukaKelolaProduk,
                 )
             }
         }

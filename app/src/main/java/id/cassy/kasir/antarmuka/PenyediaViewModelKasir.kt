@@ -6,6 +6,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.cassy.kasir.AplikasiKasir
 import id.cassy.kasir.antarmuka.detail.LayarDetailProdukViewModel
+import id.cassy.kasir.antarmuka.kelola.ViewModelFormProduk
+import id.cassy.kasir.antarmuka.kelola.ViewModelKelolaProduk
 import id.cassy.kasir.antarmuka.riwayat.LayarRiwayatTransaksiViewModel
 import id.cassy.kasir.antarmuka.transaksi.LayarDetailTransaksiViewModel
 import id.cassy.kasir.antarmuka.utama.LayarUtamaKasirViewModel
@@ -46,6 +48,26 @@ object PenyediaViewModelKasir {
             LayarDetailProdukViewModel(
                 amatiProdukBerdasarkanIdentitas = aplikasi.kontainer.amatiProdukBerdasarkanIdentitas,
                 statusTersimpan = createSavedStateHandle(),
+            )
+        }
+
+        initializer {
+            val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
+            ViewModelKelolaProduk(
+                muatKatalogProduk = aplikasi.kontainer.muatKatalogProduk,
+                hapusProduk = aplikasi.kontainer.hapusProduk,
+            )
+        }
+
+        initializer {
+            val aplikasi = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as AplikasiKasir
+            val handle = createSavedStateHandle()
+            val idProduk: String? = handle["identitasProduk"]
+
+            ViewModelFormProduk(
+                idProduk = idProduk,
+                amatiProduk = aplikasi.kontainer.amatiProdukBerdasarkanIdentitas,
+                simpanProduk = aplikasi.kontainer.simpanProduk,
             )
         }
     }

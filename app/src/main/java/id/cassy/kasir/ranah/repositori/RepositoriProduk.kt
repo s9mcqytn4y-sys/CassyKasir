@@ -35,4 +35,14 @@ interface RepositoriProduk {
      * Memperbarui katalog lokal dengan mengambil data terbaru dari jaringan.
      */
     suspend fun sinkronkanKatalog(): HasilOperasiJaringan<Unit>
+
+    /**
+     * Menyimpan atau memperbarui produk di penyimpanan lokal.
+     */
+    suspend fun simpanProduk(produk: Produk)
+
+    /**
+     * Menghapus produk dari penyimpanan lokal berdasarkan identitas unik.
+     */
+    suspend fun hapusProduk(identitasProduk: String)
 }
