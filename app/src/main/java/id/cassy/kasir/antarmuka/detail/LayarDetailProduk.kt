@@ -11,13 +11,16 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,11 +47,12 @@ fun LayarDetailProduk(
                     )
                 },
                 navigationIcon = {
-                    TextButton(
+                    IconButton(
                         onClick = saatKembali,
                     ) {
-                        Text(
-                            text = "Kembali",
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali ke katalog",
                         )
                     }
                 },
@@ -166,13 +170,13 @@ private fun KontenDetailProduk(
             )
 
             Text(
-                text = "Harga: $hargaProduk",
+                text = "Harga Jual: $hargaProduk",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
             Text(
-                text = "Stok tersedia: $stokTersedia",
+                text = "Stok di Toko: $stokTersedia",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

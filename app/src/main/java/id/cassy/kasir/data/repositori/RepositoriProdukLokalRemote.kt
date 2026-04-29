@@ -3,6 +3,7 @@ package id.cassy.kasir.data.repositori
 import id.cassy.kasir.data.jaringan.layanan.LayananProdukJaringan
 import id.cassy.kasir.data.jaringan.pemetaan.keDomain
 import id.cassy.kasir.data.lokal.basisdata.BasisDataCassyKasir
+import id.cassy.kasir.data.jaringan.validasi.validasiDaftarProdukJaringan
 import id.cassy.kasir.data.lokal.pemetaan.keDomain
 import id.cassy.kasir.data.lokal.pemetaan.keLokal
 import id.cassy.kasir.ranah.contoh.KatalogProdukContoh
@@ -11,6 +12,8 @@ import id.cassy.kasir.ranah.model.Produk
 import id.cassy.kasir.ranah.repositori.RepositoriProduk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.SerializationException
+import retrofit2.HttpException
 import java.io.IOException
 
 /**
@@ -68,6 +71,11 @@ class RepositoriProdukLokalRemote(
     override suspend fun sinkronkanKatalog(): HasilOperasiJaringan<Unit> {
         return try {
             val responsJaringan = layananJaringan.ambilDaftarProduk()
+
+            validasiDaftarProdukJaringan(
+                daftarProduk = responsJaringan,
+            )
+
             val daftarProdukDomain = responsJaringan.keDomain()
 
             aksesDataProduk.simpanBanyakProduk(
@@ -78,7 +86,25 @@ class RepositoriProdukLokalRemote(
 
             HasilOperasiJaringan.Berhasil(Unit)
         } catch (_: IOException) {
-            HasilOperasiJaringan.GagalJaringan("Koneksi internet bermasalah.")
+            HasilOperasiJaringan.GagalJaringan(
+                pesan = "Koneksi internet bermasalah.",
+            )
+        } catch (kesalahanHttp: HttpException) {
+            HasilOperasiJaringan.GagalServer(
+                kode = kesalahanHttp.code(),
+                pesan = "Server mengembalikan error ${kesalahanHttp.code()}.",
+            )
+        } catch (_: SerializationException) {
+            HasilOperasiJaringan.GagalServer(
+                kode = 500,
+                pesan = "Format data katalog dari server tidak sesuai.",
+            )
+        } catch (kesalahanValidasi: IllegalArgumentException) {
+            HasilOperasiJaringan.GagalServer(
+                kode = 422,
+                pesan = kesalahanValidasi.message
+                    ?: "Data katalog dari server tidak valid.",
+            )
         } catch (_: Exception) {
             HasilOperasiJaringan.GagalServer(
                 kode = 500,

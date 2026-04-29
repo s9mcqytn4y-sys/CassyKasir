@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.Produk
 
 /**
@@ -182,7 +183,7 @@ internal fun KartuProdukKasir(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Rp${produk.harga}",
+                        text = produk.harga.sebagaiRupiah(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

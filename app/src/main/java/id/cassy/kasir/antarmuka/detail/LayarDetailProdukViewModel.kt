@@ -125,19 +125,19 @@ class LayarDetailProdukViewModel(
                 hargaProduk = harga.sebagaiRupiah(),
                 stokTersedia = stokTersedia,
                 deskripsiProduk = deskripsi.ifBlank {
-                    "Produk ini belum memiliki deskripsi tambahan."
+                    "Belum ada keterangan tambahan untuk produk ini."
                 },
                 statusAksi = StatusAksiDetailProduk(
                     label = if (aksiTambahAktif) {
                         "Tambah ke Keranjang"
                     } else {
-                        "Produk Tidak Tersedia"
+                        "Stok Habis"
                     },
                     aktif = aksiTambahAktif,
                     keterangan = if (aksiTambahAktif) {
                         "Produk siap ditambahkan ke transaksi aktif."
                     } else {
-                        "Produk ini tidak bisa ditambahkan karena sedang tidak tersedia."
+                        "Produk ini tidak bisa ditambahkan karena stok di toko sedang kosong."
                     },
                 ),
             ),

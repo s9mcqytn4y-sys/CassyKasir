@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 import id.cassy.kasir.ranah.fungsi.hitungSubTotal
+import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.model.ItemKeranjang
 
 /**
@@ -140,14 +141,14 @@ internal fun BarisItemKeranjangKasir(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "${itemKeranjang.jumlah} x Rp${itemKeranjang.produk.harga}",
+                    text = "${itemKeranjang.jumlah} x ${itemKeranjang.produk.harga.sebagaiRupiah()}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
             Text(
-                text = "Rp${itemKeranjang.hitungSubTotal()}",
+                text = itemKeranjang.hitungSubTotal().sebagaiRupiah(),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
