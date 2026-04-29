@@ -56,16 +56,16 @@ object RiwayatTransaksiContoh {
     }
 
     /**
-     * Mencari transaksi berdasarkan ID dari data contoh.
+     * Mencari transaksi berdasarkan identitas dari data contoh.
      *
-     * @param transaksiId ID transaksi yang dicari.
+     * @param identitasTransaksi Identitas transaksi yang dicari.
      * @return Objek [Transaksi] jika ditemukan, null jika tidak.
      */
-    fun temukanBerdasarkanId(
-        transaksiId: String,
+    fun temukanBerdasarkanIdentitas(
+        identitasTransaksi: String,
     ): Transaksi? {
         return daftarAwal().firstOrNull { transaksi ->
-            transaksi.id == transaksiId
+            transaksi.id == identitasTransaksi
         }
     }
 }

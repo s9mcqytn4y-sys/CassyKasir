@@ -33,9 +33,9 @@ import id.cassy.kasir.ranah.model.ItemKeranjang
  *
  * @param daftarItemKeranjang Daftar item yang ada di keranjang.
  * @param statusKeranjang Status visual panel keranjang.
- * @param saatTambahProduk Callback untuk menambah jumlah produk berdasarkan ID.
- * @param saatKurangiProduk Callback untuk mengurangi jumlah produk berdasarkan ID.
- * @param saatHapusProduk Callback untuk menghapus produk dari keranjang berdasarkan ID.
+ * @param saatTambahProduk Callback untuk menambah jumlah produk berdasarkan identitas.
+ * @param saatKurangiProduk Callback untuk mengurangi jumlah produk berdasarkan identitas.
+ * @param saatHapusProduk Callback untuk menghapus produk dari keranjang berdasarkan identitas.
  * @param modifier Modifier untuk kustomisasi tata letak.
  */
 @Composable

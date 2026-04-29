@@ -79,8 +79,8 @@ class GudangDependensiKasir(
     /**
      * Layanan API produk untuk komunikasi jaringan.
      *
-     * Layanan ini disiapkan sebagai fondasi awal untuk transisi ke local-first.
-     * Belum dikonsumsi oleh ViewModel untuk menjaga stabilitas migrasi bertahap.
+     * Dipakai oleh repositori produk untuk sinkronisasi katalog secara local-first.
+     * UI tetap membaca katalog dari Room melalui Flow.
      */
     val layananProdukJaringan: LayananProdukJaringan by lazy {
         PenyediaJaringanKasir.buatLayananProdukJaringan(
@@ -118,7 +118,7 @@ class GudangDependensiKasir(
     }
 
     /**
-     * Kasus penggunaan untuk mengamati detail transaksi tunggal berdasarkan ID.
+     * Kasus penggunaan untuk mengamati detail transaksi tunggal berdasarkan identitas.
      */
     val amatiTransaksiBerdasarkanIdentitas: AmatiTransaksiBerdasarkanIdentitas by lazy {
         AmatiTransaksiBerdasarkanIdentitas(repositoriTransaksi)

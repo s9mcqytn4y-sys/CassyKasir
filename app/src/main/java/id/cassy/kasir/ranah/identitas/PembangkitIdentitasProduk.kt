@@ -1,18 +1,18 @@
-package id.cassy.kasir.data.lokal.identitas
+package id.cassy.kasir.ranah.identitas
 
 import java.util.Locale
 import java.util.UUID
 
 /**
- * Pembangkit identitas produk lokal.
+ * Pembangkit identitas internal produk.
  *
- * Format identitas dibuat cukup mudah dibaca manusia, tetapi tetap diberi
- * potongan acak agar aman dari bentrok saat produk dengan nama serupa dibuat.
+ * Format identitas dibuat mudah dibaca manusia, tetapi tetap diberi kode unik
+ * agar aman dari bentrok saat produk dengan nama serupa dibuat.
  *
  * Contoh:
  * produk-kopi-susu-gula-aren-a7k2m9
  */
-object PembangkitIdentitasProdukLokal {
+object PembangkitIdentitasProduk {
 
     private const val awalanIdentitasProduk = "produk"
     private const val panjangKodeUnik = 6
@@ -21,7 +21,7 @@ object PembangkitIdentitasProdukLokal {
      * Membuat identitas produk baru dari nama produk.
      *
      * @param namaProduk Nama produk yang diinput kasir atau pemilik toko.
-     * @return Identitas produk yang stabil untuk disimpan sebagai primary key.
+     * @return Identitas produk yang stabil untuk disimpan.
      */
     fun buatIdentitasBaru(
         namaProduk: String,

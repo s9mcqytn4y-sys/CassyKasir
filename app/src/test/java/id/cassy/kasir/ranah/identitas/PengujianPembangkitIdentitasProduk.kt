@@ -1,17 +1,17 @@
-package id.cassy.kasir.data.lokal.identitas
+package id.cassy.kasir.ranah.identitas
 
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Pengujian unit untuk pembangkit identitas produk lokal.
+ * Pengujian unit untuk pembangkit identitas produk.
  */
-class PengujianPembangkitIdentitasProdukLokal {
+class PengujianPembangkitIdentitasProduk {
 
     @Test
     fun identitasProdukMemakaiAwalanProdukDanSlugNama() {
-        val identitasProduk = PembangkitIdentitasProdukLokal.buatIdentitasBaru(
+        val identitasProduk = PembangkitIdentitasProduk.buatIdentitasBaru(
             namaProduk = "Kopi Susu Gula Aren",
         )
 
@@ -22,7 +22,7 @@ class PengujianPembangkitIdentitasProdukLokal {
 
     @Test
     fun identitasProdukMembersihkanKarakterTidakAman() {
-        val identitasProduk = PembangkitIdentitasProdukLokal.buatIdentitasBaru(
+        val identitasProduk = PembangkitIdentitasProduk.buatIdentitasBaru(
             namaProduk = "  Es Teh!!! 330ml  ",
         )
 
@@ -33,7 +33,7 @@ class PengujianPembangkitIdentitasProdukLokal {
 
     @Test
     fun identitasProdukKosongMemakaiNamaFallback() {
-        val identitasProduk = PembangkitIdentitasProdukLokal.buatIdentitasBaru(
+        val identitasProduk = PembangkitIdentitasProduk.buatIdentitasBaru(
             namaProduk = "   ",
         )
 
@@ -44,11 +44,11 @@ class PengujianPembangkitIdentitasProdukLokal {
 
     @Test
     fun namaProdukSamaTetapMenghasilkanIdentitasBerbeda() {
-        val identitasPertama = PembangkitIdentitasProdukLokal.buatIdentitasBaru(
+        val identitasPertama = PembangkitIdentitasProduk.buatIdentitasBaru(
             namaProduk = "Kopi Susu",
         )
 
-        val identitasKedua = PembangkitIdentitasProdukLokal.buatIdentitasBaru(
+        val identitasKedua = PembangkitIdentitasProduk.buatIdentitasBaru(
             namaProduk = "Kopi Susu",
         )
 

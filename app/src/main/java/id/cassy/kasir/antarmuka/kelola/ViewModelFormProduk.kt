@@ -2,7 +2,7 @@ package id.cassy.kasir.antarmuka.kelola
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.cassy.kasir.data.lokal.identitas.PembangkitIdentitasProdukLokal
+import id.cassy.kasir.ranah.identitas.PembangkitIdentitasProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.AmatiProdukBerdasarkanIdentitas
 import id.cassy.kasir.ranah.kasuspenggunaan.SimpanProduk
 import id.cassy.kasir.ranah.model.Produk
@@ -98,7 +98,7 @@ class ViewModelFormProduk(
         viewModelScope.launch {
             try {
                 val produkBaru = Produk(
-                    id = idProduk ?: PembangkitIdentitasProdukLokal.buatIdentitasBaru(stateSekarang.nama),
+                    id = idProduk ?: PembangkitIdentitasProduk.buatIdentitasBaru(stateSekarang.nama),
                     nama = stateSekarang.nama,
                     harga = stateSekarang.harga.toLongOrNull() ?: 0L,
                     stokTersedia = stateSekarang.stok.toIntOrNull() ?: 0,
