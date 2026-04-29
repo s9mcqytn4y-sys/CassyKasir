@@ -87,28 +87,28 @@ class RepositoriProdukLokalRemote(
             HasilOperasiJaringan.Berhasil(Unit)
         } catch (_: IOException) {
             HasilOperasiJaringan.GagalJaringan(
-                pesan = "Koneksi internet bermasalah.",
+                pesan = "Koneksi internet bermasalah. Coba lagi?",
             )
         } catch (kesalahanHttp: HttpException) {
             HasilOperasiJaringan.GagalServer(
                 kode = kesalahanHttp.code(),
-                pesan = "Server mengembalikan error ${kesalahanHttp.code()}.",
+                pesan = "Server bermasalah (Error ${kesalahanHttp.code()}). Coba beberapa saat lagi.",
             )
         } catch (_: SerializationException) {
             HasilOperasiJaringan.GagalServer(
                 kode = 500,
-                pesan = "Format data katalog dari server tidak sesuai.",
+                pesan = "Format data dari server tidak sesuai. Hubungi bantuan teknis.",
             )
         } catch (kesalahanValidasi: IllegalArgumentException) {
             HasilOperasiJaringan.GagalServer(
                 kode = 422,
                 pesan = kesalahanValidasi.message
-                    ?: "Data katalog dari server tidak valid.",
+                    ?: "Data dari server tidak valid. Hubungi bantuan teknis.",
             )
         } catch (_: Exception) {
             HasilOperasiJaringan.GagalServer(
                 kode = 500,
-                pesan = "Gagal memperbarui katalog produk.",
+                pesan = "Gagal memperbarui katalog. Coba lagi?",
             )
         }
     }

@@ -41,6 +41,18 @@ class PengujianValidasiProdukJaringan {
     }
 
     @Test(expected = IllegalArgumentException::class)
+    fun namaKosongDitolak() {
+        validasiDaftarProdukJaringan(
+            daftarProduk = listOf(
+                produkContoh(
+                    id = "produk-tanpa-nama",
+                    nama = "",
+                ),
+            ),
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
     fun identitasDuplikatDitolak() {
         validasiDaftarProdukJaringan(
             daftarProduk = listOf(
@@ -54,8 +66,14 @@ class PengujianValidasiProdukJaringan {
     fun kodePindaiDuplikatDitolak() {
         validasiDaftarProdukJaringan(
             daftarProduk = listOf(
-                produkContoh(id = "produk-satu", kodePindai = "kode-sama"),
-                produkContoh(id = "produk-dua", kodePindai = "kode-sama"),
+                produkContoh(
+                    id = "produk-satu",
+                    kodePindai = "kode-sama",
+                ),
+                produkContoh(
+                    id = "produk-dua",
+                    kodePindai = "kode-sama",
+                ),
             ),
         )
     }
@@ -74,6 +92,44 @@ class PengujianValidasiProdukJaringan {
         validasiDaftarProdukJaringan(
             daftarProduk = listOf(
                 produkContoh(stokTersedia = -1),
+            ),
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun identitasHanyaSpasiDitolak() {
+        validasiDaftarProdukJaringan(
+            daftarProduk = listOf(
+                produkContoh(id = "   "),
+            ),
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun namaHanyaSpasiDitolak() {
+        validasiDaftarProdukJaringan(
+            daftarProduk = listOf(
+                produkContoh(nama = "   "),
+            ),
+        )
+    }
+
+    @Test
+    fun stokNolDiterima() {
+        validasiDaftarProdukJaringan(
+            daftarProduk = listOf(
+                produkContoh(stokTersedia = 0),
+            ),
+        )
+    }
+
+    @Test
+    fun kodePindaiKosongDiterima() {
+        validasiDaftarProdukJaringan(
+            daftarProduk = listOf(
+                produkContoh(kodePindai = null),
+                produkContoh(id = "produk-2", kodePindai = ""),
+                produkContoh(id = "produk-3", kodePindai = "  "),
             ),
         )
     }

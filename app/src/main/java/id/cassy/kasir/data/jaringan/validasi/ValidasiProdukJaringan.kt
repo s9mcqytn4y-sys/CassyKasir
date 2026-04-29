@@ -28,11 +28,11 @@ fun validasiDaftarProdukJaringan(
     }
 
     daftarProduk.forEach { produk ->
-        require(produk.id.isNotBlank()) {
+        require(produk.id.trim().isNotBlank()) {
             "Katalog dari server memiliki produk tanpa identitas."
         }
 
-        require(produk.nama.isNotBlank()) {
+        require(produk.nama.trim().isNotBlank()) {
             "Produk ${produk.id} dari server belum memiliki nama."
         }
 
