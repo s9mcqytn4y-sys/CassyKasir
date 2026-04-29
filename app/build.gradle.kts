@@ -127,6 +127,7 @@ dependencies {
 
     // Pengujian lokal JVM untuk logika domain murni.
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // Dependensi Debug
     debugImplementation(libs.androidx.compose.ui.tooling)

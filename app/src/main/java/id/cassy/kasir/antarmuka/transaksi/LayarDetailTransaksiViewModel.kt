@@ -38,7 +38,8 @@ class LayarDetailTransaksiViewModel(
 ) : ViewModel() {
 
     private val identitasTransaksi: String =
-        savedStateHandle.toRoute<TujuanNavigasiKasir.DetailTransaksi>().identitasTransaksi
+        savedStateHandle.get<String>("identitasTransaksi")
+            ?: savedStateHandle.toRoute<TujuanNavigasiKasir.DetailTransaksi>().identitasTransaksi
 
     private val _nomorPermintaanMuatUlang = MutableStateFlow(0)
 
