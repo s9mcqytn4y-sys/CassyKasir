@@ -84,6 +84,7 @@ internal fun HeaderBerandaKasir(
 @Composable
 internal fun RingkasanKasir(
     statusBeranda: StatusBerandaKasir,
+    saatSinkronkanKatalogProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -117,6 +118,9 @@ internal fun RingkasanKasir(
             )
             KartuStatusKatalogKasir(
                 statusSinkronisasi = statusBeranda.statusSinkronisasi,
+                labelAksiSinkronisasi = statusBeranda.labelAksiSinkronisasi,
+                aksiSinkronisasiAktif = statusBeranda.aksiSinkronisasiAktif,
+                saatSinkronkanKatalogProduk = saatSinkronkanKatalogProduk,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -169,13 +173,16 @@ internal fun KartuStatistikKasir(
 @Composable
 internal fun KartuStatusKatalogKasir(
     statusSinkronisasi: StatusSinkronisasi,
+    labelAksiSinkronisasi: String,
+    aksiSinkronisasiAktif: Boolean,
+    saatSinkronkanKatalogProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val (judul, warnaLatar) = when (statusSinkronisasi) {
         StatusSinkronisasi.BelumPernah -> "Belum Sinkron" to MaterialTheme.colorScheme.errorContainer
         StatusSinkronisasi.SinkronLokal -> "Tersimpan Lokal" to MaterialTheme.colorScheme.secondaryContainer
         StatusSinkronisasi.SedangSinkron -> "Menyinkronkan..." to MaterialTheme.colorScheme.tertiaryContainer
-        StatusSinkronisasi.Berhasil -> "Terunggah" to MaterialTheme.colorScheme.primaryContainer
+        StatusSinkronisasi.Berhasil -> "Terbaru" to MaterialTheme.colorScheme.primaryContainer
         is StatusSinkronisasi.Gagal -> "Gagal" to MaterialTheme.colorScheme.errorContainer
     }
 
@@ -198,6 +205,16 @@ internal fun KartuStatusKatalogKasir(
                 text = judul,
                 style = MaterialTheme.typography.titleLarge,
             )
+
+            TextButton(
+                onClick = saatSinkronkanKatalogProduk,
+                enabled = aksiSinkronisasiAktif,
+                modifier = Modifier.heightIn(min = 48.dp),
+            ) {
+                Text(
+                    text = labelAksiSinkronisasi,
+                )
+            }
         }
     }
 }

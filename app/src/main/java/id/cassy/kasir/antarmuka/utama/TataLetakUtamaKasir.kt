@@ -69,6 +69,9 @@ internal fun TataLetakPonselKasir(
         item {
             RingkasanKasir(
                 statusBeranda = modelTampilan.statusBeranda,
+                saatSinkronkanKatalogProduk = {
+                    saatAksiDikirim(AksiLayarUtamaKasir.SinkronkanKatalogProduk)
+                },
             )
         }
 
@@ -265,6 +268,9 @@ internal fun TataLetakTabletKasir(
         ) {
             RingkasanKasir(
                 statusBeranda = modelTampilan.statusBeranda,
+                saatSinkronkanKatalogProduk = {
+                    saatAksiDikirim(AksiLayarUtamaKasir.SinkronkanKatalogProduk)
+                },
             )
 
             if (modelTampilan.statusHasilCheckout.apakahTampil) {
