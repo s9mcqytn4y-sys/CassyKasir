@@ -29,34 +29,34 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class PengujianLayarRiwayatTransaksiViewModel {
 
-    private val dispatcher = StandardTestDispatcher()
-    private val testScope = kotlinx.coroutines.test.TestScope(dispatcher)
+    private val pengaturUji = StandardTestDispatcher()
+    private val cakupanPengujian = kotlinx.coroutines.test.TestScope(pengaturUji)
     private val repositoriPalsu = RepositoriTransaksiPalsu()
-    private val useCase = AmatiRiwayatTransaksi(repositoriPalsu)
-    private lateinit var viewModel: LayarRiwayatTransaksiViewModel
+    private val amatiRiwayatTransaksi = AmatiRiwayatTransaksi(repositoriPalsu)
+    private lateinit var pengelolaTampilan: LayarRiwayatTransaksiViewModel
 
     @Before
-    fun setup() {
-        Dispatchers.setMain(dispatcher)
-        viewModel = LayarRiwayatTransaksiViewModel(useCase)
+    fun siapkan() {
+        Dispatchers.setMain(pengaturUji)
+        pengelolaTampilan = LayarRiwayatTransaksiViewModel(amatiRiwayatTransaksi)
     }
 
     @After
-    fun tearDown() {
+    fun bersihkan() {
         Dispatchers.resetMain()
     }
 
     @Test
     fun awalMuatMenampilkanStatusMemuat() = runTest {
-        val statusMuat = viewModel.modelTampilan.value.statusMuat
+        val statusMuat = pengelolaTampilan.modelTampilan.value.statusMuat
         assertTrue(statusMuat is StatusMuatRiwayatTransaksi.Memuat)
     }
 
     @Test
-    fun berhasilMemuatDaftarTransaksi() = testScope.runTest {
-        // Start collection in the background to keep the StateFlow active
-        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.modelTampilan.collect()
+    fun berhasilMemuatDaftarTransaksi() = cakupanPengujian.runTest {
+        // Mulai mengumpulkan aliran agar StateFlow aktif.
+        val pekerjaanPengumpul = launch(UnconfinedTestDispatcher(testScheduler)) {
+            pengelolaTampilan.modelTampilan.collect()
         }
 
         val daftarTransaksi = listOf(
@@ -75,27 +75,27 @@ class PengujianLayarRiwayatTransaksiViewModel {
         repositoriPalsu.emit(daftarTransaksi)
         advanceUntilIdle()
 
-        val statusMuat = viewModel.modelTampilan.value.statusMuat
+        val statusMuat = pengelolaTampilan.modelTampilan.value.statusMuat
         if (statusMuat !is StatusMuatRiwayatTransaksi.Berhasil) {
             val pesan = when (statusMuat) {
                 is StatusMuatRiwayatTransaksi.Gagal -> "Status Gagal: ${statusMuat.deskripsi}"
                 is StatusMuatRiwayatTransaksi.Kosong -> "Status Kosong: ${statusMuat.deskripsi}"
                 StatusMuatRiwayatTransaksi.Memuat -> "Status Memuat"
             }
-            job.cancel()
+            pekerjaanPengumpul.cancel()
             throw AssertionError("Seharusnya Status Berhasil, tapi: $pesan")
         }
-        val berhasil = statusMuat as StatusMuatRiwayatTransaksi.Berhasil
+        val berhasil = statusMuat
         assertEquals(1, berhasil.daftarRingkasanTransaksi.size)
         assertEquals("TRX-1", berhasil.daftarRingkasanTransaksi.first().transaksiId)
-        job.cancel()
+        pekerjaanPengumpul.cancel()
     }
 
     @Test
-    fun pencarianBerhasilMenyaringTransaksi() = testScope.runTest {
-        // Start collection in the background to keep the StateFlow active
-        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.modelTampilan.collect()
+    fun pencarianBerhasilMenyaringTransaksi() = cakupanPengujian.runTest {
+        // Mulai mengumpulkan aliran agar StateFlow aktif.
+        val pekerjaanPengumpul = launch(UnconfinedTestDispatcher(testScheduler)) {
+            pengelolaTampilan.modelTampilan.collect()
         }
 
         val daftarTransaksi = listOf(
@@ -125,15 +125,15 @@ class PengujianLayarRiwayatTransaksiViewModel {
         repositoriPalsu.emit(daftarTransaksi)
         advanceUntilIdle()
 
-        viewModel.perbaruiKataKunciPencarian("Kopi")
+        pengelolaTampilan.perbaruiKataKunciPencarian("Kopi")
         advanceUntilIdle() // Menunggu debounce 250ms
 
-        val statusMuat = viewModel.modelTampilan.value.statusMuat
+        val statusMuat = pengelolaTampilan.modelTampilan.value.statusMuat
         assertTrue("Status seharusnya Berhasil, tapi: $statusMuat", statusMuat is StatusMuatRiwayatTransaksi.Berhasil)
         val berhasil = statusMuat as StatusMuatRiwayatTransaksi.Berhasil
         assertEquals(1, berhasil.daftarRingkasanTransaksi.size)
         assertEquals("TRX-KOPI", berhasil.daftarRingkasanTransaksi.first().transaksiId)
-        job.cancel()
+        pekerjaanPengumpul.cancel()
     }
 
     private class RepositoriTransaksiPalsu : RepositoriTransaksi {

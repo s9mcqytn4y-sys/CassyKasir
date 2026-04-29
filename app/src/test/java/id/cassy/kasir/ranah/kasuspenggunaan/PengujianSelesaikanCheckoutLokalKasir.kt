@@ -12,12 +12,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Pengujian unit untuk use case [SelesaikanCheckoutLokalKasir].
+ * Pengujian unit untuk kasus penggunaan [SelesaikanCheckoutLokalKasir].
  */
 class PengujianSelesaikanCheckoutLokalKasir {
 
     private val repositoriPalsu = RepositoriTransaksiPalsu()
-    private val useCase = SelesaikanCheckoutLokalKasir(repositoriPalsu)
+    private val selesaikanCheckoutLokalKasir = SelesaikanCheckoutLokalKasir(repositoriPalsu)
 
     @Test
     fun checkoutBerhasilMenyimpanTransaksiDanMengosongkanKeranjang() = runBlocking {
@@ -33,15 +33,15 @@ class PengujianSelesaikanCheckoutLokalKasir {
             )
         )
 
-        val hasil = useCase.eksekusi(daftarItem)
+        val hasil = selesaikanCheckoutLokalKasir.eksekusi(daftarItem)
 
-        // Verifikasi hasil kembalian use case
+        // Verifikasi hasil keluaran kasus penggunaan.
         assertTrue(hasil.daftarItemKeranjangBaru.isEmpty())
         assertEquals(StatusSinkronisasi.SinkronLokal, hasil.statusSinkronisasiBaru)
         assertEquals(2, hasil.jumlahItemCheckout)
         assertEquals(20_000L, hasil.totalCheckout)
 
-        // Verifikasi apakah repositori dipanggil
+        // Verifikasi apakah repositori dipanggil.
         assertEquals(1, repositoriPalsu.daftarTransaksiTersimpan.size)
         val transaksiTersimpan = repositoriPalsu.daftarTransaksiTersimpan.first()
         assertEquals(20_000L, transaksiTersimpan.uangDibayar)
@@ -50,7 +50,7 @@ class PengujianSelesaikanCheckoutLokalKasir {
 
     @Test(expected = IllegalArgumentException::class)
     fun checkoutGagalJikaKeranjangKosong() = runBlocking {
-        useCase.eksekusi(emptyList())
+        selesaikanCheckoutLokalKasir.eksekusi(emptyList())
         Unit
     }
 
@@ -68,7 +68,7 @@ class PengujianSelesaikanCheckoutLokalKasir {
             )
         )
 
-        useCase.eksekusi(daftarItem)
+        selesaikanCheckoutLokalKasir.eksekusi(daftarItem)
         Unit
     }
 
@@ -87,7 +87,7 @@ class PengujianSelesaikanCheckoutLokalKasir {
             )
         )
 
-        useCase.eksekusi(daftarItem)
+        selesaikanCheckoutLokalKasir.eksekusi(daftarItem)
         Unit
     }
 

@@ -28,48 +28,43 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class PengujianLayarDetailTransaksiViewModel {
 
-    private val dispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(dispatcher)
+    private val pengaturUji = StandardTestDispatcher()
+    private val cakupanPengujian = TestScope(pengaturUji)
     private val repositoriPalsu = RepositoriTransaksiPalsu()
     private val amatiTransaksiBerdasarkanIdentitas = AmatiTransaksiBerdasarkanIdentitas(repositoriPalsu)
 
-    private lateinit var viewModel: LayarDetailTransaksiViewModel
+    private lateinit var pengelolaTampilan: LayarDetailTransaksiViewModel
 
     @Before
-    fun setup() {
-        Dispatchers.setMain(dispatcher)
+    fun siapkan() {
+        Dispatchers.setMain(pengaturUji)
     }
 
     @After
-    fun tearDown() {
+    fun bersihkan() {
         Dispatchers.resetMain()
     }
 
-    private fun buatViewModel(transaksiId: String) {
-        val savedStateHandle = SavedStateHandle(mapOf("identitasTransaksi" to transaksiId))
-        try {
-            viewModel = LayarDetailTransaksiViewModel(
-                savedStateHandle = savedStateHandle,
-                amatiTransaksiBerdasarkanIdentitas = amatiTransaksiBerdasarkanIdentitas
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
-        }
+    private fun buatViewModel(identitasTransaksi: String) {
+        val savedStateHandle = SavedStateHandle(mapOf("identitasTransaksi" to identitasTransaksi))
+        pengelolaTampilan = LayarDetailTransaksiViewModel(
+            savedStateHandle = savedStateHandle,
+            amatiTransaksiBerdasarkanIdentitas = amatiTransaksiBerdasarkanIdentitas,
+        )
     }
 
     @Test
-    fun berhasilMemuatDetailTransaksi() = testScope.runTest {
-        val transaksiId = "TRX-123"
-        buatViewModel(transaksiId)
+    fun berhasilMemuatDetailTransaksi() = cakupanPengujian.runTest {
+        val identitasTransaksi = "TRX-123"
+        buatViewModel(identitasTransaksi)
 
-        // Start collection
-        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.modelTampilan.collect()
+        // Mulai mengumpulkan aliran agar StateFlow aktif.
+        val pekerjaanPengumpul = launch(UnconfinedTestDispatcher(testScheduler)) {
+            pengelolaTampilan.modelTampilan.collect()
         }
 
         val transaksi = Transaksi(
-            id = transaksiId,
+            id = identitasTransaksi,
             daftarItemKeranjang = listOf(
                 ItemKeranjang(
                     produk = Produk(id = "P1", nama = "Kopi", harga = 10_000L, stokTersedia = 10),
@@ -83,33 +78,33 @@ class PengujianLayarDetailTransaksiViewModel {
         repositoriPalsu.emit(transaksi)
         advanceUntilIdle()
 
-        val statusMuat = viewModel.modelTampilan.value.statusMuat
+        val statusMuat = pengelolaTampilan.modelTampilan.value.statusMuat
         assertTrue("Status seharusnya Berhasil, tapi: $statusMuat", statusMuat is StatusMuatDetailTransaksi.Berhasil)
         val berhasil = statusMuat as StatusMuatDetailTransaksi.Berhasil
-        assertEquals(transaksiId, berhasil.transaksiId)
+        assertEquals(identitasTransaksi, berhasil.transaksiId)
         assertEquals(1, berhasil.daftarItem.size)
         assertEquals("Kopi", berhasil.daftarItem.first().namaProduk)
 
-        job.cancel()
+        pekerjaanPengumpul.cancel()
     }
 
     @Test
-    fun transaksiTidakDitemukan() = testScope.runTest {
-        val transaksiId = "TRX-404"
-        buatViewModel(transaksiId)
+    fun transaksiTidakDitemukan() = cakupanPengujian.runTest {
+        val identitasTransaksi = "TRX-404"
+        buatViewModel(identitasTransaksi)
 
-        val job = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.modelTampilan.collect()
+        val pekerjaanPengumpul = launch(UnconfinedTestDispatcher(testScheduler)) {
+            pengelolaTampilan.modelTampilan.collect()
         }
 
-        // Emit null to simulate not found
+        // Mengirim nilai null untuk meniru transaksi yang tidak ditemukan.
         repositoriPalsu.emit(null)
         advanceUntilIdle()
 
-        val statusMuat = viewModel.modelTampilan.value.statusMuat
+        val statusMuat = pengelolaTampilan.modelTampilan.value.statusMuat
         assertTrue("Status seharusnya Kosong, tapi: $statusMuat", statusMuat is StatusMuatDetailTransaksi.Kosong)
 
-        job.cancel()
+        pekerjaanPengumpul.cancel()
     }
 
     private class RepositoriTransaksiPalsu : RepositoriTransaksi {

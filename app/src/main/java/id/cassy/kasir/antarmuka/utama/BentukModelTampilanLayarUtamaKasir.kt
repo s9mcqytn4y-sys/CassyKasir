@@ -116,23 +116,38 @@ class BentukModelTampilanLayarUtamaKasir {
         statusSinkronisasi: StatusSinkronisasi,
         preferensiToko: PreferensiToko,
     ): String {
+        val waktuTerakhir = preferensiToko.waktuSinkronisasiKatalogTerakhirEpochMili
+        val pesanGagalTerakhir = preferensiToko.pesanGagalSinkronisasiKatalogTerakhir
+            ?.trim()
+            ?.takeIf { pesan -> pesan.isNotBlank() }
+
         return when (statusSinkronisasi) {
             StatusSinkronisasi.SedangSinkron -> "Sedang memperbarui katalog..."
-            is StatusSinkronisasi.Gagal -> "Gagal sinkron. Katalog lokal tetap digunakan."
+            is StatusSinkronisasi.Gagal -> {
+                pesanGagalTerakhir?.let {
+                    "Gagal sinkron: $it"
+                } ?: "Gagal sinkron. Katalog lokal tetap digunakan."
+            }
             StatusSinkronisasi.Berhasil -> {
-                val waktu = preferensiToko.waktuSinkronisasiKatalogTerakhirEpochMili
-                if (waktu == null) {
+                if (waktuTerakhir == null) {
                     "Katalog baru saja diperbarui."
                 } else {
-                    "Terakhir diperbarui ${waktu.sebagaiLabelWaktuSinkronisasi()}."
+                    "Terakhir diperbarui ${waktuTerakhir.sebagaiLabelWaktuSinkronisasi()}."
                 }
             }
             StatusSinkronisasi.SinkronLokal -> {
-                val waktu = preferensiToko.waktuSinkronisasiKatalogTerakhirEpochMili
-                if (waktu == null) {
-                    "Katalog lokal siap digunakan."
-                } else {
-                    "Terakhir diperbarui ${waktu.sebagaiLabelWaktuSinkronisasi()}."
+                when {
+                    waktuTerakhir != null -> {
+                        "Terakhir diperbarui ${waktuTerakhir.sebagaiLabelWaktuSinkronisasi()}."
+                    }
+
+                    pesanGagalTerakhir != null -> {
+                        "Sinkronisasi terakhir gagal. Katalog lokal tetap digunakan."
+                    }
+
+                    else -> {
+                        "Katalog lokal siap digunakan."
+                    }
                 }
             }
             StatusSinkronisasi.BelumPernah -> "Katalog belum pernah diperbarui dari server."

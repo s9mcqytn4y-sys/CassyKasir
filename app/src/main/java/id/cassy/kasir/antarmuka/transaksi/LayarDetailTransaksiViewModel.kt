@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
+private const val kunciIdentitasTransaksi = "identitasTransaksi"
+
 /**
  * Pengelola status untuk layar rincian transaksi tunggal.
  *
@@ -38,7 +40,7 @@ class LayarDetailTransaksiViewModel(
 ) : ViewModel() {
 
     private val identitasTransaksi: String =
-        savedStateHandle.get<String>("identitasTransaksi")
+        savedStateHandle.get<String>(kunciIdentitasTransaksi)
             ?: savedStateHandle.toRoute<TujuanNavigasiKasir.DetailTransaksi>().identitasTransaksi
 
     private val _nomorPermintaanMuatUlang = MutableStateFlow(0)
@@ -131,4 +133,3 @@ private fun Transaksi?.keModelTampilanDetailTransaksi(
         ),
     )
 }
-
