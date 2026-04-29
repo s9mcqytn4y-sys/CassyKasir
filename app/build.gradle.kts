@@ -39,11 +39,24 @@ android {
             // Memberikan pembeda visual/sistem untuk versi pengembangan
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+
+            buildConfigField(
+                "String",
+                "ALAMAT_DASAR_API",
+                "\"http://10.0.2.2:8080/\"",
+            )
         }
 
         release {
             // Optimasi kode (ProGuard/R8) untuk rilis publik
             isMinifyEnabled = true // Diaktifkan untuk keamanan & efisiensi
+
+            buildConfigField(
+                "String",
+                "ALAMAT_DASAR_API",
+                "\"https://cassy-kasir-belum-dikonfigurasi.invalid/\"",
+            )
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
