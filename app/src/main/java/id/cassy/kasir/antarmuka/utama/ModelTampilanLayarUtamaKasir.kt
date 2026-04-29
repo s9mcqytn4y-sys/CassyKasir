@@ -14,6 +14,8 @@ import id.cassy.kasir.ranah.model.StatusSinkronisasi
  * @property jumlahItemKeranjang Total kuantitas item di keranjang.
  * @property totalBelanjaSementara Estimasi nilai belanja saat ini.
  * @property statusSinkronisasi Objek status sinkronisasi data.
+ * @property labelAksiSinkronisasi Teks tombol sinkronisasi.
+ * @property aksiSinkronisasiAktif Status aktif tombol sinkronisasi.
  */
 @Immutable
 data class StatusBerandaKasir(
@@ -23,6 +25,8 @@ data class StatusBerandaKasir(
     val jumlahItemKeranjang: Int,
     val totalBelanjaSementara: String,
     val statusSinkronisasi: StatusSinkronisasi,
+    val labelAksiSinkronisasi: String,
+    val aksiSinkronisasiAktif: Boolean,
 )
 
 /**
@@ -115,6 +119,8 @@ data class ModelTampilanLayarUtamaKasir(
         jumlahItemKeranjang = 0,
         totalBelanjaSementara = "Rp0",
         statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
+        labelAksiSinkronisasi = "Perbarui katalog",
+        aksiSinkronisasiAktif = true,
     ),
     val daftarProdukTersaring: List<Produk> = emptyList(),
     val daftarItemKeranjang: List<ItemKeranjang> = emptyList(),

@@ -71,4 +71,9 @@ sealed interface AksiLayarUtamaKasir {
      * Aksi saat pengguna ingin mengosongkan kolom pencarian produk.
      */
     data object ResetPencarian : AksiLayarUtamaKasir
+
+    /**
+     * Aksi saat pengguna meminta pembaruan katalog dari jaringan.
+     */
+    data object SinkronkanKatalogProduk : AksiLayarUtamaKasir
 }

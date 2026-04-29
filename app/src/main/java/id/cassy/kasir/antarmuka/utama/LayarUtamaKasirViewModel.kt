@@ -8,6 +8,7 @@ import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.TambahProdukKeKeranjang
+import id.cassy.kasir.ranah.model.HasilOperasiJaringan
 import id.cassy.kasir.ranah.model.Produk
 import id.cassy.kasir.ranah.model.StatusSinkronisasi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
 
 /**
@@ -119,6 +121,7 @@ class LayarUtamaKasirViewModel(
             AksiLayarUtamaKasir.KonfirmasiCheckout -> konfirmasiCheckout()
             AksiLayarUtamaKasir.TutupStatusHasilCheckout -> tutupStatusHasilCheckout()
             AksiLayarUtamaKasir.ResetPencarian -> resetPencarian()
+            AksiLayarUtamaKasir.SinkronkanKatalogProduk -> sinkronkanKatalogProduk()
         }
     }
 
@@ -138,6 +141,64 @@ class LayarUtamaKasirViewModel(
 
     private fun resetPencarian() {
         _kataKunciPencarian.value = ""
+    }
+
+    private fun sinkronkanKatalogProduk() {
+        _statusTransaksi.update { statusLama ->
+            statusLama.copy(
+                statusSinkronisasi = StatusSinkronisasi.SedangSinkron,
+            )
+        }
+
+        viewModelScope.launch {
+            when (val hasilSinkronisasi = muatKatalogProduk.sinkronkan()) {
+                is HasilOperasiJaringan.Berhasil -> {
+                    _statusTransaksi.update { statusLama ->
+                        statusLama.copy(
+                            statusSinkronisasi = StatusSinkronisasi.Berhasil,
+                        )
+                    }
+
+                    kirimPesanSingkat("Katalog produk berhasil diperbarui.")
+                }
+
+                is HasilOperasiJaringan.GagalJaringan -> {
+                    _statusTransaksi.update { statusLama ->
+                        statusLama.copy(
+                            statusSinkronisasi = StatusSinkronisasi.Gagal(
+                                pesan = hasilSinkronisasi.pesan,
+                            ),
+                        )
+                    }
+
+                    kirimPesanSingkat(hasilSinkronisasi.pesan)
+                }
+
+                is HasilOperasiJaringan.GagalServer -> {
+                    _statusTransaksi.update { statusLama ->
+                        statusLama.copy(
+                            statusSinkronisasi = StatusSinkronisasi.Gagal(
+                                pesan = hasilSinkronisasi.pesan,
+                            ),
+                        )
+                    }
+
+                    kirimPesanSingkat(hasilSinkronisasi.pesan)
+                }
+
+                is HasilOperasiJaringan.FallbackLokal -> {
+                    _statusTransaksi.update { statusLama ->
+                        statusLama.copy(
+                            statusSinkronisasi = StatusSinkronisasi.Gagal(
+                                pesan = hasilSinkronisasi.alasanGagal,
+                            ),
+                        )
+                    }
+
+                    kirimPesanSingkat(hasilSinkronisasi.alasanGagal)
+                }
+            }
+        }
     }
 
     private fun alihkanVisibilitasPembayaran() {

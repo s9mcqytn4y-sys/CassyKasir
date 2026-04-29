@@ -133,6 +133,8 @@ private fun PreviewWorkspaceTabletTerangDialogCheckout() {
                     jumlahItemKeranjang = 4,
                     totalBelanjaSementara = "Rp59000",
                     statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
+                    labelAksiSinkronisasi = "Perbarui katalog",
+                    aksiSinkronisasiAktif = true,
                 ),
                 daftarProdukTersaring = daftarProduk,
                 daftarItemKeranjang = listOf(
@@ -200,6 +202,8 @@ private fun PreviewWorkspacePonselGelapHasilCheckout() {
                     jumlahItemKeranjang = 0,
                     totalBelanjaSementara = "Rp0",
                     statusSinkronisasi = StatusSinkronisasi.Berhasil,
+                    labelAksiSinkronisasi = "Perbarui katalog",
+                    aksiSinkronisasiAktif = true,
                 ),
                 daftarProdukTersaring = daftarProduk,
                 daftarItemKeranjang = emptyList(),

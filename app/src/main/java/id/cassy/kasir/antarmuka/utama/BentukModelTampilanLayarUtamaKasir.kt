@@ -7,6 +7,7 @@ import id.cassy.kasir.ranah.kasuspenggunaan.HitungTotalBelanja
 import id.cassy.kasir.ranah.kasuspenggunaan.RingkasanTotalBelanja
 import id.cassy.kasir.ranah.model.Produk
 import id.cassy.kasir.ranah.model.RincianBiayaTransaksi
+import id.cassy.kasir.ranah.model.StatusSinkronisasi
 import id.cassy.kasir.ranah.model.Uang
 
 /**
@@ -65,6 +66,11 @@ class BentukModelTampilanLayarUtamaKasir {
                 jumlahItemKeranjang = jumlahItem,
                 totalBelanjaSementara = rincianBiayaTransaksi.subtotal.sebagaiRupiah(),
                 statusSinkronisasi = statusTransaksi.statusSinkronisasi,
+                labelAksiSinkronisasi = when (statusTransaksi.statusSinkronisasi) {
+                    StatusSinkronisasi.SedangSinkron -> "Memperbarui..."
+                    else -> "Perbarui katalog"
+                },
+                aksiSinkronisasiAktif = statusTransaksi.statusSinkronisasi !is StatusSinkronisasi.SedangSinkron,
             ),
             daftarProdukTersaring = daftarProdukTersaring,
             daftarItemKeranjang = daftarItemKeranjang,
