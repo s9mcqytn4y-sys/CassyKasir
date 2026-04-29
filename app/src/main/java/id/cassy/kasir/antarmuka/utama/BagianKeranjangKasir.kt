@@ -12,12 +12,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
 import id.cassy.kasir.antarmuka.komponen.StatusKosongSederhana
 import id.cassy.kasir.ranah.fungsi.hitungSubTotal
 import id.cassy.kasir.ranah.model.ItemKeranjang
@@ -159,8 +164,9 @@ internal fun BarisItemKeranjangKasir(
                     .weight(1f)
                     .heightIn(min = 48.dp),
             ) {
-                Text(
-                    text = "Kurangi",
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = "Kurangi jumlah",
                 )
             }
 
@@ -171,8 +177,9 @@ internal fun BarisItemKeranjangKasir(
                     .weight(1f)
                     .heightIn(min = 48.dp),
             ) {
-                Text(
-                    text = "Tambah",
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Tambah jumlah",
                 )
             }
 
@@ -182,8 +189,10 @@ internal fun BarisItemKeranjangKasir(
                     .weight(1f)
                     .heightIn(min = 48.dp),
             ) {
-                Text(
-                    text = "Hapus",
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Hapus dari keranjang",
+                    tint = MaterialTheme.colorScheme.error,
                 )
             }
         }

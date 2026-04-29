@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -21,6 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Search
 import id.cassy.kasir.ranah.model.Produk
 
 /**
@@ -90,6 +95,12 @@ internal fun BidangPencarianProdukKasir(
         onValueChange = saatNilaiPencarianBerubah,
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+            )
+        },
         label = {
             Text(text = "Cari produk")
         },
@@ -192,6 +203,11 @@ internal fun KartuProdukKasir(
                         .weight(1f)
                         .heightIn(min = 48.dp),
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
                     Text(
                         text = "Detail",
                     )
@@ -204,6 +220,11 @@ internal fun KartuProdukKasir(
                         .weight(1f)
                         .heightIn(min = 48.dp),
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
                     Text(
                         text = "Tambah",
                     )
