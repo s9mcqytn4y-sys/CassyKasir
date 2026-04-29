@@ -16,6 +16,7 @@ import id.cassy.kasir.ranah.model.StatusSinkronisasi
  * @property statusSinkronisasi Objek status sinkronisasi data.
  * @property labelAksiSinkronisasi Teks tombol sinkronisasi.
  * @property aksiSinkronisasiAktif Status aktif tombol sinkronisasi.
+ * @property labelMetadataSinkronisasi Teks metadata sinkronisasi (misal: waktu terakhir).
  */
 @Immutable
 data class StatusBerandaKasir(
@@ -27,6 +28,7 @@ data class StatusBerandaKasir(
     val statusSinkronisasi: StatusSinkronisasi,
     val labelAksiSinkronisasi: String,
     val aksiSinkronisasiAktif: Boolean,
+    val labelMetadataSinkronisasi: String,
 )
 
 /**
@@ -121,6 +123,7 @@ data class ModelTampilanLayarUtamaKasir(
         statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
         labelAksiSinkronisasi = "Perbarui katalog",
         aksiSinkronisasiAktif = true,
+        labelMetadataSinkronisasi = "Katalog lokal siap digunakan.",
     ),
     val daftarProdukTersaring: List<Produk> = emptyList(),
     val daftarItemKeranjang: List<ItemKeranjang> = emptyList(),

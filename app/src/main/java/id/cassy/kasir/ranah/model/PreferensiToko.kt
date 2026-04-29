@@ -10,12 +10,16 @@ package id.cassy.kasir.ranah.model
  * @property alamatToko Alamat fisik atau informasi lokasi toko.
  * @property basisPoinPajakDefault Persentase pajak default dalam basis poin (contoh: 1100 untuk 11%).
  * @property biayaLayananDefault Biaya layanan tetap yang dibebankan per transaksi.
+ * @property waktuSinkronisasiKatalogTerakhirEpochMili Waktu sinkronisasi katalog terakhir yang berhasil.
+ * @property pesanGagalSinkronisasiKatalogTerakhir Pesan kegagalan sinkronisasi katalog terakhir.
  */
 data class PreferensiToko(
     val namaToko: String = "Cassy Kasir",
     val alamatToko: String = "",
     val basisPoinPajakDefault: Int = 0,
     val biayaLayananDefault: Long = 0L,
+    val waktuSinkronisasiKatalogTerakhirEpochMili: Long? = null,
+    val pesanGagalSinkronisasiKatalogTerakhir: String? = null,
 ) {
     init {
         require(namaToko.isNotBlank()) {
@@ -28,6 +32,10 @@ data class PreferensiToko(
 
         require(biayaLayananDefault >= 0L) {
             "Biaya layanan default tidak boleh negatif."
+        }
+
+        require(waktuSinkronisasiKatalogTerakhirEpochMili == null || waktuSinkronisasiKatalogTerakhirEpochMili >= 0L) {
+            "Waktu sinkronisasi katalog terakhir tidak valid."
         }
     }
 }

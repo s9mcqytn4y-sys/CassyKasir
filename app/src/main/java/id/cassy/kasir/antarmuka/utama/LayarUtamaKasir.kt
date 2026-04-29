@@ -135,6 +135,7 @@ private fun PreviewWorkspaceTabletTerangDialogCheckout() {
                     statusSinkronisasi = StatusSinkronisasi.SinkronLokal,
                     labelAksiSinkronisasi = "Perbarui katalog",
                     aksiSinkronisasiAktif = true,
+                    labelMetadataSinkronisasi = "Katalog lokal siap digunakan.",
                 ),
                 daftarProdukTersaring = daftarProduk,
                 daftarItemKeranjang = listOf(
@@ -204,6 +205,7 @@ private fun PreviewWorkspacePonselGelapHasilCheckout() {
                     statusSinkronisasi = StatusSinkronisasi.Berhasil,
                     labelAksiSinkronisasi = "Perbarui katalog",
                     aksiSinkronisasiAktif = true,
+                    labelMetadataSinkronisasi = "Baru saja diperbarui.",
                 ),
                 daftarProdukTersaring = daftarProduk,
                 daftarItemKeranjang = emptyList(),

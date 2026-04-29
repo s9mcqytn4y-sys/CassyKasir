@@ -21,4 +21,26 @@ class SimpanPreferensiToko(
             preferensiToko = preferensiToko,
         )
     }
+
+    /**
+     * Menyimpan metadata keberhasilan sinkronisasi katalog.
+     */
+    suspend fun simpanSinkronisasiKatalogBerhasil(
+        waktuEpochMili: Long,
+    ) {
+        repositoriPreferensiToko.simpanSinkronisasiKatalogBerhasil(
+            waktuEpochMili = waktuEpochMili,
+        )
+    }
+
+    /**
+     * Menyimpan metadata kegagalan sinkronisasi katalog.
+     */
+    suspend fun simpanSinkronisasiKatalogGagal(
+        pesan: String,
+    ) {
+        repositoriPreferensiToko.simpanSinkronisasiKatalogGagal(
+            pesan = pesan,
+        )
+    }
 }

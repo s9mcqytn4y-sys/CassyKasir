@@ -34,6 +34,8 @@ class RepositoriPreferensiTokoDataStore(
                 alamatToko = preferensi[KunciPreferensi.alamatToko] ?: "",
                 basisPoinPajakDefault = preferensi[KunciPreferensi.basisPoinPajakDefault] ?: 0,
                 biayaLayananDefault = preferensi[KunciPreferensi.biayaLayananDefault] ?: 0L,
+                waktuSinkronisasiKatalogTerakhirEpochMili = preferensi[KunciPreferensi.waktuSinkronisasiKatalogTerakhirEpochMili],
+                pesanGagalSinkronisasiKatalogTerakhir = preferensi[KunciPreferensi.pesanGagalSinkronisasiKatalogTerakhir],
             )
         }
     }
@@ -48,6 +50,42 @@ class RepositoriPreferensiTokoDataStore(
                 preferensiToko.basisPoinPajakDefault
             preferensi[KunciPreferensi.biayaLayananDefault] =
                 preferensiToko.biayaLayananDefault
+
+            preferensiToko.waktuSinkronisasiKatalogTerakhirEpochMili?.let { waktu ->
+                preferensi[KunciPreferensi.waktuSinkronisasiKatalogTerakhirEpochMili] = waktu
+            } ?: preferensi.remove(KunciPreferensi.waktuSinkronisasiKatalogTerakhirEpochMili)
+
+            preferensiToko.pesanGagalSinkronisasiKatalogTerakhir
+                ?.trim()
+                ?.takeIf { pesan -> pesan.isNotBlank() }
+                ?.let { pesan ->
+                    preferensi[KunciPreferensi.pesanGagalSinkronisasiKatalogTerakhir] = pesan
+                } ?: preferensi.remove(KunciPreferensi.pesanGagalSinkronisasiKatalogTerakhir)
+        }
+    }
+
+    override suspend fun simpanSinkronisasiKatalogBerhasil(
+        waktuEpochMili: Long,
+    ) {
+        require(waktuEpochMili >= 0L) {
+            "Waktu sinkronisasi katalog tidak valid."
+        }
+
+        konteks.dataStorePreferensiToko.edit { preferensi ->
+            preferensi[KunciPreferensi.waktuSinkronisasiKatalogTerakhirEpochMili] = waktuEpochMili
+            preferensi.remove(KunciPreferensi.pesanGagalSinkronisasiKatalogTerakhir)
+        }
+    }
+
+    override suspend fun simpanSinkronisasiKatalogGagal(
+        pesan: String,
+    ) {
+        val pesanBersih = pesan.trim().ifBlank {
+            "Sinkronisasi katalog gagal."
+        }
+
+        konteks.dataStorePreferensiToko.edit { preferensi ->
+            preferensi[KunciPreferensi.pesanGagalSinkronisasiKatalogTerakhir] = pesanBersih
         }
     }
 
@@ -59,5 +97,9 @@ class RepositoriPreferensiTokoDataStore(
         val alamatToko = stringPreferencesKey("alamat_toko")
         val basisPoinPajakDefault = intPreferencesKey("basis_poin_pajak_default")
         val biayaLayananDefault = longPreferencesKey("biaya_layanan_default")
+        val waktuSinkronisasiKatalogTerakhirEpochMili =
+            longPreferencesKey("waktu_sinkronisasi_katalog_terakhir_epoch_mili")
+        val pesanGagalSinkronisasiKatalogTerakhir =
+            stringPreferencesKey("pesan_gagal_sinkronisasi_katalog_terakhir")
     }
 }

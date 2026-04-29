@@ -24,6 +24,8 @@ object PenyediaViewModelKasir {
             LayarUtamaKasirViewModel(
                 muatKatalogProduk = aplikasi.kontainer.muatKatalogProduk,
                 selesaikanCheckoutLokalKasir = aplikasi.kontainer.selesaikanCheckoutLokalKasir,
+                amatiPreferensiToko = aplikasi.kontainer.amatiPreferensiToko,
+                simpanPreferensiToko = aplikasi.kontainer.simpanPreferensiToko,
             )
         }
 

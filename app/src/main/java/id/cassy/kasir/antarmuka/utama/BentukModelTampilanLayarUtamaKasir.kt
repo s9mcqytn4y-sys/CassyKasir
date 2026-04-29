@@ -5,10 +5,12 @@ import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
 import id.cassy.kasir.ranah.kasuspenggunaan.HasilHitungTotalBelanja
 import id.cassy.kasir.ranah.kasuspenggunaan.HitungTotalBelanja
 import id.cassy.kasir.ranah.kasuspenggunaan.RingkasanTotalBelanja
+import id.cassy.kasir.ranah.model.PreferensiToko
 import id.cassy.kasir.ranah.model.Produk
 import id.cassy.kasir.ranah.model.RincianBiayaTransaksi
 import id.cassy.kasir.ranah.model.StatusSinkronisasi
 import id.cassy.kasir.ranah.model.Uang
+import java.time.format.DateTimeFormatter
 
 /**
  * Pembentuk model tampilan untuk layar utama kasir.
@@ -27,6 +29,7 @@ class BentukModelTampilanLayarUtamaKasir {
      * @param statusElemenLayar Status elemen visual dan interaksi pada layar.
      * @param kataKunciMentah Nilai teks asli dari input pencarian sebelum di-debounce.
      * @param kataKunciEfektif Nilai teks pencarian setelah di-debounce untuk memfilter katalog.
+     * @param preferensiToko Data preferensi toko (untuk metadata sinkronisasi).
      * @return Model tampilan yang siap dikonsumsi oleh komponen Jetpack Compose.
      */
     operator fun invoke(
@@ -35,6 +38,7 @@ class BentukModelTampilanLayarUtamaKasir {
         statusElemenLayar: StatusElemenLayarUtamaKasir,
         kataKunciMentah: String,
         kataKunciEfektif: String,
+        preferensiToko: PreferensiToko,
     ): ModelTampilanLayarUtamaKasir {
         val daftarItemKeranjang = statusTransaksi.daftarItemKeranjang
 
@@ -71,6 +75,10 @@ class BentukModelTampilanLayarUtamaKasir {
                     else -> "Perbarui katalog"
                 },
                 aksiSinkronisasiAktif = statusTransaksi.statusSinkronisasi !is StatusSinkronisasi.SedangSinkron,
+                labelMetadataSinkronisasi = bentukLabelMetadataSinkronisasi(
+                    statusSinkronisasi = statusTransaksi.statusSinkronisasi,
+                    preferensiToko = preferensiToko,
+                ),
             ),
             daftarProdukTersaring = daftarProdukTersaring,
             daftarItemKeranjang = daftarItemKeranjang,
@@ -102,5 +110,39 @@ class BentukModelTampilanLayarUtamaKasir {
             tampilkanAksiResetPencarian = kataKunciMentah.isNotBlank(),
             apakahRingkasanPembayaranTampil = statusElemenLayar.apakahRingkasanPembayaranTampil,
         )
+    }
+
+    private fun bentukLabelMetadataSinkronisasi(
+        statusSinkronisasi: StatusSinkronisasi,
+        preferensiToko: PreferensiToko,
+    ): String {
+        return when (statusSinkronisasi) {
+            StatusSinkronisasi.SedangSinkron -> "Sedang memperbarui katalog..."
+            is StatusSinkronisasi.Gagal -> "Gagal sinkron. Katalog lokal tetap digunakan."
+            StatusSinkronisasi.Berhasil -> {
+                val waktu = preferensiToko.waktuSinkronisasiKatalogTerakhirEpochMili
+                if (waktu == null) {
+                    "Katalog baru saja diperbarui."
+                } else {
+                    "Terakhir diperbarui ${waktu.sebagaiLabelWaktuSinkronisasi()}."
+                }
+            }
+            StatusSinkronisasi.SinkronLokal -> {
+                val waktu = preferensiToko.waktuSinkronisasiKatalogTerakhirEpochMili
+                if (waktu == null) {
+                    "Katalog lokal siap digunakan."
+                } else {
+                    "Terakhir diperbarui ${waktu.sebagaiLabelWaktuSinkronisasi()}."
+                }
+            }
+            StatusSinkronisasi.BelumPernah -> "Katalog belum pernah diperbarui dari server."
+        }
+    }
+
+    private fun Long.sebagaiLabelWaktuSinkronisasi(): String {
+        val pembentukFormat = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
+        return java.time.Instant.ofEpochMilli(this)
+            .atZone(java.time.ZoneId.systemDefault())
+            .format(pembentukFormat)
     }
 }

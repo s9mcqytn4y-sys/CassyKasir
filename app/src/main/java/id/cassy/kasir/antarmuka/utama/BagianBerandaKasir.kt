@@ -123,6 +123,7 @@ internal fun RingkasanKasir(
                 statusSinkronisasi = statusBeranda.statusSinkronisasi,
                 labelAksiSinkronisasi = statusBeranda.labelAksiSinkronisasi,
                 aksiSinkronisasiAktif = statusBeranda.aksiSinkronisasiAktif,
+                labelMetadataSinkronisasi = statusBeranda.labelMetadataSinkronisasi,
                 saatSinkronkanKatalogProduk = saatSinkronkanKatalogProduk,
                 modifier = Modifier.weight(1f),
             )
@@ -178,6 +179,7 @@ internal fun KartuStatusKatalogKasir(
     statusSinkronisasi: StatusSinkronisasi,
     labelAksiSinkronisasi: String,
     aksiSinkronisasiAktif: Boolean,
+    labelMetadataSinkronisasi: String,
     saatSinkronkanKatalogProduk: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -223,6 +225,12 @@ internal fun KartuStatusKatalogKasir(
             Text(
                 text = judul,
                 style = MaterialTheme.typography.titleLarge,
+            )
+
+            Text(
+                text = labelMetadataSinkronisasi,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             TextButton(

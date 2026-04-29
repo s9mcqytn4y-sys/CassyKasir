@@ -3,12 +3,15 @@ package id.cassy.kasir.antarmuka.utama
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.cassy.kasir.ranah.fungsi.sebagaiRupiah
+import id.cassy.kasir.ranah.kasuspenggunaan.AmatiPreferensiToko
 import id.cassy.kasir.ranah.kasuspenggunaan.HapusProdukDariKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.KurangiProdukDiKeranjang
 import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
+import id.cassy.kasir.ranah.kasuspenggunaan.SimpanPreferensiToko
 import id.cassy.kasir.ranah.kasuspenggunaan.TambahProdukKeKeranjang
 import id.cassy.kasir.ranah.model.HasilOperasiJaringan
+import id.cassy.kasir.ranah.model.PreferensiToko
 import id.cassy.kasir.ranah.model.Produk
 import id.cassy.kasir.ranah.model.StatusSinkronisasi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,6 +38,8 @@ import kotlinx.coroutines.launch
 class LayarUtamaKasirViewModel(
     private val muatKatalogProduk: MuatKatalogProduk,
     private val selesaikanCheckoutLokalKasir: SelesaikanCheckoutLokalKasir,
+    private val amatiPreferensiToko: AmatiPreferensiToko,
+    private val simpanPreferensiToko: SimpanPreferensiToko,
 ) : ViewModel() {
 
     private val daftarProdukPenuh = muatKatalogProduk.eksekusi()
@@ -42,6 +47,13 @@ class LayarUtamaKasirViewModel(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = emptyList(),
+        )
+
+    private val preferensiToko = amatiPreferensiToko()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = PreferensiToko(),
         )
 
     private val tambahProdukKeKeranjang = TambahProdukKeKeranjang()
@@ -81,13 +93,15 @@ class LayarUtamaKasirViewModel(
         _statusElemenLayar,
         _kataKunciPencarian,
         kataKunciPencarianEfektif,
-    ) { produk, statusTransaksi, statusElemenLayar, kataKunciMentah, kataKunciEfektif ->
+        preferensiToko,
+    ) { aliran ->
         bentukModelTampilan(
-            daftarProdukPenuh = produk,
-            statusTransaksi = statusTransaksi,
-            statusElemenLayar = statusElemenLayar,
-            kataKunciMentah = kataKunciMentah,
-            kataKunciEfektif = kataKunciEfektif,
+            daftarProdukPenuh = aliran[0] as List<Produk>,
+            statusTransaksi = aliran[1] as StatusTransaksiLayarUtamaKasir,
+            statusElemenLayar = aliran[2] as StatusElemenLayarUtamaKasir,
+            kataKunciMentah = aliran[3] as String,
+            kataKunciEfektif = aliran[4] as String,
+            preferensiToko = aliran[5] as PreferensiToko,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -98,6 +112,7 @@ class LayarUtamaKasirViewModel(
             statusElemenLayar = StatusElemenLayarUtamaKasir(),
             kataKunciMentah = "",
             kataKunciEfektif = "",
+            preferensiToko = PreferensiToko(),
         ),
     )
 
@@ -158,6 +173,10 @@ class LayarUtamaKasirViewModel(
                         )
                     }
 
+                    simpanPreferensiToko.simpanSinkronisasiKatalogBerhasil(
+                        waktuEpochMili = System.currentTimeMillis(),
+                    )
+
                     kirimPesanSingkat("Katalog produk berhasil diperbarui.")
                 }
 
@@ -169,6 +188,10 @@ class LayarUtamaKasirViewModel(
                             ),
                         )
                     }
+
+                    simpanPreferensiToko.simpanSinkronisasiKatalogGagal(
+                        pesan = hasilSinkronisasi.pesan,
+                    )
 
                     kirimPesanSingkat(hasilSinkronisasi.pesan)
                 }
@@ -182,6 +205,10 @@ class LayarUtamaKasirViewModel(
                         )
                     }
 
+                    simpanPreferensiToko.simpanSinkronisasiKatalogGagal(
+                        pesan = hasilSinkronisasi.pesan,
+                    )
+
                     kirimPesanSingkat(hasilSinkronisasi.pesan)
                 }
 
@@ -193,6 +220,10 @@ class LayarUtamaKasirViewModel(
                             ),
                         )
                     }
+
+                    simpanPreferensiToko.simpanSinkronisasiKatalogGagal(
+                        pesan = hasilSinkronisasi.alasanGagal,
+                    )
 
                     kirimPesanSingkat(hasilSinkronisasi.alasanGagal)
                 }

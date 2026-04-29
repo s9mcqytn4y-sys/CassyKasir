@@ -21,4 +21,18 @@ interface RepositoriPreferensiToko {
     suspend fun simpanPreferensiToko(
         preferensiToko: PreferensiToko,
     )
+
+    /**
+     * Menyimpan metadata keberhasilan sinkronisasi katalog.
+     */
+    suspend fun simpanSinkronisasiKatalogBerhasil(
+        waktuEpochMili: Long,
+    )
+
+    /**
+     * Menyimpan metadata kegagalan sinkronisasi katalog.
+     */
+    suspend fun simpanSinkronisasiKatalogGagal(
+        pesan: String,
+    )
 }
