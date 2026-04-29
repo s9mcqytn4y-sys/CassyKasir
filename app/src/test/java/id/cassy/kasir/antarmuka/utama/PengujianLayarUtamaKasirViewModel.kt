@@ -5,7 +5,6 @@ import id.cassy.kasir.ranah.kasuspenggunaan.MuatKatalogProduk
 import id.cassy.kasir.ranah.kasuspenggunaan.SelesaikanCheckoutLokalKasir
 import id.cassy.kasir.ranah.kasuspenggunaan.SimpanPreferensiToko
 import id.cassy.kasir.ranah.model.HasilOperasiJaringan
-import id.cassy.kasir.ranah.model.ItemKeranjang
 import id.cassy.kasir.ranah.model.PreferensiToko
 import id.cassy.kasir.ranah.model.Produk
 import id.cassy.kasir.ranah.model.StatusSinkronisasi
@@ -193,6 +192,122 @@ class PengujianLayarUtamaKasirViewModel {
         assertEquals("Transaksi Berhasil", modelTampilan.statusHasilCheckout.judul)
         assertEquals(1, repositoriTransaksiPalsu.daftarTransaksiTersimpan.size)
         assertTrue(modelTampilan.statusBeranda.statusSinkronisasi is StatusSinkronisasi.SinkronLokal)
+
+        pekerjaanPengumpul.cancel()
+    }
+
+    @Test
+    fun kurangiProdukMengurangiJumlahItemKeranjang() = cakupanPengujian.runTest {
+        val produk = buatProdukContoh(
+            identitasProduk = "produk-kopi",
+            namaProduk = "Kopi Susu",
+            stokTersedia = 5,
+        )
+        repositoriProdukPalsu.aturDaftarProduk(listOf(produk))
+
+        val pekerjaanPengumpul = launch(UnconfinedTestDispatcher(testScheduler)) {
+            pengelolaTampilan.modelTampilan.collect()
+        }
+
+        advanceUntilIdle()
+
+        repeat(2) {
+            pengelolaTampilan.tanganiAksi(
+                AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                    produkId = produk.id,
+                ),
+            )
+            advanceUntilIdle()
+        }
+
+        pengelolaTampilan.tanganiAksi(
+            AksiLayarUtamaKasir.KurangiProdukDiKeranjang(
+                produkId = produk.id,
+            ),
+        )
+        advanceUntilIdle()
+
+        val modelTampilan = pengelolaTampilan.modelTampilan.value
+
+        assertEquals(1, modelTampilan.daftarItemKeranjang.size)
+        assertEquals(1, modelTampilan.daftarItemKeranjang.first().jumlah)
+
+        pekerjaanPengumpul.cancel()
+    }
+
+    @Test
+    fun hapusProdukMenghapusItemDariKeranjang() = cakupanPengujian.runTest {
+        val produk = buatProdukContoh(
+            identitasProduk = "produk-roti",
+            namaProduk = "Roti Bakar",
+            stokTersedia = 5,
+        )
+        repositoriProdukPalsu.aturDaftarProduk(listOf(produk))
+
+        val pekerjaanPengumpul = launch(UnconfinedTestDispatcher(testScheduler)) {
+            pengelolaTampilan.modelTampilan.collect()
+        }
+
+        advanceUntilIdle()
+
+        pengelolaTampilan.tanganiAksi(
+            AksiLayarUtamaKasir.TambahProdukKeKeranjang(
+                produkId = produk.id,
+            ),
+        )
+        advanceUntilIdle()
+
+        pengelolaTampilan.tanganiAksi(
+            AksiLayarUtamaKasir.HapusProdukDariKeranjang(
+                produkId = produk.id,
+            ),
+        )
+        advanceUntilIdle()
+
+        val modelTampilan = pengelolaTampilan.modelTampilan.value
+
+        assertTrue(modelTampilan.daftarItemKeranjang.isEmpty())
+        assertEquals(0, modelTampilan.statusBeranda.jumlahItemKeranjang)
+
+        pekerjaanPengumpul.cancel()
+    }
+
+    @Test
+    fun resetPencarianMengosongkanKataKunci() = cakupanPengujian.runTest {
+        repositoriProdukPalsu.aturDaftarProduk(
+            listOf(
+                buatProdukContoh(
+                    identitasProduk = "produk-kopi",
+                    namaProduk = "Kopi Susu",
+                    stokTersedia = 5,
+                ),
+                buatProdukContoh(
+                    identitasProduk = "produk-teh",
+                    namaProduk = "Teh Manis",
+                    stokTersedia = 5,
+                ),
+            ),
+        )
+
+        val pekerjaanPengumpul = launch(UnconfinedTestDispatcher(testScheduler)) {
+            pengelolaTampilan.modelTampilan.collect()
+        }
+
+        advanceUntilIdle()
+
+        pengelolaTampilan.tanganiAksi(
+            AksiLayarUtamaKasir.UbahKataKunciPencarian(
+                kataKunciBaru = "kopi",
+            ),
+        )
+        advanceUntilIdle()
+
+        pengelolaTampilan.tanganiAksi(AksiLayarUtamaKasir.ResetPencarian)
+        advanceUntilIdle()
+
+        val modelTampilan = pengelolaTampilan.modelTampilan.value
+
+        assertEquals("", modelTampilan.kataKunciPencarian)
 
         pekerjaanPengumpul.cancel()
     }
