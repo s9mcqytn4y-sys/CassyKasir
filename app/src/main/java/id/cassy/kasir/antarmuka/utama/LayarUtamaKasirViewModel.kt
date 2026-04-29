@@ -84,24 +84,43 @@ class LayarUtamaKasirViewModel(
             }
             .distinctUntilChanged()
 
+    private val statusDasarModelTampilan = combine(
+        daftarProdukPenuh,
+        _statusTransaksi,
+        _statusElemenLayar,
+    ) { daftarProdukPenuh, statusTransaksi, statusElemenLayar ->
+        StatusDasarModelTampilan(
+            daftarProdukPenuh = daftarProdukPenuh,
+            statusTransaksi = statusTransaksi,
+            statusElemenLayar = statusElemenLayar,
+        )
+    }
+
+    private val statusPencarianModelTampilan = combine(
+        _kataKunciPencarian,
+        kataKunciPencarianEfektif,
+    ) { kataKunciMentah, kataKunciEfektif ->
+        StatusPencarianModelTampilan(
+            kataKunciMentah = kataKunciMentah,
+            kataKunciEfektif = kataKunciEfektif,
+        )
+    }
+
     /**
      * Aliran status UI publik yang dirender oleh Compose.
      */
     val modelTampilan = combine(
-        daftarProdukPenuh,
-        _statusTransaksi,
-        _statusElemenLayar,
-        _kataKunciPencarian,
-        kataKunciPencarianEfektif,
+        statusDasarModelTampilan,
+        statusPencarianModelTampilan,
         preferensiToko,
-    ) { aliran ->
+    ) { statusDasar, statusPencarian, preferensiToko ->
         bentukModelTampilan(
-            daftarProdukPenuh = aliran[0] as List<Produk>,
-            statusTransaksi = aliran[1] as StatusTransaksiLayarUtamaKasir,
-            statusElemenLayar = aliran[2] as StatusElemenLayarUtamaKasir,
-            kataKunciMentah = aliran[3] as String,
-            kataKunciEfektif = aliran[4] as String,
-            preferensiToko = aliran[5] as PreferensiToko,
+            daftarProdukPenuh = statusDasar.daftarProdukPenuh,
+            statusTransaksi = statusDasar.statusTransaksi,
+            statusElemenLayar = statusDasar.statusElemenLayar,
+            kataKunciMentah = statusPencarian.kataKunciMentah,
+            kataKunciEfektif = statusPencarian.kataKunciEfektif,
+            preferensiToko = preferensiToko,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -404,4 +423,15 @@ class LayarUtamaKasirViewModel(
         )
     }
 }
+
+private data class StatusDasarModelTampilan(
+    val daftarProdukPenuh: List<Produk>,
+    val statusTransaksi: StatusTransaksiLayarUtamaKasir,
+    val statusElemenLayar: StatusElemenLayarUtamaKasir,
+)
+
+private data class StatusPencarianModelTampilan(
+    val kataKunciMentah: String,
+    val kataKunciEfektif: String,
+)
 
